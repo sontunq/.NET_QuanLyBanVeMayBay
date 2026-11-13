@@ -1,6 +1,6 @@
 using System.Data;
 using QuanLyBanVeMayBay.Controls;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.DTO;
 using QuanLyBanVeMayBay.Utils;
 
@@ -18,7 +18,7 @@ namespace QuanLyBanVeMayBay.GUI
         public ucDatVe()
         {
             InitializeComponent();
-            if (!DesignMode) TaoGioVe();
+            if (!DesignMode) _gioVe = DatVeBLL.TaoGioVe();
         }
 
         // =========================================================
@@ -36,22 +36,22 @@ namespace QuanLyBanVeMayBay.GUI
                         "PhanTramGiam", "TienGiam", "GiaThucTra");
                     GridHelper.Bind(dgvXacNhan, _gioVe, "MaChuyenBay", "MaGhe", "MaHangVe", "MaKH", "MaNguoiGiamHo");
 
-                    GanCombo(cboDiemDi, DanhMucDAL.SanBay(), "Tất cả điểm đi");
-                    GanCombo(cboDiemDen, DanhMucDAL.SanBay(), "Tất cả điểm đến");
+                    GanCombo(cboDiemDi, DanhMucBLL.SanBay(), "Tất cả điểm đi");
+                    GanCombo(cboDiemDen, DanhMucBLL.SanBay(), "Tất cả điểm đến");
                     dtpNgayBay.MinDate = DateTime.Today;
                     dtpNgayBay.Value = DateTime.Today.AddDays(1);
 
-                    bool muaTet = DateTime.Today.Month <= 3;
+                    bool muaTet = DatVeBLL.DangMuaTet;
                     chkTet.Enabled = muaTet;
                     if (!muaTet) chkTet.Text = "Ưu đãi Tết (chỉ áp dụng tháng 1–3)";
 
-                    HienChuyenBay(ChuyenBayDAL.LichBaySapToi(null, null), "Lịch bay sắp tới");
+                    HienChuyenBay(ChuyenBayBLL.LichBaySapToi(null, null), "Lịch bay sắp tới");
                     _daNap = true;
                 }
 
                 NapKhachHang(null);
                 int? km = cboKhuyenMai.SelectedValue as int?;
-                GanCombo(cboKhuyenMai, DanhMucDAL.KhuyenMai(), "Không dùng mã khuyến mãi");
+                GanCombo(cboKhuyenMai, DanhMucBLL.KhuyenMai(), "Không dùng mã khuyến mãi");
                 if (km != null) cboKhuyenMai.SelectedValue = km.Value;
                 ChuyenBuoc(_buoc);
             }
@@ -59,26 +59,6 @@ namespace QuanLyBanVeMayBay.GUI
             {
                 MsgBox.Loi(ex);
             }
-        }
-
-        private void TaoGioVe()
-        {
-            _gioVe = new DataTable();
-            _gioVe.Columns.Add("MaChuyenBay", typeof(int));
-            _gioVe.Columns.Add("Tuyen", typeof(string));
-            _gioVe.Columns.Add("NgayGioKhoiHanh", typeof(DateTime));
-            _gioVe.Columns.Add("MaGhe", typeof(int));
-            _gioVe.Columns.Add("SoGhe", typeof(string));
-            _gioVe.Columns.Add("MaHangVe", typeof(int));
-            _gioVe.Columns.Add("HangVe", typeof(string));
-            _gioVe.Columns.Add("MaKH", typeof(int));
-            _gioVe.Columns.Add("HanhKhach", typeof(string));
-            _gioVe.Columns.Add("MaNguoiGiamHo", typeof(int));
-            _gioVe.Columns.Add("NguoiGiamHo", typeof(string));
-            _gioVe.Columns.Add("GiaGoc", typeof(decimal));
-            _gioVe.Columns.Add("PhanTramGiam", typeof(int));
-            _gioVe.Columns.Add("TienGiam", typeof(decimal));
-            _gioVe.Columns.Add("GiaThucTra", typeof(decimal));
         }
 
         private static void GanCombo(ComboBox cbo, DataTable dt, string dongTrong)
@@ -101,9 +81,9 @@ namespace QuanLyBanVeMayBay.GUI
         {
             int? giu = chonMaKH ?? (cboHanhKhach.SelectedValue as int?);
             int? giuLienHe = cboLienHe.SelectedValue as int?;
-            GanCombo(cboHanhKhach, DanhMucDAL.KhachHang(), null);
-            GanCombo(cboGiamHo, DanhMucDAL.KhachHang(), "Không cần giám hộ");
-            GanCombo(cboLienHe, DanhMucDAL.KhachHang(), "Hành khách của vé thứ nhất");
+            GanCombo(cboHanhKhach, DanhMucBLL.KhachHang(), null);
+            GanCombo(cboGiamHo, DanhMucBLL.KhachHang(), "Không cần giám hộ");
+            GanCombo(cboLienHe, DanhMucBLL.KhachHang(), "Hành khách của vé thứ nhất");
             if (giu != null) cboHanhKhach.SelectedValue = giu.Value;
             if (giuLienHe != null) cboLienHe.SelectedValue = giuLienHe.Value;
         }
@@ -116,19 +96,10 @@ namespace QuanLyBanVeMayBay.GUI
             string di = cboDiemDi.SelectedValue as string, den = cboDiemDen.SelectedValue as string;
             try
             {
-                if (di == null || den == null)
-                {
-                    // Chưa chọn đủ tuyến: lọc lịch bay theo phần đã chọn
-                    HienChuyenBay(ChuyenBayDAL.LichBaySapToi(di, den), "Lịch bay sắp tới");
-                    return;
-                }
-                if (di == den)
-                {
-                    MsgBox.CanhBao("Điểm đi và điểm đến phải khác nhau.");
-                    return;
-                }
+                // Chưa chọn đủ tuyến thì BLL trả lịch bay sắp tới theo phần đã chọn
                 DateTime ngay = dtpNgayBay.Value.Date;
-                HienChuyenBay(ChuyenBayDAL.TimKiem(di, den, ngay), $"{di} → {den} · {ngay:dd/MM/yyyy}");
+                var ds = ChuyenBayBLL.TimKiem(di, den, ngay);
+                HienChuyenBay(ds, di == null || den == null ? "Lịch bay sắp tới" : $"{di} → {den} · {ngay:dd/MM/yyyy}");
             }
             catch (Exception ex)
             {
@@ -140,7 +111,7 @@ namespace QuanLyBanVeMayBay.GUI
         {
             try
             {
-                HienChuyenBay(ChuyenBayDAL.LichBaySapToi(cboDiemDi.SelectedValue as string, cboDiemDen.SelectedValue as string), "Lịch bay sắp tới");
+                HienChuyenBay(ChuyenBayBLL.LichBaySapToi(cboDiemDi.SelectedValue as string, cboDiemDen.SelectedValue as string), "Lịch bay sắp tới");
             }
             catch (Exception ex)
             {
@@ -203,7 +174,7 @@ namespace QuanLyBanVeMayBay.GUI
             if (_chuyenBay == null) return;
             try
             {
-                seatMap.SetData(ChuyenBayDAL.SoDoGhe(_chuyenBay.MaChuyenBay), _chuyenBay.BangGia);
+                seatMap.SetData(ChuyenBayBLL.SoDoGhe(_chuyenBay.MaChuyenBay), _chuyenBay.BangGia);
                 CapNhatGheTrongDon();
                 lblChuyenSoDo.Text = $"Chuyến #{_chuyenBay.MaChuyenBay} · {_chuyenBay.TuyenBay} · " +
                                      $"{_chuyenBay.NgayGioKhoiHanh:dd/MM/yyyy HH:mm} · {_chuyenBay.SoHieu}";
@@ -265,55 +236,17 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void btnThemVe_Click(object sender, EventArgs e)
         {
-            GheDTO ghe = seatMap.SelectedSeat;
-            if (_chuyenBay == null || ghe == null)
+            try
             {
-                MsgBox.CanhBao("Hãy bấm chọn một ghế trống trên sơ đồ trước.");
+                DatVeBLL.ThemVeVaoGio(_gioVe, _chuyenBay, seatMap.SelectedSeat,
+                    cboHanhKhach.SelectedValue as int?, cboHanhKhach.Text,
+                    cboGiamHo.SelectedValue as int?, cboGiamHo.Text);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
                 return;
             }
-            int? maKH = cboHanhKhach.SelectedValue as int?;
-            if (maKH == null)
-            {
-                MsgBox.CanhBao("Vui lòng chọn hành khách.");
-                return;
-            }
-            if (_gioVe.Rows.Count >= 2)
-            {
-                MsgBox.CanhBao("Mỗi đơn đặt tối đa 2 vé. Hãy tiếp tục sang bước xác nhận để tạo đơn này trước.");
-                return;
-            }
-            if (_gioVe.AsEnumerable().Any(r => r.Field<int>("MaChuyenBay") == _chuyenBay.MaChuyenBay && r.Field<int>("MaKH") == maKH.Value))
-            {
-                MsgBox.CanhBao("Hành khách này đã có vé trên chuyến bay này trong đơn.");
-                return;
-            }
-            int? giamHo = cboGiamHo.SelectedValue as int?;
-            if (giamHo != null && giamHo == maKH)
-            {
-                MsgBox.CanhBao("Người giám hộ phải khác hành khách.");
-                return;
-            }
-
-            decimal gia;
-            _chuyenBay.BangGia.TryGetValue(ghe.MaHangVe, out gia);
-
-            DataRow r = _gioVe.NewRow();
-            r["MaChuyenBay"] = _chuyenBay.MaChuyenBay;
-            r["Tuyen"] = _chuyenBay.TuyenBay;
-            r["NgayGioKhoiHanh"] = _chuyenBay.NgayGioKhoiHanh;
-            r["MaGhe"] = ghe.MaGhe;
-            r["SoGhe"] = ghe.SoGhe;
-            r["MaHangVe"] = ghe.MaHangVe;
-            r["HangVe"] = ghe.TenHangVe;
-            r["MaKH"] = maKH.Value;
-            r["HanhKhach"] = cboHanhKhach.Text;
-            r["MaNguoiGiamHo"] = (object)giamHo ?? DBNull.Value;
-            r["NguoiGiamHo"] = giamHo != null ? cboGiamHo.Text : "";
-            r["GiaGoc"] = gia;
-            r["PhanTramGiam"] = 0;
-            r["TienGiam"] = 0m;
-            r["GiaThucTra"] = gia;
-            _gioVe.Rows.Add(r);
 
             cboGiamHo.SelectedIndex = 0;
             seatMap.SelectedMaGhe = null;
@@ -324,12 +257,7 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void TuDongKhuHoi()
         {
-            if (_gioVe.Rows.Count != 2) return;
-            DataRow a = _gioVe.Rows[0], b = _gioVe.Rows[1];
-            string[] ta = a.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
-            string[] tb = b.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
-            if (a.Field<int>("MaKH") == b.Field<int>("MaKH") && ta[0] == tb[1] && ta[1] == tb[0])
-                chkKhuHoi.Checked = true;
+            if (DatVeBLL.LaCapKhuHoi(_gioVe)) chkKhuHoi.Checked = true;
         }
 
         private void btnXoaVe_Click(object sender, EventArgs e)
@@ -360,24 +288,7 @@ namespace QuanLyBanVeMayBay.GUI
             _dangTinhGia = true;
             try
             {
-                int? maKM = cboKhuyenMai.SelectedValue as int?;
-                foreach (DataRow r in _gioVe.Rows)
-                {
-                    int? khuHoi = null;
-                    if (chkKhuHoi.Checked)
-                    {
-                        DataRow khac = _gioVe.AsEnumerable().FirstOrDefault(x => x != r);
-                        if (khac != null) khuHoi = khac.Field<int>("MaChuyenBay");
-                    }
-                    int soVeTet = _gioVe.AsEnumerable().Count(x => x.Field<int>("MaKH") == r.Field<int>("MaKH"));
-
-                    DataRow g = DatVeDAL.TinhGia(r.Field<int>("MaChuyenBay"), r.Field<int>("MaHangVe"), r.Field<int>("MaKH"),
-                        chkTet.Checked, chkKhuHoi.Checked, maKM, khuHoi, soVeTet);
-                    r["GiaGoc"] = g["GiaGoc"];
-                    r["PhanTramGiam"] = g["PhanTramGiam"];
-                    r["TienGiam"] = g["TienGiam"];
-                    r["GiaThucTra"] = g["GiaThucTra"];
-                }
+                DatVeBLL.TinhGiaGioVe(_gioVe, chkTet.Checked, chkKhuHoi.Checked, cboKhuyenMai.SelectedValue as int?);
                 lblLoiGia.ForeColor = AppTheme.Muted;
                 lblLoiGia.Text = "Giá được tính bởi sp_TINHTHUGIAVE: hạng thành viên, khuyến mãi, Tết và khứ hồi cộng dồn nhưng không vượt quá 30%.";
                 return true;
@@ -400,13 +311,12 @@ namespace QuanLyBanVeMayBay.GUI
         {
             if (!TinhGia(false)) return;
 
-            int maLienHe = cboLienHe.SelectedValue as int? ?? _gioVe.Rows[0].Field<int>("MaKH");
-            decimal tong = _gioVe.AsEnumerable().Sum(r => r.Field<decimal>("GiaThucTra"));
+            decimal tong = DatVeBLL.TongThucTra(_gioVe);
             if (!MsgBox.XacNhan($"Tạo đơn gồm {_gioVe.Rows.Count} vé, tổng {DinhDang.Tien(tong)}?", "Xác nhận đặt vé", "Đặt vé", "Xem lại")) return;
 
             try
             {
-                DataRow kq = DatVeDAL.DatVe(maLienHe, _gioVe.Rows.Cast<DataRow>().ToList(), chkTet.Checked, chkKhuHoi.Checked,
+                DataRow kq = DatVeBLL.DatVe(cboLienHe.SelectedValue as int?, _gioVe, chkTet.Checked, chkKhuHoi.Checked,
                     cboKhuyenMai.SelectedValue as int?);
                 int maDon = Convert.ToInt32(kq["MaDon"]);
 
@@ -422,7 +332,7 @@ namespace QuanLyBanVeMayBay.GUI
                 chkKhuHoi.Checked = false;
                 cboKhuyenMai.SelectedIndex = 0;
                 _buoc = 1;
-                HienChuyenBay(ChuyenBayDAL.LichBaySapToi(null, null), "Lịch bay sắp tới");
+                HienChuyenBay(ChuyenBayBLL.LichBaySapToi(null, null), "Lịch bay sắp tới");
                 TaiLai();
             }
             catch (Exception ex)
@@ -495,8 +405,8 @@ namespace QuanLyBanVeMayBay.GUI
         private void CapNhatThanhDuoi()
         {
             if (_gioVe == null) return;
-            decimal giaGoc = _gioVe.AsEnumerable().Sum(r => r.Field<decimal>("GiaGoc"));
-            decimal thucTra = _gioVe.AsEnumerable().Sum(r => r.Field<decimal>("GiaThucTra"));
+            decimal giaGoc = DatVeBLL.TongGiaGoc(_gioVe);
+            decimal thucTra = DatVeBLL.TongThucTra(_gioVe);
             decimal giam = giaGoc - thucTra;
 
             lblTong.Text = DinhDang.Tien(thucTra);
@@ -504,7 +414,7 @@ namespace QuanLyBanVeMayBay.GUI
             lblGiam.Text = giam > 0 ? "−" + DinhDang.Tien(giam) : "0 đ";
             lblTongCong.Text = DinhDang.Tien(thucTra);
 
-            string ve = $"Đơn: {_gioVe.Rows.Count}/2 vé";
+            string ve = $"Đơn: {_gioVe.Rows.Count}/{DatVeBLL.SoVeToiDaMoiDon} vé";
             if (_buoc == 1)
             {
                 lblTomTat.Text = _chuyenBay == null

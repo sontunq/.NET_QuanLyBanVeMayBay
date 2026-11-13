@@ -1,6 +1,6 @@
 using System.Data;
 using QuanLyBanVeMayBay.Controls;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -33,18 +33,7 @@ namespace QuanLyBanVeMayBay.GUI
         {
             try
             {
-                DataRow don = DatVeDAL.ThongTinDon(maDon);
-                if (don == null)
-                {
-                    MsgBox.CanhBao("Không tìm thấy đơn #" + maDon + ".");
-                    return false;
-                }
-                string trangThai = don["TrangThai"].ToString();
-                if (trangThai != "Chờ thanh toán")
-                {
-                    MsgBox.CanhBao($"Đơn #{maDon} đang ở trạng thái \"{trangThai}\" nên không thể thanh toán.");
-                    return false;
-                }
+                DataRow don = DatVeBLL.LayDonDeThanhToan(maDon);
                 using (var f = new frmThanhToan(maDon, don))
                     return f.ShowDialog(owner) == DialogResult.OK;
             }
@@ -66,7 +55,7 @@ namespace QuanLyBanVeMayBay.GUI
         {
             try
             {
-                DatVeDAL.ThanhToan(_maDon, _tongTien, _phuongThuc, DinhDang.RongThanhNull(txtGhiChu.Text));
+                DatVeBLL.ThanhToan(_maDon, _tongTien, _phuongThuc, txtGhiChu.Text);
                 MsgBox.ThanhCong($"Đã thu {DinhDang.Tien(_tongTien)} ({_phuongThuc.ToLower()}) cho đơn #{_maDon}.", "Thanh toán thành công");
                 DialogResult = DialogResult.OK;
                 Close();

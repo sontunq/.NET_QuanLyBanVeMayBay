@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -22,7 +22,7 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                GridHelper.Bind(dgvMayBay, MayBayDAL.DanhSach());
+                GridHelper.Bind(dgvMayBay, MayBayBLL.DanhSach());
             }
             catch (Exception ex)
             {
@@ -47,11 +47,11 @@ namespace QuanLyBanVeMayBay.GUI
                 return;
             }
             string moi = frmTrangThai.Chon(FindForm(), "Máy bay " + r["SoHieu"], r["TrangThai"].ToString(),
-                "Hoạt động", "Bảo trì", "Ngừng hoạt động");
+                MayBayBLL.CacTrangThai);
             if (moi == null) return;
             try
             {
-                MayBayDAL.DoiTrangThai(r.Field<int>("MaMayBay"), moi);
+                MayBayBLL.DoiTrangThai(r.Field<int>("MaMayBay"), moi);
                 TaiLai();
             }
             catch (Exception ex)

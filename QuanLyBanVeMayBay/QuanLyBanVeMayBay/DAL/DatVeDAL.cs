@@ -1,6 +1,5 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
-using QuanLyBanVeMayBay.DTO;
 using static QuanLyBanVeMayBay.DAL.DataProvider;
 
 namespace QuanLyBanVeMayBay.DAL
@@ -16,11 +15,11 @@ namespace QuanLyBanVeMayBay.DAL
                 P("@MaChuyenBayKhuHoi", maChuyenBayKhuHoi), P("@SoVeTetTrongDon", soVeTet)).Rows[0];
         }
 
-        public static DataRow DatVe(int maKHLienHe, IList<DataRow> gioVe, bool tet, bool khuHoi, int? maKM)
+        public static DataRow DatVe(int maKHLienHe, IList<DataRow> gioVe, bool tet, bool khuHoi, int? maKM, int maTK)
         {
             var ps = new List<SqlParameter>
             {
-                P("@MaKHLienHe", maKHLienHe), P("@MaTKNhanVien", PhienDangNhap.MaTK),
+                P("@MaKHLienHe", maKHLienHe), P("@MaTKNhanVien", maTK),
                 P("@ApDungTet", tet), P("@ApDungKhuHoi", khuHoi), P("@MaKM", maKM),
             };
             for (int i = 0; i < gioVe.Count && i < 2; i++)
@@ -47,11 +46,11 @@ WHERE dd.MaDon = @id", P("@id", maDon));
             return dt.Rows.Count == 0 ? null : dt.Rows[0];
         }
 
-        public static void ThanhToan(int maDon, decimal soTien, string phuongThuc, string ghiChu)
+        public static void ThanhToan(int maDon, decimal soTien, string phuongThuc, string ghiChu, int maTK)
         {
             ExecuteProc("sp_THANHTOANDON",
                 P("@MaDon", maDon), P("@SoTien", soTien), P("@PhuongThuc", phuongThuc),
-                P("@MaTKNhanVien", PhienDangNhap.MaTK), P("@GhiChu", ghiChu));
+                P("@MaTKNhanVien", maTK), P("@GhiChu", ghiChu));
         }
 
         public static DataRow ThongTinVe(int maVe)
@@ -60,9 +59,9 @@ WHERE dd.MaDon = @id", P("@id", maDon));
             return dt.Rows.Count == 0 ? null : dt.Rows[0];
         }
 
-        public static DataRow HuyVe(int maVe, string lyDo)
+        public static DataRow HuyVe(int maVe, string lyDo, int maTK)
         {
-            return ExecuteProc("sp_HUYVE", P("@MaVe", maVe), P("@LyDo", lyDo), P("@MaTKNhanVien", PhienDangNhap.MaTK)).Rows[0];
+            return ExecuteProc("sp_HUYVE", P("@MaVe", maVe), P("@LyDo", lyDo), P("@MaTKNhanVien", maTK)).Rows[0];
         }
 
         // Thêm dịch vụ: theo ghi chú trong script, phần này làm bằng câu lệnh có tham số từ ứng dụng.
@@ -94,11 +93,11 @@ VALUES(@MaTK, N'Thêm dịch vụ', N'VEDICHVU', CONCAT(N'Thêm dịch vụ #', 
 
 COMMIT TRANSACTION;";
 
-        public static void ThemDichVu(int maDon, int maVe, int maDichVu, int soLuong, decimal donGia)
+        public static void ThemDichVu(int maDon, int maVe, int maDichVu, int soLuong, decimal donGia, int maTK)
         {
             ExecuteNonQuery(SqlThemDichVu,
                 P("@MaDon", maDon), P("@MaVe", maVe), P("@MaDichVu", maDichVu),
-                P("@SoLuong", soLuong), P("@DonGia", donGia), P("@MaTK", PhienDangNhap.MaTK));
+                P("@SoLuong", soLuong), P("@DonGia", donGia), P("@MaTK", maTK));
         }
 
         public static DataTable DanhSachDon(string trangThai, string tuKhoa)

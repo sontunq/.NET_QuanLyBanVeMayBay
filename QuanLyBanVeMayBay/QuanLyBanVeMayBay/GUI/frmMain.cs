@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Controls;
 using QuanLyBanVeMayBay.DTO;
 using QuanLyBanVeMayBay.Utils;
@@ -97,7 +98,7 @@ namespace QuanLyBanVeMayBay.GUI
         {
             if (!MsgBox.XacNhan("Bạn muốn đăng xuất khỏi hệ thống?", "Đăng xuất", "Đăng xuất", "Ở lại")) return;
             DaDangXuat = true;
-            PhienDangNhap.TaiKhoan = null;
+            TaiKhoanBLL.DangXuat();
             Close();
         }
 

@@ -3,20 +3,12 @@ using Microsoft.Data.SqlClient;
 
 namespace QuanLyBanVeMayBay.DAL
 {
+    /// <summary>
+    /// Các hàm chạy câu lệnh SQL / stored procedure dùng chung cho mọi lớp DAL.
+    /// Kết nối được lấy từ KetNoiCSDL.
+    /// </summary>
     public static class DataProvider
     {
-        public const string TenCSDL = "QuanLyBanVeMayBay2";
-
-        public static string ChuoiKetNoi { get; set; } = "";
-
-        public static string TaoChuoiKetNoi(string mayChu)
-        {
-            string s = (mayChu ?? "").Trim();
-            if (s.Contains("=")) return s;
-            if (s.Length == 0) s = ".";
-            return $"Server={s};Database={TenCSDL};Integrated Security=True;TrustServerCertificate=True;Encrypt=False";
-        }
-
         public static SqlParameter P(string ten, object giaTri)
         {
             return new SqlParameter(ten, giaTri ?? DBNull.Value);
@@ -34,7 +26,7 @@ namespace QuanLyBanVeMayBay.DAL
 
         public static int ExecuteNonQuery(string sql, params SqlParameter[] thamSo)
         {
-            using (var cn = new SqlConnection(ChuoiKetNoi))
+            using (var cn = KetNoiCSDL.TaoKetNoi())
             using (var cmd = new SqlCommand(sql, cn))
             {
                 cmd.Parameters.AddRange(thamSo);
@@ -45,7 +37,7 @@ namespace QuanLyBanVeMayBay.DAL
 
         public static object ExecuteScalar(string sql, params SqlParameter[] thamSo)
         {
-            using (var cn = new SqlConnection(ChuoiKetNoi))
+            using (var cn = KetNoiCSDL.TaoKetNoi())
             using (var cmd = new SqlCommand(sql, cn))
             {
                 cmd.Parameters.AddRange(thamSo);
@@ -57,7 +49,7 @@ namespace QuanLyBanVeMayBay.DAL
 
         private static DataTable Fill(string text, CommandType loai, SqlParameter[] thamSo)
         {
-            using (var cn = new SqlConnection(ChuoiKetNoi))
+            using (var cn = KetNoiCSDL.TaoKetNoi())
             using (var cmd = new SqlCommand(text, cn))
             using (var da = new SqlDataAdapter(cmd))
             {

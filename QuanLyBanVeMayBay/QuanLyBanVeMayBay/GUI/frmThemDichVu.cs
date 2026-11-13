@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -24,7 +24,7 @@ namespace QuanLyBanVeMayBay.GUI
         {
             try
             {
-                DataTable dt = DanhMucDAL.DichVu();
+                DataTable dt = DanhMucBLL.DichVu();
                 dt.Columns.Add("Hien", typeof(string));
                 foreach (DataRow r in dt.Rows)
                     r["Hien"] = $"{r["Ten"]}  ·  {DinhDang.Tien(r["GiaTri"])}";
@@ -54,14 +54,9 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void btnThem_Click(object sender, EventArgs e)
         {
-            if (!(cboDichVu.SelectedValue is int))
-            {
-                MsgBox.CanhBao("Vui lòng chọn dịch vụ.");
-                return;
-            }
             try
             {
-                DatVeDAL.ThemDichVu(_maDon, _maVe, (int)cboDichVu.SelectedValue, (int)nudSoLuong.Value, DonGia);
+                DatVeBLL.ThemDichVu(_maDon, _maVe, cboDichVu.SelectedValue as int?, (int)nudSoLuong.Value, DonGia);
                 DialogResult = DialogResult.OK;
                 Close();
             }

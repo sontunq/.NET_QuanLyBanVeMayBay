@@ -1,6 +1,4 @@
-using Microsoft.Data.SqlClient;
-using QuanLyBanVeMayBay.DAL;
-using QuanLyBanVeMayBay.DTO;
+using QuanLyBanVeMayBay.BLL;
 
 namespace QuanLyBanVeMayBay.GUI
 {
@@ -25,37 +23,20 @@ namespace QuanLyBanVeMayBay.GUI
         private void btnDangNhap_Click(object sender, EventArgs e)
         {
             lblLoi.Text = "";
-            if (string.IsNullOrWhiteSpace(txtTaiKhoan.Text) || string.IsNullOrEmpty(txtMatKhau.Text))
-            {
-                lblLoi.Text = "Vui lòng nhập tên đăng nhập và mật khẩu.";
-                return;
-            }
-
             Cursor = Cursors.WaitCursor;
             btnDangNhap.Enabled = false;
             try
             {
-                DataProvider.ChuoiKetNoi = DataProvider.TaoChuoiKetNoi(txtMayChu.Text);
-                TaiKhoanDTO tk = TaiKhoanDAL.DangNhap(txtTaiKhoan.Text.Trim(), txtMatKhau.Text);
-                if (tk == null)
-                {
-                    lblLoi.Text = "Sai tên đăng nhập/mật khẩu hoặc tài khoản đã bị khóa.";
-                    txtMatKhau.SelectAll();
-                    txtMatKhau.Focus();
-                    return;
-                }
-                PhienDangNhap.TaiKhoan = tk;
+                TaiKhoanBLL.DangNhap(txtMayChu.Text, txtTaiKhoan.Text, txtMatKhau.Text);
                 if (chkGhiNho.Checked) LuuMayChu(txtMayChu.Text.Trim());
                 DialogResult = DialogResult.OK;
                 Close();
             }
-            catch (SqlException ex) when (ex.Number == 4060)
+            catch (LoiNghiepVu ex)
             {
-                lblLoi.Text = "Không mở được CSDL " + DataProvider.TenCSDL + ". Hãy chạy file SQL trong thư mục Database trước.";
-            }
-            catch (SqlException ex) when (ex.Number == 2812)
-            {
-                lblLoi.Text = "Không tìm thấy sp_DANGNHAP — script SQL chưa chạy hết.";
+                lblLoi.Text = ex.Message;
+                txtMatKhau.SelectAll();
+                txtMatKhau.Focus();
             }
             catch (Exception ex)
             {

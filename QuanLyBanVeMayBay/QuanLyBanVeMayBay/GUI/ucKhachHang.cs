@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -31,7 +31,7 @@ namespace QuanLyBanVeMayBay.GUI
             int? giu = chon ?? MaKHDangChon;
             try
             {
-                DataTable dt = KhachHangDAL.DanhSach(DinhDang.RongThanhNull(txtTim.Text));
+                DataTable dt = KhachHangBLL.DanhSach(txtTim.Text);
                 GridHelper.Bind(dgvKhachHang, dt, "Email", "NgayGiaoDichDauTien");
                 GridHelper.SelectRow(dgvKhachHang, "MaKH", giu);
                 NapLichSu();
@@ -53,7 +53,7 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                DataTable dt = DatVeDAL.VeCuaKhach(kh.Field<int>("MaKH"));
+                DataTable dt = DatVeBLL.VeCuaKhach(kh.Field<int>("MaKH"));
                 GridHelper.Bind(dgvLichSu, dt);
                 cardLichSu.Subtitle = $"· {kh["HoTen"]} · {dt.Rows.Count} vé";
             }
@@ -112,7 +112,7 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                DataRow r = KhachHangDAL.XetHang(ma.Value);
+                DataRow r = KhachHangBLL.XetHang(ma.Value);
                 MsgBox.ThongTin($"Hạng hiện tại: {r["TenHang"]} (giảm {r["PhanTramGiam"]}%)\nTổng chi tiêu: {DinhDang.Tien(r["TongChiTieu"])}",
                     r["HoTen"].ToString());
                 NapKhachHang(ma);

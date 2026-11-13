@@ -1,4 +1,4 @@
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -13,21 +13,16 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void nudSoHang_ValueChanged(object sender, EventArgs e)
         {
-            int h = (int)nudSoHang.Value;
-            lblTongGhe.Text = $"= {h * 5} ghế  ({h * 3} PT · {h} PTĐB · {h} TG)";
+            lblTongGhe.Text = MayBayBLL.MoTaSoGhe((int)nudSoHang.Value);
         }
 
         private void btnTao_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSoHieu.Text) || string.IsNullOrWhiteSpace(txtHangSanXuat.Text) || string.IsNullOrWhiteSpace(txtLoai.Text))
-            {
-                MsgBox.CanhBao("Vui lòng nhập đủ số hiệu, hãng sản xuất và loại máy bay.");
-                return;
-            }
             try
             {
-                int ma = MayBayDAL.Tao(txtSoHieu.Text.Trim(), txtHangSanXuat.Text.Trim(), txtLoai.Text.Trim(), (int)nudSoHang.Value);
-                MsgBox.ThanhCong($"Đã tạo máy bay #{ma} với {(int)nudSoHang.Value * 5} ghế.");
+                int soHang = (int)nudSoHang.Value;
+                int ma = MayBayBLL.Tao(txtSoHieu.Text, txtHangSanXuat.Text, txtLoai.Text, soHang);
+                MsgBox.ThanhCong($"Đã tạo máy bay #{ma} với {soHang * MayBayBLL.GheMoiHang} ghế.");
                 DialogResult = DialogResult.OK;
                 Close();
             }

@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -34,7 +34,7 @@ namespace QuanLyBanVeMayBay.GUI
             try
             {
                 string tt = cboTrangThai.SelectedIndex > 0 ? cboTrangThai.Text : null;
-                DataTable dt = DatVeDAL.DanhSachDon(tt, DinhDang.RongThanhNull(txtTim.Text));
+                DataTable dt = DatVeBLL.DanhSachDon(tt, txtTim.Text);
                 GridHelper.Bind(dgvDon, dt, "MaKHLienHe");
                 cardDon.Subtitle = "· " + dt.Rows.Count + " đơn";
                 GridHelper.SelectRow(dgvDon, "MaDon", giu);
@@ -58,8 +58,8 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                GridHelper.Bind(dgvVe, DatVeDAL.VeTrongDon(maDon.Value), "MaChuyenBay", "GiaGoc");
-                GridHelper.Bind(dgvDichVu, DatVeDAL.DichVuTrongDon(maDon.Value));
+                GridHelper.Bind(dgvVe, DatVeBLL.VeTrongDon(maDon.Value), "MaChuyenBay", "GiaGoc");
+                GridHelper.Bind(dgvDichVu, DatVeBLL.DichVuTrongDon(maDon.Value));
                 cardVe.Subtitle = "· đơn #" + maDon;
             }
             catch (Exception ex)

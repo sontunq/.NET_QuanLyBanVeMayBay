@@ -1,4 +1,4 @@
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -21,7 +21,7 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                GridHelper.Bind(dgvNhatKy, TaiKhoanDAL.LayNhatKy());
+                GridHelper.Bind(dgvNhatKy, TaiKhoanBLL.LayNhatKy());
                 if (dgvNhatKy.Columns.Contains("NoiDung")) dgvNhatKy.Columns["NoiDung"].FillWeight = 260;
             }
             catch (Exception ex)

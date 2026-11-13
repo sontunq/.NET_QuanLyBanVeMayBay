@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.DTO;
 using QuanLyBanVeMayBay.Utils;
 
@@ -35,7 +35,7 @@ namespace QuanLyBanVeMayBay.GUI
             int? giu = MaCBDangChon;
             try
             {
-                DataTable dt = ChuyenBayDAL.DanhSach(cboHienThi.SelectedIndex == 0);
+                DataTable dt = ChuyenBayBLL.DanhSach(cboHienThi.SelectedIndex == 0);
                 GridHelper.Bind(dgvChuyenBay, dt, "SanBayDi", "SanBayDen");
                 cardChuyenBay.Subtitle = "· " + dt.Rows.Count + " chuyến";
                 GridHelper.SelectRow(dgvChuyenBay, "MaChuyenBay", giu);
@@ -58,7 +58,7 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                DataTable dt = ChuyenBayDAL.HanhKhach(ma.Value);
+                DataTable dt = ChuyenBayBLL.HanhKhach(ma.Value);
                 GridHelper.Bind(dgvHanhKhach, dt);
                 cardHanhKhach.Subtitle = $"· chuyến #{ma} · {dt.Rows.Count} vé";
             }
@@ -89,11 +89,11 @@ namespace QuanLyBanVeMayBay.GUI
                 return;
             }
             string moi = frmTrangThai.Chon(FindForm(), "Chuyến bay #" + r["MaChuyenBay"], r["TrangThai"].ToString(),
-                "Đang mở bán", "Đã đóng", "Đã bay", "Đã hủy");
+                ChuyenBayBLL.CacTrangThai);
             if (moi == null) return;
             try
             {
-                ChuyenBayDAL.DoiTrangThai(r.Field<int>("MaChuyenBay"), moi);
+                ChuyenBayBLL.DoiTrangThai(r.Field<int>("MaChuyenBay"), moi);
                 NapChuyenBay();
             }
             catch (Exception ex)

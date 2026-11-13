@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -36,17 +36,17 @@ namespace QuanLyBanVeMayBay.GUI
                 int? nam = cboNam.SelectedIndex > 0 ? int.Parse(cboNam.Text) : (int?)null;
                 int? thang = cboThang.SelectedIndex > 0 ? cboThang.SelectedIndex : (int?)null;
 
-                DataRow r = ThongKeDAL.TongQuan(nam, thang);
+                DataRow r = ThongKeBLL.TongQuan(nam, thang);
                 statChuyenBay.Value = Convert.ToInt32(r["TongChuyenBay"]).ToString("N0");
                 statVe.Value = Convert.ToInt32(r["TongVeConHieuLuc"]).ToString("N0");
                 statVeHuy.Value = Convert.ToInt32(r["TongVeDaHuy"]).ToString("N0");
                 statDoanhThu.Value = DinhDang.Tien(r["TongTienThu"]);
 
-                DataTable dt = ThongKeDAL.DoanhThuTheoThang(12);
+                DataTable dt = ThongKeBLL.DoanhThuTheoThang(12);
                 chartDoanhThu.SetData(dt.AsEnumerable().Select(x =>
                     new KeyValuePair<string, decimal>($"T{x["Thang"]}/{x["Nam"]}", Convert.ToDecimal(x["DoanhThuThuan"]))));
 
-                GridHelper.Bind(dgvSapBay, ChuyenBayDAL.SapKhoiHanh(15));
+                GridHelper.Bind(dgvSapBay, ChuyenBayBLL.SapKhoiHanh(15));
             }
             catch (Exception ex)
             {

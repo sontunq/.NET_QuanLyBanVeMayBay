@@ -1,6 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
-using QuanLyBanVeMayBay.DTO;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -23,7 +22,7 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                GridHelper.Bind(dgvTaiKhoan, TaiKhoanDAL.LayDanhSach());
+                GridHelper.Bind(dgvTaiKhoan, TaiKhoanBLL.LayDanhSach());
             }
             catch (Exception ex)
             {
@@ -48,16 +47,12 @@ namespace QuanLyBanVeMayBay.GUI
                 return;
             }
             int maTK = r.Field<int>("MaTK");
-            if (maTK == PhienDangNhap.MaTK)
-            {
-                MsgBox.CanhBao("Không thể tự khóa tài khoản đang đăng nhập.");
-                return;
-            }
-            string moi = r["TrangThai"].ToString() == "Hoạt động" ? "Bị khóa" : "Hoạt động";
-            if (!MsgBox.XacNhan($"Chuyển tài khoản {r["TenDangNhap"]} sang \"{moi}\"?")) return;
             try
             {
-                TaiKhoanDAL.DoiTrangThai(maTK, moi);
+                TaiKhoanBLL.KiemTraCoTheDoiTrangThai(maTK);
+                string moi = TaiKhoanBLL.TrangThaiKeTiep(r["TrangThai"].ToString());
+                if (!MsgBox.XacNhan($"Chuyển tài khoản {r["TenDangNhap"]} sang \"{moi}\"?")) return;
+                TaiKhoanBLL.DoiTrangThai(maTK, moi);
                 TaiLai();
             }
             catch (Exception ex)

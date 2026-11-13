@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -27,18 +27,17 @@ namespace QuanLyBanVeMayBay.GUI
             lblGiaGiaTri.Text = DinhDang.Tien(gia);
             lblDonGiaTri.Text = $"#{ve["MaDon"]} · {trangThaiDon}";
 
-            // Xem trước theo đúng quy tắc của sp_HUYVE (DATEDIFF theo giờ)
-            TimeSpan conLai = khoiHanh - DateTime.Now;
+            // Xem trước phí hủy (quy tắc nằm ở BLL, giống sp_HUYVE)
+            PhiHuyDuKien phiHuy = DatVeBLL.TinhPhiHuy(khoiHanh, gia, trangThaiDon);
+            TimeSpan conLai = phiHuy.ConLai;
             int gio = (int)Math.Floor(conLai.TotalHours);
-            decimal tyLe = gio < 24 ? 0.30m : gio < 72 ? 0.20m : 0.10m;
             string thoiGian = conLai.TotalDays >= 1 ? $"{(int)conLai.TotalDays} ngày {conLai.Hours} giờ" : $"{Math.Max(0, gio)} giờ {Math.Max(0, conLai.Minutes)} phút";
-            lblConLai.Text = $"Còn {thoiGian} trước giờ bay  →  phí hủy {tyLe:P0}";
+            lblConLai.Text = $"Còn {thoiGian} trước giờ bay  →  phí hủy {phiHuy.TyLe:P0}";
 
-            if (trangThaiDon == "Đã thanh toán")
+            if (phiHuy.CoThuPhi)
             {
-                decimal phi = Math.Round(gia * tyLe, 0);
-                lblPhiHuy.Text = "Phí hủy dự kiến: " + DinhDang.Tien(phi);
-                lblTienHoan.Text = "Tiền hoàn dự kiến: " + DinhDang.Tien(Math.Max(0, gia - phi));
+                lblPhiHuy.Text = "Phí hủy dự kiến: " + DinhDang.Tien(phiHuy.Phi);
+                lblTienHoan.Text = "Tiền hoàn dự kiến: " + DinhDang.Tien(phiHuy.TienHoan);
             }
             else
             {
@@ -53,22 +52,7 @@ namespace QuanLyBanVeMayBay.GUI
         {
             try
             {
-                DataRow ve = DatVeDAL.ThongTinVe(maVe);
-                if (ve == null)
-                {
-                    MsgBox.CanhBao("Không tìm thấy vé #" + maVe + ".");
-                    return false;
-                }
-                if (ve["TrangThai"].ToString() == "Đã hủy")
-                {
-                    MsgBox.CanhBao("Vé #" + maVe + " đã được hủy trước đó.");
-                    return false;
-                }
-                if (Convert.ToDateTime(ve["NgayGioKhoiHanh"]) <= DateTime.Now)
-                {
-                    MsgBox.CanhBao("Chuyến bay của vé này đã khởi hành nên không thể hủy.");
-                    return false;
-                }
+                DataRow ve = DatVeBLL.LayVeDeHuy(maVe);
                 using (var f = new frmHuyVe(maVe, ve))
                     return f.ShowDialog(owner) == DialogResult.OK;
             }
@@ -81,6 +65,7 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void btnHuyVe_Click(object sender, EventArgs e)
         {
+            // BLL cũng kiểm tra lý do; kiểm tra sớm ở đây để không hỏi xác nhận vô ích
             if (string.IsNullOrWhiteSpace(txtLyDo.Text))
             {
                 MsgBox.CanhBao("Vui lòng nhập lý do hủy vé.");
@@ -91,7 +76,7 @@ namespace QuanLyBanVeMayBay.GUI
 
             try
             {
-                DataRow kq = DatVeDAL.HuyVe(_maVe, txtLyDo.Text.Trim());
+                DataRow kq = DatVeBLL.HuyVe(_maVe, txtLyDo.Text);
                 MsgBox.ThanhCong($"Đã hủy vé #{_maVe}.\nPhí hủy: {DinhDang.Tien(kq["PhiHuy"])}\nTiền hoàn: {DinhDang.Tien(kq["TienHoan"])}", "Hủy vé thành công");
                 DialogResult = DialogResult.OK;
                 Close();

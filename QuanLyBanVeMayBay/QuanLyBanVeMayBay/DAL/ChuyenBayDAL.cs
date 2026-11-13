@@ -66,23 +66,23 @@ ORDER BY NgayGioKhoiHanh", P("@n", soLuong));
                                   FROM V_VECHITIET WHERE MaChuyenBay = @id ORDER BY SoGhe", P("@id", maChuyenBay));
         }
 
-        public static int Tao(int maMayBay, string di, string den, DateTime khoiHanh, int phut,
+        public static int Tao(int maMayBay, string di, string den, DateTime khoiHanh, int phut, int maTK,
                               decimal giaPT, decimal giaPTDB, decimal giaTG)
         {
             DataTable dt = ExecuteProc("sp_TAOCHUYENBAY",
                 P("@MaMayBay", maMayBay), P("@MaSanBayDi", di), P("@MaSanBayDen", den),
-                P("@NgayGioKhoiHanh", khoiHanh), P("@ThoiGianBayPhut", phut), P("@NguoiTao", PhienDangNhap.MaTK),
+                P("@NgayGioKhoiHanh", khoiHanh), P("@ThoiGianBayPhut", phut), P("@NguoiTao", maTK),
                 P("@GiaPhoThong", giaPT), P("@GiaPhoThongDacBiet", giaPTDB), P("@GiaThuongGia", giaTG));
             return Convert.ToInt32(dt.Rows[0]["MaChuyenBay"]);
         }
 
-        public static void DoiTrangThai(int maChuyenBay, string trangThai)
+        public static void DoiTrangThai(int maChuyenBay, string trangThai, int maTK)
         {
             ExecuteNonQuery(@"
 UPDATE CHUYENBAY SET TrangThai = @tt WHERE MaChuyenBay = @id;
 INSERT INTO NHATKYHOATDONG(MaTK, HanhDong, DoiTuong, NoiDung)
 VALUES(@tk, N'Cập nhật', N'CHUYENBAY', CONCAT(N'Chuyến #', @id, N' -> ', @tt));",
-                P("@tt", trangThai), P("@id", maChuyenBay), P("@tk", PhienDangNhap.MaTK));
+                P("@tt", trangThai), P("@id", maChuyenBay), P("@tk", maTK));
         }
     }
 }

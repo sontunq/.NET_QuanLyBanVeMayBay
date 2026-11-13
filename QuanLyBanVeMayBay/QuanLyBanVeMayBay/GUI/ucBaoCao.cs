@@ -1,6 +1,6 @@
 using System.Data;
 using QuanLyBanVeMayBay.Controls;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -25,13 +25,13 @@ namespace QuanLyBanVeMayBay.GUI
             }
             try
             {
-                DataTable thang = ThongKeDAL.DoanhThuTheoThang(null);
+                DataTable thang = ThongKeBLL.DoanhThuTheoThang(null);
                 GridHelper.Bind(dgvThang, thang);
                 chartThang.SetData(thang.AsEnumerable().Select(r =>
                     new KeyValuePair<string, decimal>($"T{r["Thang"]}/{r["Nam"]}", Convert.ToDecimal(r["DoanhThuThuan"]))));
 
-                GridHelper.Bind(dgvTheoChuyen, ThongKeDAL.DoanhThuTheoChuyenBay());
-                GridHelper.Bind(dgvTheoNhanVien, ThongKeDAL.DoanhThuTheoNhanVien());
+                GridHelper.Bind(dgvTheoChuyen, ThongKeBLL.DoanhThuTheoChuyenBay());
+                GridHelper.Bind(dgvTheoNhanVien, ThongKeBLL.DoanhThuTheoNhanVien());
             }
             catch (Exception ex)
             {

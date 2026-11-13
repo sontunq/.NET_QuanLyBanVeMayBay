@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -25,16 +25,9 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void TraCuu()
         {
-            int? maVe = DinhDang.SoNguyen(txtMaVe.Text);
-            int? maCB = DinhDang.SoNguyen(txtMaChuyenBay.Text);
-            if ((txtMaVe.Text.Trim().Length > 0 && maVe == null) || (txtMaChuyenBay.Text.Trim().Length > 0 && maCB == null))
-            {
-                MsgBox.CanhBao("Mã vé và mã chuyến bay phải là số.");
-                return;
-            }
             try
             {
-                DataTable dt = DatVeDAL.TraCuuVe(maVe, maCB, DinhDang.RongThanhNull(txtSoGiayTo.Text));
+                DataTable dt = DatVeBLL.TraCuuVe(txtMaVe.Text, txtMaChuyenBay.Text, txtSoGiayTo.Text);
                 GridHelper.Bind(dgvKetQua, dt, "MaKH", "ThanhPhoDi", "ThanhPhoDen");
                 cardKetQua.Subtitle = "· " + dt.Rows.Count + " vé" + (dt.Rows.Count > 0 ? " · nhấp đúp vào một vé để hủy" : "");
             }

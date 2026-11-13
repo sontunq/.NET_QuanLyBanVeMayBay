@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.GUI;
 
 namespace QuanLyBanVeMayBay.Utils
@@ -36,7 +37,12 @@ namespace QuanLyBanVeMayBay.Utils
 
         public static void Loi(Exception ex)
         {
-            // Lỗi nghiệp vụ do THROW trong stored procedure có mã >= 50000
+            // Lỗi nghiệp vụ: do BLL kiểm tra, hoặc do THROW trong stored procedure (mã >= 50000)
+            if (ex is LoiNghiepVu)
+            {
+                CanhBao(ex.Message);
+                return;
+            }
             var se = ex as SqlException;
             if (se != null && se.Number >= 50000)
                 Show(LoaiThongBao.CanhBao, "Không thể thực hiện", se.Message, "Đã hiểu", null);

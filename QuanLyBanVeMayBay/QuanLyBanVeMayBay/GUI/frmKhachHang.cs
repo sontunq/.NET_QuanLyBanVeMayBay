@@ -1,5 +1,5 @@
 using System.Data;
-using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.BLL;
 using QuanLyBanVeMayBay.Utils;
 
 namespace QuanLyBanVeMayBay.GUI
@@ -30,7 +30,7 @@ namespace QuanLyBanVeMayBay.GUI
             lblTieuDe.Text = "Sửa khách hàng #" + _maKH;
             try
             {
-                DataRow r = KhachHangDAL.Lay(_maKH.Value);
+                DataRow r = KhachHangBLL.Lay(_maKH.Value);
                 if (r == null) return;
                 txtHoTen.Text = r["HoTen"].ToString();
                 cboLoaiGiayTo.SelectedItem = r["LoaiGiayTo"].ToString();
@@ -49,27 +49,10 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void btnLuu_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtHoTen.Text) || string.IsNullOrWhiteSpace(txtSoGiayTo.Text))
-            {
-                MsgBox.CanhBao("Họ tên và số giấy tờ là bắt buộc.");
-                return;
-            }
-
-            string hoTen = txtHoTen.Text.Trim(), soGiayTo = txtSoGiayTo.Text.Trim();
-            string sdt = DinhDang.RongThanhNull(txtSoDienThoai.Text);
-            string email = DinhDang.RongThanhNull(txtEmail.Text);
-            string diaChi = DinhDang.RongThanhNull(txtDiaChi.Text);
             try
             {
-                if (_maKH == null)
-                {
-                    MaKHKetQua = KhachHangDAL.Them(hoTen, cboLoaiGiayTo.Text, soGiayTo, dtpNgaySinh.Value, cboGioiTinh.Text, sdt, email, diaChi);
-                }
-                else
-                {
-                    KhachHangDAL.Sua(_maKH.Value, hoTen, cboLoaiGiayTo.Text, soGiayTo, dtpNgaySinh.Value, cboGioiTinh.Text, sdt, email, diaChi);
-                    MaKHKetQua = _maKH.Value;
-                }
+                MaKHKetQua = KhachHangBLL.Luu(_maKH, txtHoTen.Text, cboLoaiGiayTo.Text, txtSoGiayTo.Text, dtpNgaySinh.Value,
+                    cboGioiTinh.Text, txtSoDienThoai.Text, txtEmail.Text, txtDiaChi.Text);
                 DialogResult = DialogResult.OK;
                 Close();
             }
