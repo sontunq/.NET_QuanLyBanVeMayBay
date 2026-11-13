@@ -1,0 +1,526 @@
+using System.Data;
+using QuanLyBanVeMayBay.Controls;
+using QuanLyBanVeMayBay.DAL;
+using QuanLyBanVeMayBay.DTO;
+using QuanLyBanVeMayBay.Utils;
+
+namespace QuanLyBanVeMayBay.GUI
+{
+    public partial class ucDatVe : UserControl, ITaiLai
+    {
+        private int _buoc = 1;
+        private bool _daNap;
+        private bool _dangTinhGia;
+        private ChuyenBayDTO _chuyenBay;
+        private DataTable _gioVe;
+        private readonly List<FlightCard> _the = new List<FlightCard>();
+
+        public ucDatVe()
+        {
+            InitializeComponent();
+            if (!DesignMode) TaoGioVe();
+        }
+
+        // =========================================================
+        // Nạp dữ liệu
+        // =========================================================
+        public void TaiLai()
+        {
+            try
+            {
+                if (!_daNap)
+                {
+                    GridHelper.Apply(dgvGioVe);
+                    GridHelper.Apply(dgvXacNhan);
+                    GridHelper.Bind(dgvGioVe, _gioVe, "MaChuyenBay", "NgayGioKhoiHanh", "MaGhe", "MaHangVe", "MaKH", "MaNguoiGiamHo",
+                        "PhanTramGiam", "TienGiam", "GiaThucTra");
+                    GridHelper.Bind(dgvXacNhan, _gioVe, "MaChuyenBay", "MaGhe", "MaHangVe", "MaKH", "MaNguoiGiamHo");
+
+                    GanCombo(cboDiemDi, DanhMucDAL.SanBay(), "Tất cả điểm đi");
+                    GanCombo(cboDiemDen, DanhMucDAL.SanBay(), "Tất cả điểm đến");
+                    dtpNgayBay.MinDate = DateTime.Today;
+                    dtpNgayBay.Value = DateTime.Today.AddDays(1);
+
+                    bool muaTet = DateTime.Today.Month <= 3;
+                    chkTet.Enabled = muaTet;
+                    if (!muaTet) chkTet.Text = "Ưu đãi Tết (chỉ áp dụng tháng 1–3)";
+
+                    HienChuyenBay(ChuyenBayDAL.LichBaySapToi(null, null), "Lịch bay sắp tới");
+                    _daNap = true;
+                }
+
+                NapKhachHang(null);
+                int? km = cboKhuyenMai.SelectedValue as int?;
+                GanCombo(cboKhuyenMai, DanhMucDAL.KhuyenMai(), "Không dùng mã khuyến mãi");
+                if (km != null) cboKhuyenMai.SelectedValue = km.Value;
+                ChuyenBuoc(_buoc);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+            }
+        }
+
+        private void TaoGioVe()
+        {
+            _gioVe = new DataTable();
+            _gioVe.Columns.Add("MaChuyenBay", typeof(int));
+            _gioVe.Columns.Add("Tuyen", typeof(string));
+            _gioVe.Columns.Add("NgayGioKhoiHanh", typeof(DateTime));
+            _gioVe.Columns.Add("MaGhe", typeof(int));
+            _gioVe.Columns.Add("SoGhe", typeof(string));
+            _gioVe.Columns.Add("MaHangVe", typeof(int));
+            _gioVe.Columns.Add("HangVe", typeof(string));
+            _gioVe.Columns.Add("MaKH", typeof(int));
+            _gioVe.Columns.Add("HanhKhach", typeof(string));
+            _gioVe.Columns.Add("MaNguoiGiamHo", typeof(int));
+            _gioVe.Columns.Add("NguoiGiamHo", typeof(string));
+            _gioVe.Columns.Add("GiaGoc", typeof(decimal));
+            _gioVe.Columns.Add("PhanTramGiam", typeof(int));
+            _gioVe.Columns.Add("TienGiam", typeof(decimal));
+            _gioVe.Columns.Add("GiaThucTra", typeof(decimal));
+        }
+
+        private static void GanCombo(ComboBox cbo, DataTable dt, string dongTrong)
+        {
+            if (dongTrong != null)
+            {
+                DataRow r = dt.NewRow();
+                r["Ten"] = dongTrong;
+                r["Ma"] = DBNull.Value;
+                dt.Rows.InsertAt(r, 0);
+            }
+            cbo.DataSource = null;
+            cbo.DisplayMember = "Ten";
+            cbo.ValueMember = "Ma";
+            cbo.DataSource = dt;
+            if (dt.Rows.Count > 0) cbo.SelectedIndex = 0;
+        }
+
+        private void NapKhachHang(int? chonMaKH)
+        {
+            int? giu = chonMaKH ?? (cboHanhKhach.SelectedValue as int?);
+            int? giuLienHe = cboLienHe.SelectedValue as int?;
+            GanCombo(cboHanhKhach, DanhMucDAL.KhachHang(), null);
+            GanCombo(cboGiamHo, DanhMucDAL.KhachHang(), "Không cần giám hộ");
+            GanCombo(cboLienHe, DanhMucDAL.KhachHang(), "Hành khách của vé thứ nhất");
+            if (giu != null) cboHanhKhach.SelectedValue = giu.Value;
+            if (giuLienHe != null) cboLienHe.SelectedValue = giuLienHe.Value;
+        }
+
+        // =========================================================
+        // Bước 1: chọn chuyến bay
+        // =========================================================
+        private void btnTimChuyen_Click(object sender, EventArgs e)
+        {
+            string di = cboDiemDi.SelectedValue as string, den = cboDiemDen.SelectedValue as string;
+            try
+            {
+                if (di == null || den == null)
+                {
+                    // Chưa chọn đủ tuyến: lọc lịch bay theo phần đã chọn
+                    HienChuyenBay(ChuyenBayDAL.LichBaySapToi(di, den), "Lịch bay sắp tới");
+                    return;
+                }
+                if (di == den)
+                {
+                    MsgBox.CanhBao("Điểm đi và điểm đến phải khác nhau.");
+                    return;
+                }
+                DateTime ngay = dtpNgayBay.Value.Date;
+                HienChuyenBay(ChuyenBayDAL.TimKiem(di, den, ngay), $"{di} → {den} · {ngay:dd/MM/yyyy}");
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+            }
+        }
+
+        private void btnLichBay_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                HienChuyenBay(ChuyenBayDAL.LichBaySapToi(cboDiemDi.SelectedValue as string, cboDiemDen.SelectedValue as string), "Lịch bay sắp tới");
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+            }
+        }
+
+        private void btnDoiChieu_Click(object sender, EventArgs e)
+        {
+            int a = cboDiemDi.SelectedIndex;
+            cboDiemDi.SelectedIndex = cboDiemDen.SelectedIndex;
+            cboDiemDen.SelectedIndex = a;
+        }
+
+        private void HienChuyenBay(List<ChuyenBayDTO> ds, string tieuDe)
+        {
+            int? giu = _chuyenBay?.MaChuyenBay;
+            flpChuyenBay.SuspendLayout();
+            foreach (var t in _the) t.Dispose();
+            _the.Clear();
+            flpChuyenBay.Controls.Clear();
+
+            foreach (var cb in ds)
+            {
+                var the = new FlightCard { ChuyenBay = cb, Width = Math.Max(400, flpChuyenBay.ClientSize.Width - 24) };
+                the.Click += (s, e) => ChonChuyen(((FlightCard)s).ChuyenBay);
+                _the.Add(the);
+                flpChuyenBay.Controls.Add(the);
+            }
+            flpChuyenBay.ResumeLayout();
+
+            cardChuyenBay.Title = "Chuyến bay";
+            cardChuyenBay.Subtitle = ds.Count > 0 ? $"· {tieuDe} · {ds.Count} chuyến" : "· " + tieuDe;
+            lblKhongCo.Text = "Không có chuyến bay phù hợp.\nThử đổi ngày bay hoặc bấm \"Lịch bay sắp tới\" để xem các ngày còn chuyến.";
+            lblKhongCo.Visible = ds.Count == 0;
+            flpChuyenBay.Visible = ds.Count > 0;
+
+            var cu = ds.FirstOrDefault(c => c.MaChuyenBay == giu);
+            ChonChuyen(cu);
+        }
+
+        private void ChonChuyen(ChuyenBayDTO cb)
+        {
+            _chuyenBay = cb;
+            foreach (var t in _the) t.Selected = cb != null && t.ChuyenBay.MaChuyenBay == cb.MaChuyenBay;
+            CapNhatThanhDuoi();
+        }
+
+        private void flpChuyenBay_Resize(object sender, EventArgs e)
+        {
+            int w = Math.Max(400, flpChuyenBay.ClientSize.Width - 24);
+            foreach (var t in _the) t.Width = w;
+        }
+
+        // =========================================================
+        // Bước 2: sơ đồ ghế + hành khách
+        // =========================================================
+        private void NapSoDoGhe()
+        {
+            if (_chuyenBay == null) return;
+            try
+            {
+                seatMap.SetData(ChuyenBayDAL.SoDoGhe(_chuyenBay.MaChuyenBay), _chuyenBay.BangGia);
+                CapNhatGheTrongDon();
+                lblChuyenSoDo.Text = $"Chuyến #{_chuyenBay.MaChuyenBay} · {_chuyenBay.TuyenBay} · " +
+                                     $"{_chuyenBay.NgayGioKhoiHanh:dd/MM/yyyy HH:mm} · {_chuyenBay.SoHieu}";
+                pnlSoDo_Resize(this, EventArgs.Empty);
+                HienGheDangChon();
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+            }
+        }
+
+        private void CapNhatGheTrongDon()
+        {
+            if (_chuyenBay == null) return;
+            seatMap.SetInCart(_gioVe.AsEnumerable()
+                .Where(r => r.Field<int>("MaChuyenBay") == _chuyenBay.MaChuyenBay)
+                .Select(r => r.Field<int>("MaGhe")));
+        }
+
+        private void pnlSoDo_Resize(object sender, EventArgs e)
+        {
+            // Căn giữa hình máy bay theo chiều ngang
+            int x = Math.Max(0, (pnlSoDo.ClientSize.Width - seatMap.Width) / 2);
+            seatMap.Location = new Point(x + pnlSoDo.AutoScrollPosition.X, seatMap.Top);
+        }
+
+        private void seatMap_SeatSelected(object sender, EventArgs e)
+        {
+            HienGheDangChon();
+        }
+
+        private void HienGheDangChon()
+        {
+            GheDTO ghe = seatMap.SelectedSeat;
+            if (ghe == null)
+            {
+                lblGheChon.Text = "Bấm vào một ghế trống trên sơ đồ";
+                lblGheGia.Text = "";
+            }
+            else
+            {
+                lblGheChon.Text = $"Ghế {ghe.SoGhe}  ·  {ghe.TenHangVe}";
+                decimal? gia = seatMap.GiaCuaHang(ghe.MaHangVe);
+                lblGheGia.Text = gia == null ? "" : DinhDang.Tien(gia.Value);
+            }
+            CapNhatThanhDuoi();
+        }
+
+        private void btnKhachMoi_Click(object sender, EventArgs e)
+        {
+            using (var f = new frmKhachHang())
+            {
+                if (f.ShowDialog(FindForm()) != DialogResult.OK) return;
+                try { NapKhachHang(f.MaKHKetQua); }
+                catch (Exception ex) { MsgBox.Loi(ex); }
+            }
+        }
+
+        private void btnThemVe_Click(object sender, EventArgs e)
+        {
+            GheDTO ghe = seatMap.SelectedSeat;
+            if (_chuyenBay == null || ghe == null)
+            {
+                MsgBox.CanhBao("Hãy bấm chọn một ghế trống trên sơ đồ trước.");
+                return;
+            }
+            int? maKH = cboHanhKhach.SelectedValue as int?;
+            if (maKH == null)
+            {
+                MsgBox.CanhBao("Vui lòng chọn hành khách.");
+                return;
+            }
+            if (_gioVe.Rows.Count >= 2)
+            {
+                MsgBox.CanhBao("Mỗi đơn đặt tối đa 2 vé. Hãy tiếp tục sang bước xác nhận để tạo đơn này trước.");
+                return;
+            }
+            if (_gioVe.AsEnumerable().Any(r => r.Field<int>("MaChuyenBay") == _chuyenBay.MaChuyenBay && r.Field<int>("MaKH") == maKH.Value))
+            {
+                MsgBox.CanhBao("Hành khách này đã có vé trên chuyến bay này trong đơn.");
+                return;
+            }
+            int? giamHo = cboGiamHo.SelectedValue as int?;
+            if (giamHo != null && giamHo == maKH)
+            {
+                MsgBox.CanhBao("Người giám hộ phải khác hành khách.");
+                return;
+            }
+
+            decimal gia;
+            _chuyenBay.BangGia.TryGetValue(ghe.MaHangVe, out gia);
+
+            DataRow r = _gioVe.NewRow();
+            r["MaChuyenBay"] = _chuyenBay.MaChuyenBay;
+            r["Tuyen"] = _chuyenBay.TuyenBay;
+            r["NgayGioKhoiHanh"] = _chuyenBay.NgayGioKhoiHanh;
+            r["MaGhe"] = ghe.MaGhe;
+            r["SoGhe"] = ghe.SoGhe;
+            r["MaHangVe"] = ghe.MaHangVe;
+            r["HangVe"] = ghe.TenHangVe;
+            r["MaKH"] = maKH.Value;
+            r["HanhKhach"] = cboHanhKhach.Text;
+            r["MaNguoiGiamHo"] = (object)giamHo ?? DBNull.Value;
+            r["NguoiGiamHo"] = giamHo != null ? cboGiamHo.Text : "";
+            r["GiaGoc"] = gia;
+            r["PhanTramGiam"] = 0;
+            r["TienGiam"] = 0m;
+            r["GiaThucTra"] = gia;
+            _gioVe.Rows.Add(r);
+
+            cboGiamHo.SelectedIndex = 0;
+            seatMap.SelectedMaGhe = null;
+            CapNhatGheTrongDon();
+            HienGheDangChon();
+            TuDongKhuHoi();
+        }
+
+        private void TuDongKhuHoi()
+        {
+            if (_gioVe.Rows.Count != 2) return;
+            DataRow a = _gioVe.Rows[0], b = _gioVe.Rows[1];
+            string[] ta = a.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
+            string[] tb = b.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
+            if (a.Field<int>("MaKH") == b.Field<int>("MaKH") && ta[0] == tb[1] && ta[1] == tb[0])
+                chkKhuHoi.Checked = true;
+        }
+
+        private void btnXoaVe_Click(object sender, EventArgs e)
+        {
+            DataRow r = GridHelper.SelectedRow(dgvGioVe);
+            if (r == null)
+            {
+                MsgBox.CanhBao("Chọn vé cần xóa trong danh sách \"Vé trong đơn\".");
+                return;
+            }
+            _gioVe.Rows.Remove(r);
+            if (_gioVe.Rows.Count < 2) chkKhuHoi.Checked = false;
+            CapNhatGheTrongDon();
+            CapNhatThanhDuoi();
+        }
+
+        // =========================================================
+        // Bước 3: ưu đãi, tính giá, đặt vé
+        // =========================================================
+        private void TuyChonGia_Changed(object sender, EventArgs e)
+        {
+            if (_buoc == 3 && _gioVe != null && _gioVe.Rows.Count > 0) TinhGia(true);
+        }
+
+        private bool TinhGia(bool imLang)
+        {
+            if (_dangTinhGia || _gioVe.Rows.Count == 0) return false;
+            _dangTinhGia = true;
+            try
+            {
+                int? maKM = cboKhuyenMai.SelectedValue as int?;
+                foreach (DataRow r in _gioVe.Rows)
+                {
+                    int? khuHoi = null;
+                    if (chkKhuHoi.Checked)
+                    {
+                        DataRow khac = _gioVe.AsEnumerable().FirstOrDefault(x => x != r);
+                        if (khac != null) khuHoi = khac.Field<int>("MaChuyenBay");
+                    }
+                    int soVeTet = _gioVe.AsEnumerable().Count(x => x.Field<int>("MaKH") == r.Field<int>("MaKH"));
+
+                    DataRow g = DatVeDAL.TinhGia(r.Field<int>("MaChuyenBay"), r.Field<int>("MaHangVe"), r.Field<int>("MaKH"),
+                        chkTet.Checked, chkKhuHoi.Checked, maKM, khuHoi, soVeTet);
+                    r["GiaGoc"] = g["GiaGoc"];
+                    r["PhanTramGiam"] = g["PhanTramGiam"];
+                    r["TienGiam"] = g["TienGiam"];
+                    r["GiaThucTra"] = g["GiaThucTra"];
+                }
+                lblLoiGia.ForeColor = AppTheme.Muted;
+                lblLoiGia.Text = "Giá được tính bởi sp_TINHTHUGIAVE: hạng thành viên, khuyến mãi, Tết và khứ hồi cộng dồn nhưng không vượt quá 30%.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                lblLoiGia.ForeColor = AppTheme.BadText;
+                lblLoiGia.Text = "Chưa tính được giá: " + ex.Message;
+                if (!imLang) MsgBox.Loi(ex);
+                return false;
+            }
+            finally
+            {
+                _dangTinhGia = false;
+                CapNhatThanhDuoi();
+            }
+        }
+
+        private void DatVe()
+        {
+            if (!TinhGia(false)) return;
+
+            int maLienHe = cboLienHe.SelectedValue as int? ?? _gioVe.Rows[0].Field<int>("MaKH");
+            decimal tong = _gioVe.AsEnumerable().Sum(r => r.Field<decimal>("GiaThucTra"));
+            if (!MsgBox.XacNhan($"Tạo đơn gồm {_gioVe.Rows.Count} vé, tổng {DinhDang.Tien(tong)}?", "Xác nhận đặt vé", "Đặt vé", "Xem lại")) return;
+
+            try
+            {
+                DataRow kq = DatVeDAL.DatVe(maLienHe, _gioVe.Rows.Cast<DataRow>().ToList(), chkTet.Checked, chkKhuHoi.Checked,
+                    cboKhuyenMai.SelectedValue as int?);
+                int maDon = Convert.ToInt32(kq["MaDon"]);
+
+                stepBar.StepsDone = 2;
+                bool daTra = MsgBox.XacNhan($"Đã tạo đơn #{maDon} — tổng {DinhDang.Tien(kq["TongThanhToan"])}.\n" +
+                                            "Đơn đang ở trạng thái Chờ thanh toán. Thanh toán ngay?", "Đặt vé thành công", "Thanh toán", "Để sau")
+                             && frmThanhToan.ThanhToan(FindForm(), maDon);
+                if (!daTra)
+                    MsgBox.ThongTin($"Có thể thêm dịch vụ (hành lý, suất ăn...) và thanh toán đơn #{maDon} sau ở mục \"Đơn đặt vé\".");
+
+                // Làm mới cho lần đặt tiếp theo
+                _gioVe.Rows.Clear();
+                chkKhuHoi.Checked = false;
+                cboKhuyenMai.SelectedIndex = 0;
+                _buoc = 1;
+                HienChuyenBay(ChuyenBayDAL.LichBaySapToi(null, null), "Lịch bay sắp tới");
+                TaiLai();
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+            }
+        }
+
+        private void tlpGia_Paint(object sender, PaintEventArgs e)
+        {
+            // Đường kẻ trước dòng tổng
+            int y = tlpGia.GetRowHeights().Take(2).Sum() + 4;
+            using (var p = new Pen(AppTheme.Border) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash })
+                e.Graphics.DrawLine(p, 0, y, tlpGia.Width, y);
+        }
+
+        // =========================================================
+        // Điều hướng giữa các bước + thanh tổng tiền
+        // =========================================================
+        private void btnTiepTuc_Click(object sender, EventArgs e)
+        {
+            if (_buoc == 1)
+            {
+                if (_chuyenBay == null)
+                {
+                    MsgBox.CanhBao("Vui lòng chọn một chuyến bay.");
+                    return;
+                }
+                ChuyenBuoc(2);
+            }
+            else if (_buoc == 2)
+            {
+                if (_gioVe.Rows.Count == 0)
+                {
+                    MsgBox.CanhBao("Đơn chưa có vé nào. Chọn ghế, chọn hành khách rồi bấm \"Thêm vé vào đơn\".");
+                    return;
+                }
+                ChuyenBuoc(3);
+            }
+            else
+            {
+                DatVe();
+            }
+        }
+
+        private void btnQuayLai_Click(object sender, EventArgs e)
+        {
+            if (_buoc > 1) ChuyenBuoc(_buoc - 1);
+        }
+
+        private void ChuyenBuoc(int buoc)
+        {
+            _buoc = buoc;
+            pnlBuoc1.Visible = buoc == 1;
+            pnlBuoc2.Visible = buoc == 2;
+            pnlBuoc3.Visible = buoc == 3;
+            stepBar.StepsDone = buoc - 1;
+            btnQuayLai.Visible = buoc > 1;
+
+            if (buoc == 1) btnTiepTuc.Text = "Tiếp tục: Chọn ghế";
+            else if (buoc == 2) btnTiepTuc.Text = "Tiếp tục: Xác nhận";
+            else btnTiepTuc.Text = "Đặt vé";
+            btnTiepTuc.Kind = buoc == 3 ? ButtonKind.Accent : ButtonKind.Primary;
+
+            if (buoc == 2) NapSoDoGhe();
+            if (buoc == 3) TinhGia(true);
+            CapNhatThanhDuoi();
+        }
+
+        private void CapNhatThanhDuoi()
+        {
+            if (_gioVe == null) return;
+            decimal giaGoc = _gioVe.AsEnumerable().Sum(r => r.Field<decimal>("GiaGoc"));
+            decimal thucTra = _gioVe.AsEnumerable().Sum(r => r.Field<decimal>("GiaThucTra"));
+            decimal giam = giaGoc - thucTra;
+
+            lblTong.Text = DinhDang.Tien(thucTra);
+            lblGiaGoc.Text = DinhDang.Tien(giaGoc);
+            lblGiam.Text = giam > 0 ? "−" + DinhDang.Tien(giam) : "0 đ";
+            lblTongCong.Text = DinhDang.Tien(thucTra);
+
+            string ve = $"Đơn: {_gioVe.Rows.Count}/2 vé";
+            if (_buoc == 1)
+            {
+                lblTomTat.Text = _chuyenBay == null
+                    ? "Chọn một chuyến bay để bắt đầu  ·  " + ve
+                    : $"Đã chọn chuyến #{_chuyenBay.MaChuyenBay}  {_chuyenBay.TuyenBay}  ·  {_chuyenBay.NgayGioKhoiHanh:dd/MM HH:mm}  ·  {ve}";
+            }
+            else if (_buoc == 2)
+            {
+                GheDTO ghe = seatMap.SelectedSeat;
+                lblTomTat.Text = (ghe == null ? "Chưa chọn ghế" : $"Ghế {ghe.SoGhe} · {ghe.TenHangVe}") + "  ·  " + ve +
+                                 (_gioVe.Rows.Count == 1 ? "  ·  Có thể quay lại bước 1 để thêm vé chiều về" : "");
+            }
+            else
+            {
+                lblTomTat.Text = string.Join("   |   ", _gioVe.AsEnumerable().Select(r => $"{r["Tuyen"]} · {r["SoGhe"]}"));
+            }
+        }
+    }
+}
