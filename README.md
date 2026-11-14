@@ -41,7 +41,16 @@ Tài liệu này giúp cả nhóm nắm được hệ thống làm gì, ai dùng
 | `admin` | `admin123` | Quản trị viên |
 | `nv01` … `nv04` | `123456` | Nhân viên |
 
-> Chạy lại file SQL sẽ tạo lại toàn bộ dữ liệu mẫu (chuyến bay có ngày tính theo ngày hiện tại).
+> **Cập nhật CSDL khi file SQL thay đổi**: script chỉ tạo mới, không xóa bảng cũ, nên phải xóa CSDL rồi chạy lại.
+> Thao tác này **xóa toàn bộ dữ liệu** và thay bằng dữ liệu mẫu (chuyến bay có ngày tính theo ngày hiện tại).
+>
+> ```sql
+> USE master;
+> ALTER DATABASE QuanLyBanVeMayBay2 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+> DROP DATABASE QuanLyBanVeMayBay2;
+> CREATE DATABASE QuanLyBanVeMayBay2;
+> -- sau đó chạy lại Database/QuanLyBanVeMayBay.sql
+> ```
 
 ---
 
@@ -206,7 +215,7 @@ flowchart LR
 
 **Ví dụ**: vé Phổ thông 900.000 đ, khách hạng Vàng (10%), mua tháng 2 có ưu đãi Tết (10%), vé khứ hồi (10%), mã khuyến mãi 5% → tổng 35% → **áp 30%** → giá thực trả 630.000 đ.
 
-**Giá gốc mẫu** (đặt khi tạo chuyến bay):
+**Giá gốc** do nhân viên nhập cho từng hạng khi tạo chuyến bay. Dữ liệu mẫu dùng mức giá sau:
 
 | Tuyến | Phổ thông | PT đặc biệt | Thương gia |
 |---|---:|---:|---:|
@@ -299,6 +308,7 @@ Hạng tính theo **tổng chi tiêu** (tiền vé + dịch vụ đã thanh toá
 | Kim Cương | 100.000.000 đ | 15% |
 
 - Hạng có **hiệu lực 1 năm** kể từ giao dịch đầu tiên. Hết hạn thì khách về hạng **Thành viên**.
+- ⚠️ Hiện hệ thống **chưa tự gia hạn**: ngày hết hạn chỉ được đặt một lần ở giao dịch đầu tiên, nên sau 1 năm khách luôn ở hạng Thành viên dù vẫn mua vé. Nếu muốn tính lại theo từng năm, cần sửa `sp_THANHTOANDON` và `sp_XETHANGTHANHVIEN`.
 - Hạng được xét lại tự động sau mỗi lần **thanh toán** và **hủy vé có hoàn tiền**.
 
 ```mermaid
