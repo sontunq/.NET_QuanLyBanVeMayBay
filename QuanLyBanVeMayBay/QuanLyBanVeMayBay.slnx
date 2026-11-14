@@ -1,9 +1,0 @@
-<Solution>
-  <Configurations>
-    <Platform Name="Any CPU" />
-  </Configurations>
-  <Folder Name="/Database/">
-    <File Path="Database/QuanLyBanVeMayBay.sql" />
-  </Folder>
-  <Project Path="QuanLyBanVeMayBay/QuanLyBanVeMayBay.csproj" />
-</Solution>
