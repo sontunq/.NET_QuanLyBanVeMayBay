@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý bán vé máy bay</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #e9eef1;
+    --surface: #ffffff;
+    --surface-2: #f4f7f8;
+    --ink: #0f2a33;
+    --ink-2: #44555c;
+    --muted: #6b7a80;
+    --line: #d5dee2;
+    --primary: #0e5f73;
+    --primary-soft: #e3f0f3;
+    --accent: #b7862b;
+    --accent-soft: #f8f0df;
+    --danger: #b3261e;
+    --danger-soft: #fbe9e7;
+    --good: #1d7a46;
+    --good-soft: #e5f4ea;
+    /* dữ liệu biểu đồ (bảng màu đã kiểm định, thứ tự cố định) */
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #eda100;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
+  body { overflow: hidden; }
+
+  /* Sân khấu 16:9 cố định 1280x720, co giãn theo cửa sổ */
+  #khung { position: fixed; inset: 0; display: grid; place-items: center; }
+  #san-khau { width: 1280px; height: 720px; position: relative; transform-origin: center center; }
+  .slide { position: absolute; inset: 0; background: var(--surface); border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(15,42,51,.14); padding: 44px 56px 40px; display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none; transition: opacity .25s ease; overflow: hidden; }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .dau { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .dau .phan { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
+  .dau .nguoi { margin-left: auto; font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+    background: var(--primary-soft); color: var(--primary); }
+  .dau .nguoi.suan { background: var(--accent-soft); color: #7a5717; }
+  h1 { font-size: 46px; line-height: 1.15; margin: 0 0 14px; letter-spacing: -.01em; }
+  h2 { font-size: 32px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -.01em; }
+  .phu { color: var(--ink-2); font-size: 17px; margin: 0 0 18px; }
+  .than { flex: 1; min-height: 0; display: flex; gap: 28px; }
+  .cot { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .cot.hep { flex: 0 0 38%; }
+  ul { margin: 0; padding-left: 20px; font-size: 17px; line-height: 1.5; color: var(--ink); }
+  li { margin: 3px 0; }
+  li b, p b { color: var(--primary); }
+  p { margin: 0; font-size: 17px; line-height: 1.5; }
+  code { font-family: Consolas, "Cascadia Mono", monospace; font-size: .92em; background: var(--surface-2);
+    padding: 1px 6px; border-radius: 5px; color: #12424f; }
+  .the { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; }
+  .the h3 { margin: 0 0 8px; font-size: 16px; color: var(--primary); text-transform: uppercase; letter-spacing: .05em; }
+  .the.vang { background: var(--accent-soft); border-color: #ecd9b0; }
+  .the.vang h3 { color: #7a5717; }
+  .the.do { background: var(--danger-soft); border-color: #f1c7c2; }
+  .the.do h3 { color: var(--danger); }
+  .the.xanh { background: var(--good-soft); border-color: #bfe3cc; }
+  .the.xanh h3 { color: var(--good); }
+  .luoi { display: grid; gap: 12px; }
+  .luoi.c2 { grid-template-columns: 1fr 1fr; }
+  .luoi.c3 { grid-template-columns: 1fr 1fr 1fr; }
+  .luoi.c4 { grid-template-columns: repeat(4, 1fr); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+  td.so, th.so { text-align: right; font-variant-numeric: tabular-nums; }
+  .ghi { font-size: 13.5px; color: var(--muted); }
+  .nhan { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px;
+    background: var(--primary-soft); color: var(--primary); }
+  .nhan.moi { background: var(--good-soft); color: var(--good); }
+  .nhan.chua { background: var(--danger-soft); color: var(--danger); }
+
+  /* Sơ đồ Mermaid: co vừa khung */
+  .so-do { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px; overflow: hidden; }
+  .so-do .mermaid { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .so-do svg { max-width: 100% !important; max-height: 100% !important; height: auto; width: auto; }
+  .mermaid:not([data-processed]) { visibility: hidden; }
+
+  /* Trang bìa */
+  .bia { background: linear-gradient(135deg, #0e5f73 0%, #0b4554 60%, #0a3a47 100%); color: #fff; justify-content: center; }
+  .bia h1 { color: #fff; font-size: 58px; }
+  .bia .phu { color: #cfe3e8; font-size: 22px; }
+  .bia .dong { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
+  .bia .dong span { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); padding: 8px 16px; border-radius: 999px; font-size: 16px; }
+  .bia .may { position: absolute; right: 60px; bottom: 50px; opacity: .14; width: 360px; }
+
+  /* Số liệu nhanh */
+  .so-lieu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .so-lieu div { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .so-lieu b { display: block; font-size: 34px; color: var(--primary); line-height: 1.1; }
+  .so-lieu span { font-size: 14px; color: var(--ink-2); }
+
+  /* Cây thư mục */
+  pre.cay { margin: 0; font-family: Consolas, "Cascadia Mono", monospace; font-size: 15px; line-height: 1.55;
+    background: #0f2a33; color: #dce9ed; border-radius: 12px; padding: 16px 20px; overflow: hidden; }
+  pre.cay .c { color: #8fb4bf; }
+  pre.cay .t { color: #ffd27a; font-weight: 600; }
+
+  /* Biểu đồ cột tự vẽ */
+  .bd { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; position: relative; }
+  .bd h3 { margin: 0 0 2px; font-size: 16px; }
+  .bd .ghi { margin-bottom: 10px; }
+  .hang-bd { display: grid; grid-template-columns: 150px 1fr 120px; align-items: center; gap: 10px; margin: 9px 0; font-size: 15px; }
+  .hang-bd .ten { color: var(--ink-2); }
+  .hang-bd .gt { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .rail { height: 22px; background: #e7edef; border-radius: 4px; position: relative; }
+  .bar { height: 100%; background: var(--series-1); border-radius: 0 4px 4px 0; cursor: default; }
+  .bar:hover, .seg:hover { filter: brightness(1.1); }
+  .ngang { display: flex; height: 44px; gap: 2px; border-radius: 4px; overflow: hidden; }
+  .seg { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: default; }
+  .chu-giai { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 13.5px; color: var(--ink-2); }
+  .chu-giai i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  #tip { position: fixed; z-index: 50; pointer-events: none; background: #0f2a33; color: #fff; font-size: 13px; padding: 6px 10px;
+    border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
+
+  /* Thanh điều khiển */
+  #dieu-khien { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 8px 16px;
+    font-size: 13px; color: var(--ink-2); }
+  #tien-do { position: fixed; left: 0; top: 0; height: 4px; background: var(--primary); transition: width .25s; }
+  #dieu-khien button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px;
+    padding: 5px 12px; font: inherit; cursor: pointer; }
+  #dieu-khien button:hover { background: var(--primary-soft); }
+  #so-trang { font-variant-numeric: tabular-nums; min-width: 64px; text-align: center; }
+  #dieu-khien .goi-y { margin-left: auto; color: var(--muted); }
+  @media (max-width: 700px) { #dieu-khien .goi-y { display: none; } }
+
+  /* In ra PDF: mỗi slide một trang */
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    body { overflow: visible; background: #fff; }
+    #khung { position: static; display: block; }
+    #san-khau { transform: none !important; width: auto; height: auto; }
+    .slide { position: relative; opacity: 1; width: 1280px; height: 720px; break-after: page; box-shadow: none; border-radius: 0; }
+    #dieu-khien, #tien-do, #tip { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="tien-do"></div>
+<div id="khung"><div id="san-khau">
+
+<!-- ======================= 1. BÌA ======================= -->
+<section class="slide bia">
+  <svg class="may" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+  <div class="phu" style="text-transform:uppercase;letter-spacing:.12em;font-size:15px;margin-bottom:10px">Đồ án môn học · WinForms C# + SQL Server</div>
+  <h1>Hệ thống quản lý<br>bán vé máy bay tại quầy</h1>
+  <p class="phu">Từ tìm chuyến, chọn ghế, lập đơn nhiều vé, thanh toán đến hủy vé và hoàn tiền</p>
+  <div class="dong">
+    <span>Phần 1 · Ngân — Bài toán, kiến trúc, CSDL, phạm vi</span>
+    <span>Phần 2 · Suan — Các quy trình nghiệp vụ</span>
+  </div>
+</section>
+
+<!-- ======================= 2. BÀI TOÁN ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">01 · Giới thiệu bài toán</span></div>
+  <h2>Bài toán: bán vé máy bay tại quầy</h2>
+  <p class="phu">Khách đến quầy → nhân viên tìm chuyến, chọn ghế, lập đơn, thu tiền; khi khách đổi ý thì hủy vé và hoàn tiền.</p>
+  <div class="than">
+    <div class="cot">
+      <div class="the"><h3>Vấn đề khi làm thủ công</h3>
+        <ul>
+          <li>Hai quầy có thể bán <b>trùng một ghế</b></li>
+          <li>Tính giá dễ sai khi cộng dồn nhiều ưu đãi</li>
+          <li>Phí hủy, tiền hoàn tính tay, khó đối chiếu</li>
+          <li>Không theo dõi được chi tiêu, hạng thành viên của khách</li>
+        </ul></div>
+      <div class="the xanh"><h3>Mục tiêu của hệ thống</h3>
+        <ul>
+          <li>Sơ đồ ghế trực quan, khóa ghế an toàn khi đặt</li>
+          <li>Một đơn chứa <b>nhiều vé</b>, giá tính tự động, tối đa giảm 30%</li>
+          <li>Thanh toán 3 phương thức, thu thêm khi mua dịch vụ sau</li>
+          <li>Hủy vé tính phí theo thời gian, hoàn tiền đúng số đã trả</li>
+          <li>Báo cáo doanh thu, nhật ký thao tác</li>
+        </ul></div>
+    </div>
+    <div class="cot hep">
+      <div class="the"><h3>Người dùng</h3>
+        <ul>
+          <li><b>Nhân viên</b> bán vé tại quầy</li>
+          <li><b>Quản trị viên</b> quản lý máy bay, tài khoản, nhật ký</li>
+          <li><b>Khách hàng</b> không dùng phần mềm; nhân viên nhập thông tin</li>
+        </ul></div>
+      <div class="the vang"><h3>Công nghệ</h3>
+        <ul>
+          <li>C# WinForms, <b>.NET 8</b></li>
+          <li><b>SQL Server</b>: bảng, view, thủ tục, trigger</li>
+          <li>Thư viện: <code>Microsoft.Data.SqlClient</code>, <code>QRCoder</code> (mã VietQR)</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 3. SỐ LIỆU NHANH ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">01 · Giới thiệu bài toán</span></div>
+  <h2>Hệ thống nhìn từ con số</h2>
+  <p class="phu">Toàn bộ CSDL nằm trong một file duy nhất <code>Database/QuanLyBanVeMayBay.sql</code>.</p>
+  <div class="so-lieu">
+    <div><b>18</b><span>bảng dữ liệu</span></div>
+    <div><b>7</b><span>view phục vụ hiển thị và báo cáo</span></div>
+    <div><b>17</b><span>thủ tục lưu trữ (stored procedure)</span></div>
+    <div><b>1</b><span>trigger ghi nhật ký tài khoản</span></div>
+    <div><b>10</b><span>màn hình chức năng (3 chỉ dành cho quản trị)</span></div>
+    <div><b>3</b><span>lớp: GUI · BLL · DAL</span></div>
+    <div><b>30%</b><span>mức giảm giá tối đa trên một vé</span></div>
+    <div><b>3</b><span>phương thức thanh toán: tiền mặt · chuyển khoản · thẻ</span></div>
+  </div>
+  <div class="the" style="margin-top:16px">
+    <h3>Dữ liệu mẫu đi kèm</h3>
+    <p>15 sân bay (8 trong nước, 7 quốc tế) · 4 máy bay × 56 ghế · 46 chuyến bay · 40 khách hàng · 10 đơn mẫu · 8 dịch vụ · 5 hạng thành viên · 3 khuyến mãi (Tết đã <b>tạm dừng</b>) · 5 tài khoản (<code>admin</code>, <code>nv01</code>–<code>nv04</code>)</p>
+  </div>
+</section>
+
+<!-- ======================= 4. CẤU TRÚC THƯ MỤC ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">02 · Cấu trúc thư mục</span></div>
+  <h2>Cấu trúc thư mục dự án</h2>
+  <p class="phu">Mỗi thư mục ứng với một lớp hoặc một vai trò rõ ràng.</p>
+  <div class="than">
+    <div class="cot">
+<pre class="cay"><span class="t">QuanLyBanVeMayBay/</span>
+├── <span class="t">Database/</span>
+│   └── QuanLyBanVeMayBay.sql  <span class="c">bảng, view, thủ tục, trigger, dữ liệu mẫu</span>
+├── <span class="t">GUI/</span>        <span class="c">Form + UserControl (mỗi màn hình: .cs + .Designer.cs)</span>
+├── <span class="t">Controls/</span>   <span class="c">control tự vẽ: SeatMap, FlightCard, BarChart, StepBar…</span>
+├── <span class="t">BLL/</span>        <span class="c">nghiệp vụ: DatVeBLL, ThanhToanBLL, KiemTraDuLieu…</span>
+├── <span class="t">DAL/</span>        <span class="c">truy cập dữ liệu: DataProvider, KetNoiCSDL, *DAL</span>
+├── <span class="t">DTO/</span>        <span class="c">đối tượng truyền dữ liệu: ChuyenBayDTO, GheDTO…</span>
+├── <span class="t">Utils/</span>      <span class="c">AppTheme, DinhDang, GridHelper, MsgBox</span>
+├── Program.cs
+├── QuanLyBanVeMayBay.csproj  <span class="c">.NET 8 WinForms</span>
+└── QuanLyBanVeMayBay.slnx</pre>
+    </div>
+    <div class="cot hep">
+      <div class="the"><h3>Quy ước đặt tên</h3>
+        <ul>
+          <li><code>frm…</code>: hộp thoại (Form) — vd <code>frmThanhToan</code></li>
+          <li><code>uc…</code>: màn hình trong khung chính — vd <code>ucDatVe</code></li>
+          <li><code>…BLL</code> / <code>…DAL</code>: cùng tên nghiệp vụ ở hai lớp</li>
+          <li><code>sp_…</code>: thủ tục, <code>V_…</code>: view, <code>trg_…</code>: trigger</li>
+        </ul></div>
+      <div class="the vang"><h3>Điểm khởi đầu</h3>
+        <p><code>Program.cs</code> mở <code>frmDangNhap</code> → đăng nhập thành công mở <code>frmMain</code> (thanh menu bên trái, nạp các <code>uc…</code>).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 5. KIẾN TRÚC 3 LỚP ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">03 · Kiến trúc phần mềm</span></div>
+  <h2>Kiến trúc 3 lớp: Giao diện · Nghiệp vụ · CSDL</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.35"><pre class="mermaid">
+flowchart TB
+    subgraph GUI["GUI · Giao diện"]
+        F["Form và UserControl<br/>frmThanhToan, ucDatVe, ..."]
+        C["Control tự vẽ<br/>SeatMap, FlightCard, BarChart"]
+    end
+    subgraph BLL["BLL · Nghiệp vụ"]
+        B["DatVeBLL, ThanhToanBLL,<br/>KhachHangBLL, ..."]
+        V["KiemTraDuLieu<br/>kiểm tra dữ liệu nhập"]
+        L["LoiNghiepVu<br/>lỗi thân thiện"]
+    end
+    subgraph DAL["DAL · Truy cập dữ liệu"]
+        D["DatVeDAL, ChuyenBayDAL, ..."]
+        P["DataProvider<br/>ExecuteQuery, ExecuteProc,<br/>ChayTrongGiaoDich"]
+        K["KetNoiCSDL"]
+    end
+    DB[("SQL Server<br/>bảng, view, thủ tục, trigger")]
+    DTO[["DTO: ChuyenBayDTO, GheDTO, TaiKhoanDTO"]]
+    F --> B
+    C --> DTO
+    B --> V
+    B --> D
+    D --> P --> K --> DB
+    B -. ném .-> L -. hộp cảnh báo .-> F
+    D -. trả về .-> DTO
+    </pre></div>
+    <div class="cot hep">
+      <div class="the"><h3>GUI</h3><p>Chỉ hiển thị và nhận thao tác. Không viết SQL, không chứa quy tắc nghiệp vụ.</p></div>
+      <div class="the"><h3>BLL</h3><p>Kiểm tra dữ liệu, quy tắc (giỏ vé, khứ hồi, phí hủy xem trước). Báo lỗi sớm bằng <code>LoiNghiepVu</code>.</p></div>
+      <div class="the"><h3>DAL</h3><p>Gọi thủ tục / câu lệnh có tham số. <code>ChayTrongGiaoDich</code> gom nhiều thủ tục vào <b>một giao dịch</b>.</p></div>
+      <div class="the vang"><h3>Nguyên tắc</h3><p>Mỗi lớp chỉ gọi lớp ngay dưới nó. Quy tắc quan trọng được kiểm tra <b>hai lần</b>: BLL (thân thiện) và thủ tục SQL (an toàn khi nhiều quầy cùng thao tác).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 6. XỬ LÝ LỖI QUA CÁC LỚP ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">03 · Kiến trúc phần mềm</span></div>
+  <h2>Một thao tác đi qua 3 lớp và cách báo lỗi</h2>
+  <p class="phu">Ví dụ: thêm khách hàng mới. Lỗi được chia hai loại và hiện khác nhau.</p>
+  <div class="than">
+    <div class="so-do" style="flex:1.4"><pre class="mermaid">
+sequenceDiagram
+    actor NV as Nhân viên
+    participant G as frmKhachHang (GUI)
+    participant B as KhachHangBLL
+    participant K as KiemTraDuLieu
+    participant D as KhachHangDAL
+    participant S as SQL Server
+    NV->>G: Nhập thông tin, bấm Lưu
+    G->>B: Luu(...)
+    B->>K: Chuẩn hóa họ tên, SĐT, email, giấy tờ
+    alt Dữ liệu sai quy tắc
+        K-->>G: LoiNghiepVu → hộp cảnh báo
+    else Hợp lệ
+        B->>D: Them / Sua (dữ liệu đã chuẩn hóa)
+        D->>S: INSERT có tham số
+        alt Vi phạm ràng buộc (vd trùng số giấy tờ)
+            S-->>G: SqlException → hộp lỗi
+        else Thành công
+            S-->>G: Mã khách hàng mới
+        end
+    end
+    </pre></div>
+    <div class="cot hep">
+      <div class="the vang"><h3>Lỗi nghiệp vụ</h3>
+        <p>BLL ném <code>LoiNghiepVu</code>, hoặc thủ tục SQL <code>THROW</code> mã <b>≥ 50000</b> → hộp <b>cảnh báo</b>, chỉ hiện đúng câu nghiệp vụ.</p></div>
+      <div class="the do"><h3>Lỗi hệ thống</h3>
+        <p>Mất kết nối, lỗi bất ngờ → hộp <b>lỗi</b> kèm thông điệp kỹ thuật.</p></div>
+      <div class="the"><h3>Giao dịch nhiều bước</h3>
+        <p>Một bước lỗi → <code>ROLLBACK</code> toàn bộ: không để lại đơn dở dang, ghế không bị giữ.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 7. NHÓM BẢNG ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>18 bảng, chia 6 nhóm</h2>
+  <div class="than">
+    <div class="cot">
+      <table>
+        <tr><th>Nhóm</th><th>Bảng</th><th>Vai trò</th></tr>
+        <tr><td><b>Danh mục</b></td><td><code>SANBAY</code> <code>HANGVE</code> <code>HANGTHANHVIEN</code> <code>DICHVU</code> <code>KHUYENMAI</code></td><td>Cấu hình nghiệp vụ, ít thay đổi</td></tr>
+        <tr><td><b>Đội bay</b></td><td><code>MAYBAY</code> <code>GHE</code></td><td>Máy bay và sơ đồ ghế cố định của từng máy bay</td></tr>
+        <tr><td><b>Khai thác</b></td><td><code>CHUYENBAY</code> <code>GIAVE</code> <code>GHECHUYENBAY</code></td><td>Chuyến bay, giá theo hạng, trạng thái từng ghế trên chuyến</td></tr>
+        <tr><td><b>Giao dịch</b></td><td><code>DONDATVE</code> <code>VE</code> <code>VEDICHVU</code> <code>THANHTOAN</code> <code>HUYVE</code></td><td>Bán vé, thu tiền, hủy và hoàn</td></tr>
+        <tr><td><b>Con người</b></td><td><code>KHACHHANG</code> <code>TAIKHOAN</code></td><td>Khách hàng và nhân viên</td></tr>
+        <tr><td><b>Kiểm soát</b></td><td><code>NHATKYHOATDONG</code></td><td>Nhật ký thao tác: ai, làm gì, lúc nào</td></tr>
+      </table>
+    </div>
+    <div class="cot hep">
+      <div class="the"><h3>Ý tưởng thiết kế</h3>
+        <ul>
+          <li><b>Ghế của máy bay</b> (<code>GHE</code>) tách khỏi <b>ghế trên chuyến</b> (<code>GHECHUYENBAY</code>): một máy bay bay nhiều chuyến, mỗi chuyến có trạng thái ghế riêng.</li>
+          <li><b>Giá theo chuyến × hạng</b> (<code>GIAVE</code>): cùng hạng nhưng mỗi chuyến một giá.</li>
+          <li><b>Đơn</b> là một lần giao dịch; <b>vé</b> là một chỗ ngồi của một hành khách.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 8. ERD TỔNG THỂ ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>ERD tổng thể</h2>
+  <div class="than">
+    <div class="so-do"><pre class="mermaid">
+erDiagram
+    SANBAY ||--o{ CHUYENBAY : "điểm đi / đến"
+    MAYBAY ||--o{ CHUYENBAY : "khai thác"
+    MAYBAY ||--|{ GHE : "có"
+    HANGVE ||--o{ GHE : "thuộc hạng"
+    CHUYENBAY ||--|{ GIAVE : "bảng giá"
+    HANGVE ||--o{ GIAVE : "định giá"
+    CHUYENBAY ||--|{ GHECHUYENBAY : "trạng thái ghế"
+    GHE ||--o{ GHECHUYENBAY : "trên chuyến"
+    HANGTHANHVIEN ||--o{ KHACHHANG : "xếp hạng"
+    KHACHHANG ||--o{ DONDATVE : "liên hệ"
+    KHUYENMAI |o--o{ DONDATVE : "áp dụng"
+    TAIKHOAN ||--o{ DONDATVE : "lập"
+    DONDATVE ||--|{ VE : "gồm 1..n"
+    KHACHHANG ||--o{ VE : "hành khách / giám hộ"
+    CHUYENBAY ||--o{ VE : "của chuyến"
+    GHE ||--o{ VE : "ngồi"
+    VE ||--o{ VEDICHVU : "mua thêm"
+    DICHVU ||--o{ VEDICHVU : "là"
+    DONDATVE ||--o{ THANHTOAN : "thu / hoàn"
+    VE ||--o| HUYVE : "bị hủy"
+    TAIKHOAN ||--o{ NHATKYHOATDONG : "ghi"
+    </pre></div>
+    <div class="cot hep" style="flex:0 0 30%">
+      <div class="the"><h3>Cách đọc</h3>
+        <ul>
+          <li><code>||--o{</code>: một – nhiều (có thể 0)</li>
+          <li><code>||--|{</code>: một – nhiều (ít nhất 1)</li>
+          <li><code>||--o|</code>: một – không hoặc một</li>
+          <li><code>|o--o{</code>: phía “một” có thể trống (FK cho phép NULL)</li>
+        </ul></div>
+      <div class="the vang"><h3>Trục chính</h3>
+        <p><code>DONDATVE</code> → <code>VE</code> → <code>VEDICHVU</code>, cùng <code>THANHTOAN</code> và <code>HUYVE</code>: toàn bộ dòng tiền của một lần bán.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 9. PHÂN TÍCH ERD (1) ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>Phân tích ERD: phần giao dịch</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.3"><pre class="mermaid">
+erDiagram
+    DONDATVE ||--|{ VE : "gồm"
+    DONDATVE ||--o{ THANHTOAN : "thu / hoàn"
+    VE ||--o{ VEDICHVU : "mua thêm"
+    VE ||--o| HUYVE : "bị hủy"
+    KHACHHANG ||--o{ VE : "MaKH"
+    KHACHHANG |o--o{ VE : "MaNguoiGiamHo"
+    DONDATVE {
+        int MaDon PK
+        int MaKHLienHe FK
+        int MaKM FK "NULL"
+        money TongTienVe
+        money TongTienDichVu
+        money TongThanhToan
+        string TrangThai
+    }
+    VE {
+        int MaVe PK
+        int MaDon FK
+        int MaChuyenBay FK
+        int MaGhe FK
+        int MaKH FK
+        money GiaGoc
+        int PhanTramGiamHang
+        int PhanTramGiamKhuHoi
+        int PhanTramGiamKM
+        int TongPhanTramGiam "0..30"
+        money GiaThucTra
+        string TrangThai
+    }
+    VEDICHVU {
+        int MaVe PK
+        int MaDichVu PK
+        int SoLuong
+        money ThanhTien "tính tự động"
+    }
+    THANHTOAN {
+        int MaThanhToan PK
+        money SoTien
+        string PhuongThuc
+        string TrangThai "Thành công / Đã hoàn"
+    }
+    HUYVE {
+        int MaVe FK "UNIQUE"
+        money PhiHuy
+        money TienHoan
+    }
+    </pre></div>
+    <div class="cot hep">
+      <div class="the"><h3>1 · Lưu “ảnh chụp” giá trên vé</h3>
+        <p>Vé lưu <b>giá gốc và từng loại % giảm</b> lúc bán. Sau này đổi giá vé hay hạng thành viên, vé cũ vẫn đúng số tiền đã bán.</p></div>
+      <div class="the"><h3>2 · Khách hàng đóng 3 vai</h3>
+        <p><b>Khách liên hệ</b> của đơn, <b>hành khách</b> của vé, <b>người giám hộ</b> (FK cho phép NULL) — cùng một bảng <code>KHACHHANG</code>.</p></div>
+      <div class="the"><h3>3 · Thanh toán là sổ thu chi</h3>
+        <p>Một đơn có nhiều dòng <code>THANHTOAN</code>: lần thu đầu, thu thêm dịch vụ, và dòng <b>Đã hoàn</b> khi hủy vé.</p></div>
+      <div class="the"><h3>4 · Mỗi vé hủy tối đa 1 lần</h3>
+        <p><code>HUYVE.MaVe</code> là <code>UNIQUE</code> → quan hệ 1 – 0..1.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 10. PHÂN TÍCH ERD (2) ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>Phân tích ERD: ghế, giá và ràng buộc toàn vẹn</h2>
+  <div class="than">
+    <div class="cot">
+      <div class="the"><h3>Bảng trung gian (khóa chính ghép)</h3>
+        <table>
+          <tr><th>Bảng</th><th>Khóa chính</th><th>Ý nghĩa</th></tr>
+          <tr><td><code>GIAVE</code></td><td>(MaChuyenBay, MaHangVe)</td><td>Mỗi chuyến có đúng 1 giá cho mỗi hạng</td></tr>
+          <tr><td><code>GHECHUYENBAY</code></td><td>(MaChuyenBay, MaGhe)</td><td>Trạng thái ghế: Trống / Đã đặt / Khóa</td></tr>
+          <tr><td><code>VEDICHVU</code></td><td>(MaVe, MaDichVu)</td><td>Một dịch vụ chỉ xuất hiện 1 lần trên một vé</td></tr>
+        </table></div>
+      <div class="the"><h3>Hai khóa ngoại cùng trỏ một bảng</h3>
+        <p><code>CHUYENBAY</code> có <code>MaSanBayDi</code> và <code>MaSanBayDen</code> cùng tham chiếu <code>SANBAY</code>, kèm <code>CHECK (MaSanBayDi &lt;&gt; MaSanBayDen)</code>.</p></div>
+    </div>
+    <div class="cot">
+      <div class="the vang"><h3>Chỉ mục duy nhất có lọc — chống bán trùng</h3>
+        <ul>
+          <li><code>UX_Ve_ChuyenBay_Ghe_Active</code>: (chuyến, ghế) duy nhất <b>với vé chưa hủy</b> → một ghế không bán hai lần</li>
+          <li><code>UX_Ve_ChuyenBay_Khach_Active</code>: (chuyến, khách) duy nhất → <b>mỗi hành khách 1 ghế/chuyến</b></li>
+          <li>Vé đã hủy không tính → ghế được bán lại</li>
+        </ul></div>
+      <div class="the"><h3>Ràng buộc CHECK tiêu biểu</h3>
+        <ul>
+          <li>Mọi % giảm và tổng % giảm: <b>0 – 30</b></li>
+          <li>Tiền ≥ 0, giá gốc &gt; 0, số tiền thanh toán &gt; 0</li>
+          <li>Trạng thái chỉ nhận giá trị trong danh sách cố định</li>
+          <li><code>KHUYENMAI</code>: <code>NgayKetThuc ≥ NgayBatDau</code></li>
+          <li><code>VEDICHVU.ThanhTien</code> là <b>cột tính toán</b> = SoLuong × DonGia</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 11. VIEW + TRIGGER ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>View và trigger</h2>
+  <div class="than">
+    <div class="cot" style="flex:1.5">
+      <table>
+        <tr><th>View</th><th>Ghép từ</th><th>Dùng ở</th></tr>
+        <tr><td><code>V_CHUYENBAYCHITIET</code></td><td>Chuyến + sân bay + máy bay + giá thấp nhất + số ghế trống</td><td>Tìm chuyến, lịch bay</td></tr>
+        <tr><td><code>V_SODOGHECHUYENBAY</code></td><td>Ghế trên chuyến + vị trí + hạng</td><td>Vẽ sơ đồ ghế</td></tr>
+        <tr><td><code>V_VECHITIET</code></td><td>Vé + hành khách + tuyến + ghế + hạng + trạng thái đơn</td><td>Đơn đặt vé, tra cứu, hủy</td></tr>
+        <tr><td><code>V_LICHSUGIAODICH</code></td><td>Đơn + khách liên hệ + tổng đã thu + tổng đã hoàn</td><td>Danh sách đơn</td></tr>
+        <tr><td><code>V_DOANHTHUTHEOTHANG</code></td><td>Thu − hoàn theo tháng</td><td>Báo cáo, tổng quan</td></tr>
+        <tr><td><code>V_DOANHTHUTHEOCHUYENBAY</code></td><td>Doanh thu vé + dịch vụ từng chuyến</td><td>Báo cáo</td></tr>
+        <tr><td><code>V_KHACHHANGTHANHVIEN</code></td><td>Khách + hạng + còn/hết hiệu lực</td><td>Khách hàng</td></tr>
+      </table>
+    </div>
+    <div class="cot">
+      <div class="the"><h3>Vì sao dùng view?</h3>
+        <p>Gom các phép JOIN lặp lại vào một chỗ. Giao diện chỉ <code>SELECT</code> từ view, không phải viết lại JOIN ở nhiều nơi.</p></div>
+      <div class="the vang"><h3>Trigger <code>trg_GHINHATKY</code></h3>
+        <ul>
+          <li>Gắn trên <code>TAIKHOAN</code>, chạy <b>AFTER INSERT, UPDATE, DELETE</b></li>
+          <li>So sánh bảng <code>inserted</code> / <code>deleted</code> để biết là thêm, sửa hay xóa</li>
+          <li>Tự ghi một dòng vào <code>NHATKYHOATDONG</code> — không phụ thuộc giao diện</li>
+        </ul></div>
+      <p class="ghi">Các thao tác khác (đặt vé, thanh toán, hủy vé, thêm dịch vụ) được thủ tục tự ghi nhật ký.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 12. THỦ TỤC ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>17 thủ tục lưu trữ</h2>
+  <div class="than">
+    <div class="cot">
+      <table>
+        <tr><th>Nhóm</th><th>Thủ tục</th></tr>
+        <tr><td><b>Đặt vé</b> <span class="nhan moi">luồng mới</span></td><td><code>sp_TAODONNHIEUVE</code> → <code>sp_THEMVEDON</code> (mỗi vé 1 lần) → <code>sp_XACNHANDON</code>; <code>sp_XOAVEDON</code></td></tr>
+        <tr><td><b>Giá</b></td><td><code>sp_TINHTHUGIAVE</code> — tính thử giá một vé</td></tr>
+        <tr><td><b>Tiền</b></td><td><code>sp_THANHTOANDON</code> · <code>sp_THEMDICHVUVE</code> · <code>sp_HUYVE</code></td></tr>
+        <tr><td><b>Khai thác</b></td><td><code>sp_TAOCHUYENBAY</code> · <code>sp_TAOMAYBAYVAGHE</code> · <code>sp_TIMKIEMCHUYENBAY</code></td></tr>
+        <tr><td><b>Khác</b></td><td><code>sp_DANGNHAP</code> · <code>sp_TRACUUVE</code> · <code>sp_XETHANGTHANHVIEN</code> · <code>sp_THONGKEDASHBOARD</code> · <code>sp_LAYDULIEUCOMBOBOX</code></td></tr>
+        <tr><td><b>Tương thích</b></td><td><code>sp_DATVE</code> — cách đặt cũ, giữ lại nhưng ứng dụng không còn gọi</td></tr>
+      </table>
+    </div>
+    <div class="cot hep">
+      <div class="the vang"><h3>Mẫu chung của thủ tục ghi dữ liệu</h3>
+        <ol style="margin:0;padding-left:20px;font-size:16px;line-height:1.55">
+          <li><code>BEGIN TRY</code> + <code>BEGIN TRANSACTION</code></li>
+          <li>Khóa dòng cần sửa: <code>WITH (UPDLOCK, HOLDLOCK)</code></li>
+          <li>Kiểm tra quy tắc → <code>THROW 50xxx</code></li>
+          <li>Ghi dữ liệu, tính lại tổng, ghi nhật ký</li>
+          <li><code>COMMIT</code>; lỗi thì <code>ROLLBACK</code> + <code>THROW</code></li>
+        </ol></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 13. NHẬP LIỆU KHÁCH HÀNG ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">04 · Cơ sở dữ liệu</span></div>
+  <h2>Quy tắc nhập liệu khách hàng</h2>
+  <p class="phu">Kiểm tra và <b>chuẩn hóa</b> trước khi lưu (<code>BLL/KiemTraDuLieu.cs</code>); CSDL chặn thêm bằng CHECK và UNIQUE.</p>
+  <div class="than">
+    <div class="cot" style="flex:1.6">
+      <table>
+        <tr><th>Trường</th><th>Quy tắc</th><th>Ví dụ hợp lệ</th></tr>
+        <tr><td>Họ tên</td><td>Chữ cái + khoảng trắng, cho phép <code>'</code> <code>-</code>; 2–100 ký tự; gộp khoảng trắng thừa</td><td>Jean-Paul O'Neil</td></tr>
+        <tr><td>CCCD</td><td>Đúng 12 chữ số</td><td>079079000001</td></tr>
+        <tr><td>Hộ chiếu</td><td>6–9 ký tự in hoa/số, có ít nhất 1 số</td><td>C1234567</td></tr>
+        <tr><td>Giấy khai sinh</td><td>3–20 ký tự; <b>chỉ cho người dưới 14 tuổi</b></td><td>125/2018</td></tr>
+        <tr><td>SĐT Việt Nam</td><td>Di động 10 số đầu 03/05/07/08/09 (hoặc +84…); lưu dạng <code>+84…</code></td><td>0912345678 → +84912345678</td></tr>
+        <tr><td>SĐT nước ngoài</td><td><code>+</code> mã quốc gia, tổng 8–15 chữ số</td><td>+14155552671</td></tr>
+        <tr><td>Email</td><td>Dạng <code>ten@tenmien.duoi</code>, lưu chữ thường</td><td>nguyenvana@gmail.com</td></tr>
+        <tr><td>Ngày sinh</td><td>Không ở tương lai</td><td></td></tr>
+      </table>
+    </div>
+    <div class="cot">
+      <div class="the vang"><h3>Ở mức CSDL</h3>
+        <ul>
+          <li><code>SoGiayTo</code> <b>UNIQUE</b>: một giấy tờ chỉ gắn một khách</li>
+          <li><code>LoaiGiayTo</code> ∈ CCCD / Hộ chiếu / Giấy khai sinh</li>
+          <li><code>GioiTinh</code> ∈ Nam / Nữ / Khác</li>
+        </ul></div>
+      <div class="the"><h3>Liên quan khi đặt vé</h3>
+        <p>Hành khách <b>dưới 16 tuổi</b> (tính tại ngày bay) phải có <b>người giám hộ từ 18 tuổi</b> — <code>sp_THEMVEDON</code> kiểm tra.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 14. PHẠM VI ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">05 · Tổng quan nghiệp vụ</span></div>
+  <h2>Phạm vi: có và không có trong hệ thống</h2>
+  <div class="than">
+    <div class="cot">
+      <div class="the xanh" style="flex:1"><h3>Có trong hệ thống</h3>
+        <ul>
+          <li>Quản lý chuyến bay, máy bay, sơ đồ ghế, bảng giá theo hạng</li>
+          <li>Hồ sơ khách hàng, hạng thành viên, tích lũy chi tiêu</li>
+          <li>Đặt vé: <b>một đơn nhiều vé</b>, nhiều hành khách, nhiều chuyến</li>
+          <li>Tự nhận <b>khứ hồi</b>, áp mã khuyến mãi, ưu đãi khách hàng mới</li>
+          <li>Dịch vụ đi kèm chọn bằng checklist, <b>thêm được cả sau khi thanh toán</b></li>
+          <li>Thanh toán tiền mặt / chuyển khoản VietQR / thẻ</li>
+          <li>Hủy vé, phí hủy theo thời gian, hoàn tiền</li>
+          <li>Báo cáo doanh thu, nhật ký thao tác, phân quyền</li>
+        </ul></div>
+    </div>
+    <div class="cot">
+      <div class="the do" style="flex:1"><h3>Không có trong hệ thống</h3>
+        <ul>
+          <li>Khách tự đặt vé online</li>
+          <li>Kết nối cổng thanh toán / máy POS thật (thẻ và chuyển khoản là <b>mô phỏng</b>)</li>
+          <li>Đối soát tự động với ngân hàng</li>
+          <li>Check-in, in thẻ lên máy bay</li>
+          <li>Đổi vé, đổi chuyến</li>
+          <li>Ưu đãi Tết <span class="nhan chua">đã ngừng</span> — cột dữ liệu vẫn giữ, luôn bằng 0</li>
+          <li>Tự chuyển vé sang “Đã bay”, khóa/mở ghế trên giao diện <span class="nhan chua">chưa làm</span></li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 15. TÁC NHÂN ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">05 · Tổng quan nghiệp vụ</span></div>
+  <h2>Tác nhân và phân quyền</h2>
+  <div class="than">
+    <div class="cot" style="flex:1.4">
+      <table>
+        <tr><th>Menu</th><th>Màn hình</th><th>Chức năng chính</th><th>Quyền</th></tr>
+        <tr><td>Tổng quan</td><td><code>ucTongQuan</code></td><td>Doanh thu, số vé, biểu đồ, chuyến sắp bay</td><td>Tất cả</td></tr>
+        <tr><td>Đặt vé</td><td><code>ucDatVe</code></td><td>3 bước: chọn chuyến → ghế + hành khách → xác nhận</td><td>Tất cả</td></tr>
+        <tr><td>Đơn đặt vé</td><td><code>ucDonDatVe</code></td><td>Xem đơn, thêm dịch vụ, thanh toán, hủy vé</td><td>Tất cả</td></tr>
+        <tr><td>Tra cứu vé</td><td><code>ucTraCuuVe</code></td><td>Tìm theo mã vé, mã chuyến, số giấy tờ; hủy</td><td>Tất cả</td></tr>
+        <tr><td>Khách hàng</td><td><code>ucKhachHang</code></td><td>Thêm/sửa khách, xem hạng</td><td>Tất cả</td></tr>
+        <tr><td>Chuyến bay</td><td><code>ucChuyenBay</code></td><td>Tạo chuyến, đổi trạng thái</td><td>Tất cả</td></tr>
+        <tr><td>Báo cáo</td><td><code>ucBaoCao</code></td><td>Doanh thu theo tháng, chuyến, nhân viên</td><td>Tất cả</td></tr>
+        <tr><td>Máy bay</td><td><code>ucMayBay</code></td><td>Thêm máy bay, số hàng ghế mỗi hạng</td><td><b>Quản trị</b></td></tr>
+        <tr><td>Tài khoản</td><td><code>ucTaiKhoan</code></td><td>Thêm nhân viên, khóa/mở khóa</td><td><b>Quản trị</b></td></tr>
+        <tr><td>Nhật ký</td><td><code>ucNhatKy</code></td><td>Các thao tác gần nhất</td><td><b>Quản trị</b></td></tr>
+      </table>
+    </div>
+    <div class="cot">
+      <div class="the"><h3>Nhân viên</h3><p>Bán vé tại quầy: 7 màn hình nghiệp vụ.</p></div>
+      <div class="the vang"><h3>Quản trị viên</h3><p>Toàn bộ quyền nhân viên + 3 màn hình quản lý (ẩn với nhân viên).</p></div>
+      <div class="the"><h3>Khách hàng</h3><p>Không đăng nhập; là dữ liệu do nhân viên nhập.</p></div>
+      <p class="ghi">Tài khoản bị khóa không đăng nhập được; không thể tự khóa tài khoản đang dùng.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 16. USE CASE ======================= -->
+<section class="slide" data-nguoi="Ngân">
+  <div class="dau"><span class="phan">06 · Sơ đồ chức năng</span></div>
+  <h2>Sơ đồ use case</h2>
+  <div class="than">
+    <div class="so-do"><pre class="mermaid">
+flowchart LR
+    NV(["👤 Nhân viên"])
+    QT(["👤 Quản trị viên"])
+    subgraph HT["Hệ thống bán vé"]
+        direction TB
+        DN["Đăng nhập"]
+        TQ["Xem tổng quan"]
+        TK["Tìm chuyến bay"]
+        DV["Đặt vé nhiều vé + chọn ghế"]
+        DVK["Thêm dịch vụ - checklist"]
+        TT["Thanh toán / thu thêm"]
+        TC["Tra cứu vé"]
+        HV["Hủy vé + hoàn tiền"]
+        KH["Quản lý khách hàng"]
+        CB["Quản lý chuyến bay"]
+        BC["Xem báo cáo doanh thu"]
+        MB["Quản lý máy bay + sơ đồ ghế"]
+        TKH["Quản lý tài khoản"]
+        NK["Xem nhật ký"]
+    end
+    NV --- DN & TQ & TK & DV & DVK & TT & TC & HV & KH & CB & BC
+    QT --- MB & TKH & NK
+    QT -. "kế thừa quyền" .-> NV
+    DV -. "include" .-> TK
+    HV -. "extend" .-> TC
+    TT -. "sau khi" .-> DV
+    </pre></div>
+    <div class="cot hep" style="flex:0 0 27%">
+      <div class="the"><h3>Quan hệ</h3>
+        <ul>
+          <li><b>include</b>: đặt vé luôn bắt đầu bằng tìm chuyến</li>
+          <li><b>extend</b>: từ tra cứu vé có thể hủy vé</li>
+          <li>Quản trị viên <b>kế thừa</b> mọi use case của nhân viên</li>
+        </ul></div>
+      <div class="the vang"><h3>Chuyển sang phần 2</h3><p>Suan sẽ đi sâu vào 6 nhóm nghiệp vụ: bán vé, giá, thanh toán, hủy vé, hạng thành viên, vòng đời trạng thái.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 17. BÁN VÉ - LUỒNG ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">07 · Quy trình bán vé</span></div>
+  <h2>Quy trình bán vé: luồng nghiệp vụ</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.6"><pre class="mermaid">
+flowchart TD
+    A(["Khách đến quầy"]) --> B["Tìm chuyến: điểm đi, điểm đến, ngày"]
+    B --> C{"Có chuyến mở bán<br/>còn ghế trống?"}
+    C -- Không --> Z1(["Báo khách"])
+    C -- Có --> D["Chọn chuyến, xem sơ đồ ghế"]
+    D --> E["Chọn ghế trống + hành khách<br/>(chưa có hồ sơ thì tạo mới)"]
+    E --> F{"Dưới 16 tuổi?"}
+    F -- Có --> G["Chọn người giám hộ ≥ 18 tuổi"]
+    F -- Không --> H
+    G --> H["Thêm vé vào giỏ"]
+    H --> I{"Thêm vé nữa?<br/>người khác / chuyến khác"}
+    I -- Có --> D
+    I -- Không --> J["Bước 3: chọn khách liên hệ, mã KM<br/>xem giá từng vé - khứ hồi tự nhận"]
+    J --> K["Hộp xác nhận liệt kê từng vé + tổng tiền"]
+    K -- Xem lại --> J
+    K -- Đặt vé --> L["Tạo đơn: Chờ thanh toán"]
+    L --> M{"Thanh toán ngay?"}
+    M -- Để sau --> Z2(["Đơn chờ; thêm dịch vụ / thanh toán<br/>ở màn Đơn đặt vé"])
+    M -- Có --> N(["Sang quy trình thanh toán"])
+    </pre></div>
+    <div class="cot">
+      <div class="the"><h3>Ràng buộc khi thêm vé</h3>
+        <ul>
+          <li>Chuyến <b>Đang mở bán</b> và <b>chưa khởi hành</b></li>
+          <li>Ghế <b>Trống</b>, đúng hạng của ghế</li>
+          <li><b>Không giới hạn số vé</b> trong một đơn</li>
+          <li>Mỗi hành khách <b>1 ghế / chuyến</b></li>
+          <li>Người giám hộ khác hành khách</li>
+        </ul></div>
+      <div class="the vang"><h3>Giỏ vé nằm ở giao diện</h3><p>Giỏ chưa lưu CSDL nên nhân viên thêm/xóa vé thoải mái; chỉ khi bấm <b>Đặt vé</b> mới ghi một lần.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 18. BÁN VÉ - TRÌNH TỰ ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">07 · Quy trình bán vé</span></div>
+  <h2>Quy trình bán vé: sơ đồ trình tự</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.7"><pre class="mermaid">
+sequenceDiagram
+    actor NV as Nhân viên
+    participant G as ucDatVe
+    participant B as DatVeBLL
+    participant D as DatVeDAL
+    participant S as SQL Server
+    NV->>G: Chọn ghế + hành khách
+    G->>B: ThemVeVaoGio
+    B-->>G: Kiểm tra trùng ghế, trùng khách trên chuyến
+    NV->>G: Sang bước 3
+    G->>B: TinhGiaGioVe(mã KM, khách liên hệ)
+    loop Mỗi vé trong giỏ
+        B->>S: sp_TINHTHUGIAVE (kèm chuyến chiều về nếu có)
+        S-->>B: % giảm, giá thực trả
+    end
+    NV->>G: Đặt vé (sau hộp xác nhận)
+    G->>B: DatVe(giỏ)
+    B->>D: DatVe
+    rect rgb(227,240,243)
+    Note over D,S: Một giao dịch: ChayTrongGiaoDich
+    D->>S: sp_TAODONNHIEUVE
+    S-->>D: MaDon (đã kiểm tra KM, cộng lượt dùng)
+    loop Mỗi vé
+        D->>S: sp_THEMVEDON
+        Note right of S: Khóa đơn, kiểm tra ghế, tuổi,<br/>tính giá, ghế thành Đã đặt,<br/>tính lại khứ hồi + tổng đơn
+    end
+    D->>S: Ghi nhật ký, sp_XACNHANDON
+    end
+    S-->>G: Danh sách vé + tổng tiền
+    G->>NV: Hỏi thanh toán ngay
+    </pre></div>
+    <div class="cot hep" style="flex:0 0 28%">
+      <div class="the vang"><h3>Vì sao gói trong một giao dịch?</h3>
+        <p>Nếu vé thứ 3 lỗi (vd ghế vừa bị quầy khác đặt) thì <b>cả đơn được hoàn tác</b>: không đơn rác, không giữ ghế, không mất lượt khuyến mãi.</p></div>
+      <div class="the"><h3>Kiểm tra 2 lần</h3>
+        <p>BLL báo sớm khi còn ở giỏ; thủ tục kiểm tra lại khi ghi. Nếu hai quầy cùng bấm đặt một ghế, <b>chỉ mục duy nhất</b> trên <code>VE</code> chỉ cho một quầy thành công.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 19. GIÁ - QUY TẮC ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">08 · Tính giá và giảm giá</span></div>
+  <h2>Quy tắc tính giá</h2>
+  <p class="phu"><b>Giá thực trả = Giá gốc × (1 − Tổng % giảm)</b>, tổng % giảm = cộng dồn 3 loại, <b>tối đa 30%</b>. Dịch vụ đi kèm không được giảm.</p>
+  <div class="than">
+    <div class="cot" style="flex:1.25">
+      <table>
+        <tr><th>Loại giảm</th><th>Mức</th><th>Điều kiện</th></tr>
+        <tr><td><b>Hạng thành viên</b></td><td>0 / 8 / 10 / 12 / 15%</td><td>Theo hạng của <b>hành khách</b>; hạng hết hạn → 0%</td></tr>
+        <tr><td><b>Khứ hồi</b></td><td>10%</td><td>Trong đơn, <b>cùng hành khách</b> có vé tuyến ngược lại (A→B và B→A). Hệ thống <b>tự nhận</b>, áp cho cả hai vé</td></tr>
+        <tr><td><b>Mã khuyến mãi</b></td><td>Theo mã</td><td>Đang hoạt động, còn hạn, còn lượt; có thể có <b>mức giảm tối đa (đ)</b></td></tr>
+        <tr><td>Ưu đãi khách hàng mới</td><td>3%, tối đa 300.000 đ</td><td>Chỉ khi <b>khách liên hệ chưa từng có đơn</b></td></tr>
+        <tr><td>Ưu đãi Tết</td><td>—</td><td><span class="nhan chua">Tạm dừng</span>, không còn trong danh sách chọn</td></tr>
+      </table>
+      <div class="the" style="margin-top:4px"><h3>Mức giảm tối đa của mã KM</h3>
+        <p>Vé Thương gia 18.000.000 đ, mã 3% (tối đa 300.000 đ): 3% = 540.000 đ &gt; 300.000 đ → quy đổi <b>300.000 / 18.000.000 = 1,67% → lấy phần nguyên 1%</b>.</p></div>
+    </div>
+    <div class="cot">
+      <div class="bd">
+        <h3>Ví dụ: vé Phổ thông 900.000 đ</h3>
+        <div class="ghi">Khách hạng Vàng, có vé chiều về, dùng mã khách hàng mới → giảm 23%</div>
+        <div class="ngang" role="img" aria-label="Giá thực trả 693.000 đồng, giảm hạng 90.000, giảm khứ hồi 90.000, giảm khuyến mãi 27.000">
+          <div class="seg" style="flex:693;background:var(--series-1)" data-tip="Giá thực trả: 693.000 đ (77%)">693.000</div>
+          <div class="seg" style="flex:90;background:var(--series-2)" data-tip="Hạng Vàng 10%: −90.000 đ">10%</div>
+          <div class="seg" style="flex:90;background:var(--series-3)" data-tip="Khứ hồi 10%: −90.000 đ">10%</div>
+          <div class="seg" style="flex:27;background:var(--series-4);color:#3b2a00" data-tip="Khách hàng mới 3%: −27.000 đ">3</div>
+        </div>
+        <div class="chu-giai">
+          <span><i style="background:var(--series-1)"></i>Giá thực trả 693.000</span>
+          <span><i style="background:var(--series-2)"></i>Hạng Vàng −90.000</span>
+          <span><i style="background:var(--series-3)"></i>Khứ hồi −90.000</span>
+          <span><i style="background:var(--series-4)"></i>KM mới −27.000</span>
+        </div>
+      </div>
+      <div class="the vang"><h3>Chạm trần 30%</h3>
+        <p>Kim Cương 15% + khứ hồi 10% + mã 5% = 30% → đúng trần. Nếu tổng vượt (ví dụ thêm mã khác), hệ thống <b>chỉ lấy 30%</b>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 20. GIÁ - LUỒNG + TRÌNH TỰ ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">08 · Tính giá và giảm giá</span></div>
+  <h2>Tính giá: luồng và trình tự</h2>
+  <div class="than">
+    <div class="so-do"><pre class="mermaid">
+flowchart TD
+    G["Giá gốc<br/>GIAVE theo chuyến + hạng"] --> S
+    H["% hạng thành viên<br/>của hành khách"] --> S
+    K{"Cùng khách có vé<br/>tuyến ngược trong đơn?"} -- Có: 10% --> S
+    K -- Không: 0% --> S
+    M{"Mã KM hợp lệ?<br/>KM mới: khách liên hệ<br/>chưa có đơn"} -- "Có: % hoặc quy đổi từ trần đ" --> S
+    M -- "Không chọn: 0%" --> S
+    M -- "Sai: báo lỗi" --> X(["Dừng"])
+    S{{"Cộng dồn"}} --> C{"> 30%?"}
+    C -- Có --> C30["Lấy 30%"]
+    C -- Không --> CX["Giữ nguyên"]
+    C30 & CX --> R["Tiền giảm = làm tròn giá gốc × % <br/>Giá thực trả = giá gốc − tiền giảm"]
+    </pre></div>
+    <div class="so-do"><pre class="mermaid">
+sequenceDiagram
+    participant G as ucDatVe
+    participant B as DatVeBLL
+    participant S as SQL Server
+    Note over G: Đổi mã KM hoặc khách liên hệ
+    G->>B: TinhGiaGioVe
+    B->>B: ChuyenKhuHoiCua(vé)
+    B->>S: sp_TINHTHUGIAVE
+    S-->>B: % từng loại + giá
+    B-->>G: Cập nhật giỏ + tổng
+    Note over G,S: Khi đặt thật
+    G->>S: sp_THEMVEDON
+    Note right of S: Tính lại từ CSDL,<br/>không tin giá từ giao diện
+    </pre></div>
+  </div>
+  <p class="ghi" style="margin-top:10px">Giá xem trước và giá lưu thật dùng cùng công thức; kết quả kiểm thử: đơn 5 vé xem trước 4.320.000 đ = lưu thật 4.320.000 đ.</p>
+</section>
+
+<!-- ======================= 21. THANH TOÁN - LUỒNG ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">09 · Thanh toán</span></div>
+  <h2>Thanh toán: luồng nghiệp vụ</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.5"><pre class="mermaid">
+flowchart TD
+    A["Mở thanh toán cho đơn"] --> A1{"Đơn đã hủy?<br/>Còn phải thu ≤ 0?"}
+    A1 -- Có --> X(["Từ chối"])
+    A1 -- Không --> B{"Phương thức"}
+    B -- Tiền mặt --> C["Nhập tiền khách đưa"] --> C1{"Đủ tiền?"}
+    C1 -- Chưa --> C
+    C1 -- Đủ --> C2["Hiện tiền thối"]
+    B -- Chuyển khoản --> D["Mã VietQR: STK, số tiền,<br/>nội dung DH + mã đơn"] --> D1["Nhân viên kiểm tra ngân hàng,<br/>tick Đã nhận được tiền"]
+    B -- Thẻ --> E["Số thẻ, chủ thẻ, hạn, CVV"] --> E1{"Hợp lệ?"}
+    E1 -- Không --> E
+    E1 -- Có --> E2["Xác nhận trừ tiền"]
+    C2 & D1 & E2 --> F["THANHTOAN: Thành công<br/>Đơn: Đã thanh toán"]
+    F --> G["Cộng chi tiêu từng hành khách<br/>xét lại hạng thành viên"]
+    </pre></div>
+    <div class="cot">
+      <div class="the vang"><h3>Số tiền phải thu</h3>
+        <p style="font-size:15.5px"><b>Còn phải thu</b> = Tổng đơn − (Đã thu − Đã hoàn − Phí hủy đã giữ)</p>
+        <p class="ghi" style="margin-top:6px">Thu đúng bằng số này, không thu một phần. Đơn đã thanh toán vẫn mở được khi còn nợ tiền dịch vụ thêm sau.</p></div>
+      <div class="the"><h3>Kiểm tra thẻ</h3>
+        <ul style="font-size:15px">
+          <li>12–19 chữ số, đúng thuật toán <b>Luhn</b></li>
+          <li>Loại: Visa, Mastercard, JCB, Amex, NAPAS</li>
+          <li>Tên in hoa không dấu ≥ 2 từ; hạn MM/YY chưa hết</li>
+          <li>Chỉ lưu <b>loại thẻ + 4 số cuối</b>, không lưu CVV</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 22. THANH TOÁN - TRÌNH TỰ + DỊCH VỤ ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">09 · Thanh toán</span></div>
+  <h2>Thanh toán và thu thêm dịch vụ: sơ đồ trình tự</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.6"><pre class="mermaid">
+sequenceDiagram
+    actor NV as Nhân viên
+    participant F as frmThemDichVu / frmThanhToan
+    participant B as DatVeBLL
+    participant S as SQL Server
+    opt Thêm dịch vụ (kể cả đơn đã thanh toán)
+        NV->>F: Tick các dịch vụ trong checklist
+        F->>B: ThemDichVu(vé, danh sách)
+        B->>S: sp_THEMDICHVUVE mỗi dịch vụ, chung 1 giao dịch
+        S-->>B: Tổng tiền dịch vụ, tổng đơn mới
+        B-->>F: Còn phải thu
+        F->>NV: Đơn đã thanh toán? Hỏi thu tiền ngay
+    end
+    NV->>F: Mở thanh toán
+    F->>B: LayDonDeThanhToan
+    B->>S: Đọc đơn + đã thu, đã hoàn, phí hủy
+    S-->>F: Còn phải thu
+    NV->>F: Chọn phương thức, xác nhận
+    F->>B: ThanhToan(số tiền, phương thức, ghi chú)
+    B->>S: sp_THANHTOANDON
+    Note right of S: Khóa đơn, số tiền phải đúng bằng còn phải thu,<br/>ghi THANHTOAN, đơn thành Đã thanh toán,<br/>cộng chi tiêu, xét hạng, ghi nhật ký
+    S-->>F: Thành công
+    </pre></div>
+    <div class="cot hep" style="flex:0 0 30%">
+      <div class="the"><h3>Dịch vụ dạng checklist</h3>
+        <ul style="font-size:15.5px">
+          <li>8 dịch vụ: hành lý 10/20 kg, suất ăn, nước uống, chọn chỗ, ưu tiên thủ tục, gói tiện ích</li>
+          <li>Mỗi dịch vụ <b>1 lần / vé</b>; dịch vụ đã có hiện “(đã có)”, không bỏ tick được</li>
+          <li>Đơn giá lấy từ CSDL, không lấy từ giao diện</li>
+        </ul></div>
+      <div class="the vang"><h3>Chi tiêu được cộng</h3>
+        <p style="font-size:15.5px">Lần thu đầu: tiền vé + dịch vụ của từng hành khách. Lần thu thêm: chia theo phần dịch vụ của từng hành khách.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 23. HỦY VÉ - QUY TẮC ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">10 · Hủy vé và hoàn tiền</span></div>
+  <h2>Hủy vé: phí hủy và tiền hoàn</h2>
+  <div class="than">
+    <div class="cot">
+      <div class="bd">
+        <h3>Phí hủy theo thời gian còn lại trước giờ bay</h3>
+        <div class="ghi">% trên giá thực trả của vé · ví dụ vé 900.000 đ</div>
+        <div class="hang-bd"><span class="ten">Từ 72 giờ trở lên</span><div class="rail"><div class="bar" style="width:33.3%" data-tip="≥ 72 giờ: phí 10% = 90.000 đ"></div></div><span class="gt">10% · 90.000</span></div>
+        <div class="hang-bd"><span class="ten">24 đến dưới 72 giờ</span><div class="rail"><div class="bar" style="width:66.6%" data-tip="24–72 giờ: phí 20% = 180.000 đ"></div></div><span class="gt">20% · 180.000</span></div>
+        <div class="hang-bd"><span class="ten">Dưới 24 giờ</span><div class="rail"><div class="bar" style="width:100%" data-tip="< 24 giờ: phí 30% = 270.000 đ"></div></div><span class="gt">30% · 270.000</span></div>
+      </div>
+      <div class="the do"><h3>Không cho hủy khi</h3>
+        <ul><li>Vé đã hủy hoặc đã bay</li><li>Chuyến đã khởi hành</li><li>Hạng vé không cho phép hủy (<code>HANGVE.ChoPhepHuy = 0</code>)</li></ul></div>
+    </div>
+    <div class="cot">
+      <div class="the vang"><h3>Đơn đã thanh toán</h3>
+        <p style="font-size:16px"><b>Dư sau hủy</b> = Đã trả thực − (Tổng đơn − giá vé − dịch vụ của vé)</p>
+        <p style="font-size:16px"><b>Phí hủy</b> = min(phí theo giờ, Dư sau hủy)</p>
+        <p style="font-size:16px"><b>Tiền hoàn</b> = Dư sau hủy − Phí hủy</p>
+        <p class="ghi" style="margin-top:6px">→ Hoàn cả tiền dịch vụ của vé. Nếu đơn còn nợ tiền dịch vụ, khoản nợ được trừ thẳng vào tiền hoàn.</p></div>
+      <div class="the xanh"><h3>Đơn chưa thanh toán</h3>
+        <p>Phí 0, hoàn 0. Các vé còn lại <b>tính lại khứ hồi</b> (hủy một chiều thì chiều kia mất 10%) và vẫn thanh toán bình thường.</p></div>
+      <p class="ghi">Ví dụ đã kiểm thử: vé giá thực trả 810.000 đ (đã giảm khứ hồi) + 700.000 đ dịch vụ, còn khoảng 2,5 ngày → phí 20% = 162.000 đ, hoàn 810.000 − 162.000 + 700.000 = 1.348.000 đ.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 24. HỦY VÉ - LUỒNG ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">10 · Hủy vé và hoàn tiền</span></div>
+  <h2>Hủy vé: luồng nghiệp vụ</h2>
+  <div class="than">
+    <div class="so-do"><pre class="mermaid">
+flowchart TD
+    A["Yêu cầu hủy vé<br/>từ Đơn đặt vé hoặc Tra cứu"] --> B{"Vé đã hủy / đã bay<br/>hoặc chuyến đã khởi hành?"}
+    B -- Có --> X1(["Từ chối"])
+    B -- Không --> C{"Hạng vé<br/>cho phép hủy?"}
+    C -- Không --> X2(["Từ chối"])
+    C -- Có --> P["Xem trước phí và tiền hoàn<br/>nhập lý do, xác nhận"]
+    P --> D{"Đơn đã thanh toán<br/>và còn dư sau hủy?"}
+    D -- Không --> E["Phí 0, hoàn 0<br/>tính lại khứ hồi các vé còn lại"]
+    D -- Có --> F["Phí 10/20/30% theo giờ<br/>hoàn = dư − phí<br/>ghi THANHTOAN: Đã hoàn"]
+    F --> F2["Trừ chi tiêu, xét lại hạng"]
+    E & F2 --> G["Ghi HUYVE, xóa dịch vụ của vé<br/>Vé: Đã hủy · Ghế: Trống<br/>tính lại tổng đơn"]
+    G --> H{"Mọi vé trong đơn<br/>đã hủy?"}
+    H -- Có --> K(["Đơn: Đã hủy"])
+    H -- Không --> L(["Đơn giữ trạng thái"])
+    </pre></div>
+  </div>
+</section>
+
+<!-- ======================= 25. HỦY VÉ - TRÌNH TỰ ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">10 · Hủy vé và hoàn tiền</span></div>
+  <h2>Hủy vé: sơ đồ trình tự</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.6"><pre class="mermaid">
+sequenceDiagram
+    actor NV as Nhân viên
+    participant F as frmHuyVe
+    participant B as DatVeBLL
+    participant S as SQL Server
+    NV->>F: Chọn vé, bấm Hủy
+    F->>B: LayVeDeHuy(mã vé)
+    B->>S: V_VECHITIET
+    B-->>F: Báo sớm nếu đã hủy / đã khởi hành
+    F->>B: TinhPhiHuy(vé) - xem trước
+    B->>S: Thông tin đơn + dịch vụ của vé
+    B-->>F: Phí, tiền hoàn dự kiến
+    NV->>F: Nhập lý do, xác nhận
+    F->>B: HuyVe(mã vé, lý do)
+    B->>S: sp_HUYVE
+    Note right of S: Khóa vé, kiểm tra lại,<br/>tính phí + hoàn, ghi HUYVE,<br/>THANHTOAN Đã hoàn, trả ghế,<br/>tính lại đơn, trừ chi tiêu, xét hạng
+    S-->>F: Phí hủy, tiền hoàn thực tế
+    F->>NV: Thông báo kết quả
+    </pre></div>
+    <div class="cot hep" style="flex:0 0 30%">
+      <div class="the vang"><h3>Xem trước = thực tế</h3>
+        <p>BLL dùng <b>cùng công thức</b> với <code>sp_HUYVE</code> (kể cả cách làm tròn), nên số trên màn hình khớp số được ghi.</p></div>
+      <div class="the"><h3>Dòng tiền khi hủy</h3>
+        <ul style="font-size:15.5px">
+          <li><code>HUYVE</code>: lý do, phí, tiền hoàn, người xử lý</li>
+          <li><code>THANHTOAN</code>: dòng <b>Đã hoàn</b> (nếu hoàn &gt; 0)</li>
+          <li>Phí hủy giữ lại <b>không</b> bị tính là tiền khách trả dư</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 26. HẠNG THÀNH VIÊN ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">11 · Hạng thành viên</span></div>
+  <h2>Hạng thành viên</h2>
+  <p class="phu">Hạng tính theo <b>tổng chi tiêu</b> = tiền vé + dịch vụ đã thanh toán − tiền đã hoàn.</p>
+  <div class="than">
+    <div class="cot">
+      <div class="bd">
+        <h3>Ngưỡng tổng chi tiêu (triệu đồng) và % giảm giá vé</h3>
+        <div class="ghi">Đạt ngưỡng nào thì lên hạng đó</div>
+        <div class="hang-bd"><span class="ten">Thành viên</span><div class="rail"><div class="bar" style="width:0.6%" data-tip="Thành viên: từ 0 đ · giảm 0%"></div></div><span class="gt">0 tr · 0%</span></div>
+        <div class="hang-bd"><span class="ten">Bạc</span><div class="rail"><div class="bar" style="width:20%" data-tip="Bạc: từ 20 triệu · giảm 8%"></div></div><span class="gt">20 tr · 8%</span></div>
+        <div class="hang-bd"><span class="ten">Vàng</span><div class="rail"><div class="bar" style="width:40%" data-tip="Vàng: từ 40 triệu · giảm 10%"></div></div><span class="gt">40 tr · 10%</span></div>
+        <div class="hang-bd"><span class="ten">Bạch Kim</span><div class="rail"><div class="bar" style="width:50%" data-tip="Bạch Kim: từ 50 triệu · giảm 12%"></div></div><span class="gt">50 tr · 12%</span></div>
+        <div class="hang-bd"><span class="ten">Kim Cương</span><div class="rail"><div class="bar" style="width:100%" data-tip="Kim Cương: từ 100 triệu · giảm 15%"></div></div><span class="gt">100 tr · 15%</span></div>
+      </div>
+      <div class="the"><h3>Khi nào xét lại hạng?</h3>
+        <ul><li>Sau mỗi lần <b>thanh toán</b> (cả lần thu thêm dịch vụ)</li><li>Sau mỗi lần <b>hủy vé có hoàn tiền</b></li></ul></div>
+    </div>
+    <div class="cot">
+      <div class="so-do" style="flex:1"><pre class="mermaid">
+flowchart LR
+    TV["Thành viên<br/>0%"] -- "≥ 20tr" --> B["Bạc<br/>8%"]
+    B -- "≥ 40tr" --> V["Vàng<br/>10%"]
+    V -- "≥ 50tr" --> BK["Bạch Kim<br/>12%"]
+    BK -- "≥ 100tr" --> KC["Kim Cương<br/>15%"]
+    B & V & BK & KC -. "hết hạn 1 năm" .-> TV
+      </pre></div>
+      <div class="the do"><h3>Hiệu lực 1 năm — hạn chế hiện tại</h3>
+        <p style="font-size:15.5px">Hạn = <b>giao dịch đầu tiên + 1 năm</b>, chỉ đặt một lần, <b>chưa tự gia hạn</b>. Sau 1 năm khách về hạng Thành viên dù vẫn mua vé.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 27. VÒNG ĐỜI: ĐƠN + VÉ/GHẾ ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">12 · Vòng đời trạng thái</span></div>
+  <h2>Vòng đời: đơn đặt vé, vé và ghế</h2>
+  <div class="than">
+    <div class="so-do"><pre class="mermaid">
+stateDiagram-v2
+    [*] --> Cho: Tạo đơn
+    Cho: Chờ thanh toán
+    Da: Đã thanh toán
+    Huy: Đã hủy
+    Cho --> Da: Thu đủ tiền
+    Cho --> Cho: Hủy bớt vé (phí 0)
+    Cho --> Huy: Hủy hết vé
+    Da --> Da: Thêm dịch vụ → thu thêm<br/>Hủy bớt vé (có phí)
+    Da --> Huy: Hủy hết vé (phí + hoàn)
+    Huy --> [*]
+    </pre></div>
+    <div class="so-do"><pre class="mermaid">
+stateDiagram-v2
+    direction LR
+    state "Vé" as Ve {
+        [*] --> DaDat: Đặt vé
+        DaDat: Đã đặt
+        DaDat --> DaHuyVe: Hủy vé
+        DaHuyVe: Đã hủy
+        DaDat --> DaBay: (*) sau khi bay
+        DaBay: Đã bay
+    }
+    state "Ghế trên chuyến" as Ghe {
+        [*] --> Trong: Tạo chuyến
+        Trong: Trống
+        Trong --> DaDatGhe: Đặt vé
+        DaDatGhe: Đã đặt
+        DaDatGhe --> Trong: Hủy vé
+        Trong --> Khoa: (*) khóa ghế
+        Khoa: Khóa
+    }
+    </pre></div>
+  </div>
+  <p class="ghi" style="margin-top:10px">(*) Có trong CSDL nhưng chưa có chức năng trên giao diện. Vé chưa tự chuyển “Đã bay”; vé của chuyến đã khởi hành vẫn không hủy được vì hệ thống kiểm tra giờ bay.</p>
+</section>
+
+<!-- ======================= 28. VÒNG ĐỜI: CHUYẾN BAY + KHÁC ======================= -->
+<section class="slide" data-nguoi="Suan">
+  <div class="dau"><span class="phan">12 · Vòng đời trạng thái</span></div>
+  <h2>Vòng đời: chuyến bay và các đối tượng khác</h2>
+  <div class="than">
+    <div class="so-do" style="flex:1.3"><pre class="mermaid">
+stateDiagram-v2
+    direction LR
+    [*] --> MoBan: Tạo chuyến<br/>(sinh giá 3 hạng + ghế Trống)
+    MoBan: Đang mở bán
+    DaDong: Đã đóng
+    DaBay: Đã bay
+    DaHuy: Đã hủy
+    MoBan --> DaDong: Ngừng bán
+    DaDong --> MoBan: Mở bán lại
+    MoBan --> DaBay: Sau khi bay
+    DaDong --> DaBay: Sau khi bay
+    MoBan --> DaHuy: Hủy chuyến
+    DaDong --> DaHuy: Hủy chuyến
+    </pre></div>
+    <div class="cot hep" style="flex:0 0 34%">
+      <div class="the"><h3>Chuyến bay</h3>
+        <p style="font-size:15.5px">Nhân viên đổi <b>thủ công</b>. Chỉ chuyến <b>Đang mở bán</b> và <b>chưa khởi hành</b> mới bán được vé. Sơ đồ là luồng nên theo; hệ thống chưa chặn các bước chuyển khác.</p></div>
+      <table>
+        <tr><th>Đối tượng</th><th>Trạng thái</th></tr>
+        <tr><td>Thanh toán</td><td>Thành công · Đã hoàn · <span class="ghi">Thất bại (chưa dùng)</span></td></tr>
+        <tr><td>Tài khoản</td><td>Hoạt động ⇄ Bị khóa</td></tr>
+        <tr><td>Máy bay</td><td>Hoạt động · Bảo trì · Ngừng hoạt động</td></tr>
+        <tr><td>Khuyến mãi</td><td>Hoạt động ⇄ Tạm dừng</td></tr>
+        <tr><td>Sân bay, hạng vé, dịch vụ</td><td>Hoạt động · Ngừng hoạt động</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 29. KẾT ======================= -->
+<section class="slide bia">
+  <div class="phu" style="text-transform:uppercase;letter-spacing:.12em;font-size:15px;margin-bottom:10px">Tổng kết</div>
+  <h1>Cảm ơn thầy cô và các bạn<br>đã lắng nghe</h1>
+  <div class="dong">
+    <span>3 lớp GUI · BLL · DAL</span>
+    <span>18 bảng · 7 view · 17 thủ tục · 1 trigger</span>
+    <span>Đơn nhiều vé trong một giao dịch</span>
+    <span>Giá tự động, trần 30%</span>
+    <span>Hoàn tiền đúng số đã trả</span>
+  </div>
+  <p class="phu" style="margin-top:34px">Hỏi đáp · Demo trực tiếp trên ứng dụng</p>
+</section>
+
+</div></div>
+
+<div id="tip"></div>
+<div id="dieu-khien">
+  <button id="truoc" aria-label="Slide trước">←</button>
+  <span id="so-trang">1 / 1</span>
+  <button id="sau" aria-label="Slide sau">→</button>
+  <button id="toan-man" aria-label="Toàn màn hình">Toàn màn hình</button>
+  <span class="goi-y">← → hoặc Space để chuyển · F toàn màn hình · Ctrl+P in PDF</span>
+</div>
+
+<!-- Mermaid: dùng bản lưu sẵn trong lib/ để chạy không cần mạng; thiếu file thì tải từ CDN -->
+<script src="lib/mermaid.min.js"></script>
+<script>
+  if (!window.mermaid) document.write('<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"><\/script>');
+</script>
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const stage = document.getElementById('san-khau');
+  let hienTai = 0;
+
+  // Nhãn người trình bày
+  slides.forEach(s => {
+    const nguoi = s.dataset.nguoi;
+    const dau = s.querySelector('.dau');
+    if (nguoi && dau) {
+      const tag = document.createElement('span');
+      tag.className = 'nguoi' + (nguoi === 'Suan' ? ' suan' : '');
+      tag.textContent = 'Trình bày: ' + nguoi;
+      dau.appendChild(tag);
+    }
+  });
+
+  function coGian() {
+    const k = Math.min(window.innerWidth / 1280, (window.innerHeight - 44) / 720) * 0.97;
+    stage.style.transform = 'scale(' + k + ')';
+  }
+  function den(i) {
+    hienTai = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => s.classList.toggle('active', j === hienTai));
+    document.getElementById('so-trang').textContent = (hienTai + 1) + ' / ' + slides.length;
+    document.getElementById('tien-do').style.width = ((hienTai + 1) / slides.length * 100) + '%';
+    try { history.replaceState(null, '', '#' + (hienTai + 1)); } catch (e) {}
+  }
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); den(hienTai + 1); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); den(hienTai - 1); }
+    else if (e.key === 'Home') den(0);
+    else if (e.key === 'End') den(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') toanMan();
+  });
+  function toanMan() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+  document.getElementById('truoc').onclick = () => den(hienTai - 1);
+  document.getElementById('sau').onclick = () => den(hienTai + 1);
+  document.getElementById('toan-man').onclick = toanMan;
+  window.addEventListener('resize', coGian);
+
+  // Tooltip cho các cột biểu đồ
+  const tip = document.getElementById('tip');
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      tip.textContent = el.dataset.tip; tip.style.opacity = 1;
+      tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 14) + 'px';
+    });
+    el.addEventListener('mouseleave', () => tip.style.opacity = 0);
+  });
+
+  coGian();
+  const batDau = parseInt((location.hash || '#1').slice(1), 10);
+  den(isNaN(batDau) ? 0 : batDau - 1);
+
+  // Vẽ sơ đồ
+  if (window.mermaid) {
+    mermaid.initialize({
+      startOnLoad: false, theme: 'base', securityLevel: 'strict',
+      fontFamily: '"Segoe UI", system-ui, sans-serif',
+      themeVariables: {
+        fontSize: '15px', primaryColor: '#e3f0f3', primaryBorderColor: '#0e5f73', primaryTextColor: '#0f2a33',
+        lineColor: '#44555c', secondaryColor: '#f8f0df', tertiaryColor: '#ffffff',
+        actorBkg: '#e3f0f3', actorBorder: '#0e5f73', noteBkgColor: '#f8f0df', noteBorderColor: '#b7862b',
+        clusterBkg: '#ffffff', clusterBorder: '#d5dee2'
+      },
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+      sequence: { useMaxWidth: true, mirrorActors: false, messageAlign: 'center' },
+      er: { useMaxWidth: true },
+      state: { useMaxWidth: true }
+    });
+    mermaid.run({ querySelector: '.mermaid' }).catch(err => console.error(err));
+  }
+})();
+</script>
+</body>
+</html>

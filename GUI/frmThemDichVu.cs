@@ -8,6 +8,18 @@ namespace QuanLyBanVeMayBay.GUI
     {
         private readonly int _maDon, _maVe;
 
+        /// <summary>Một dòng trong danh sách dịch vụ.</summary>
+        private class DongDichVu
+        {
+            public int Ma;
+            public string Ten;
+            public decimal DonGia;
+            public bool DaCo;   // vé đã đăng ký dịch vụ này trước đó
+
+            public override string ToString() =>
+                $"{Ten}  ·  {DinhDang.Tien(DonGia)}" + (DaCo ? "   (đã có)" : "");
+        }
+
         public frmThemDichVu()
         {
             InitializeComponent();
@@ -24,13 +36,18 @@ namespace QuanLyBanVeMayBay.GUI
         {
             try
             {
-                DataTable dt = DanhMucBLL.DichVu();
-                dt.Columns.Add("Hien", typeof(string));
-                foreach (DataRow r in dt.Rows)
-                    r["Hien"] = $"{r["Ten"]}  ·  {DinhDang.Tien(r["GiaTri"])}";
-                cboDichVu.DisplayMember = "Hien";
-                cboDichVu.ValueMember = "Ma";
-                cboDichVu.DataSource = dt;
+                HashSet<int> daCo = DatVeBLL.DichVuCuaVe(_maVe);
+                clbDichVu.Items.Clear();
+                foreach (DataRow r in DanhMucBLL.DichVu().Rows)
+                {
+                    int ma = Convert.ToInt32(r["Ma"]);
+                    var dong = new DongDichVu
+                    {
+                        Ma = ma, Ten = r["Ten"].ToString(), DonGia = Convert.ToDecimal(r["GiaTri"]), DaCo = daCo.Contains(ma),
+                    };
+                    clbDichVu.Items.Add(dong, dong.DaCo);
+                }
+                TinhThanhTien();
             }
             catch (Exception ex)
             {
@@ -38,27 +55,52 @@ namespace QuanLyBanVeMayBay.GUI
             }
         }
 
-        private decimal DonGia
+        /// <summary>Dịch vụ mới được tick (bỏ qua các dịch vụ vé đã có).</summary>
+        private List<DongDichVu> DichVuMoiDaChon(int? dangDoi = null, CheckState? trangThaiMoi = null)
         {
-            get
+            var ds = new List<DongDichVu>();
+            for (int i = 0; i < clbDichVu.Items.Count; i++)
             {
-                var row = (cboDichVu.SelectedItem as DataRowView)?.Row;
-                return row == null ? 0 : Convert.ToDecimal(row["GiaTri"]);
+                var d = (DongDichVu)clbDichVu.Items[i];
+                bool tick = i == dangDoi ? trangThaiMoi == CheckState.Checked : clbDichVu.GetItemChecked(i);
+                if (tick && !d.DaCo) ds.Add(d);
             }
+            return ds;
         }
 
-        private void TinhThanhTien(object sender, EventArgs e)
+        private void TinhThanhTien(int? dangDoi = null, CheckState? trangThaiMoi = null)
         {
-            lblThanhTien.Text = DinhDang.Tien(DonGia * nudSoLuong.Value);
+            var ds = DichVuMoiDaChon(dangDoi, trangThaiMoi);
+            lblThanhTien.Text = DinhDang.Tien(ds.Sum(d => d.DonGia));
+            btnThem.Text = ds.Count > 0 ? $"Thêm ({ds.Count})" : "Thêm";
+        }
+
+        private void clbDichVu_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            // Dịch vụ vé đã có: giữ nguyên dấu tick, không cho bỏ
+            if (((DongDichVu)clbDichVu.Items[e.Index]).DaCo)
+            {
+                e.NewValue = CheckState.Checked;
+                return;
+            }
+            TinhThanhTien(e.Index, e.NewValue);
         }
 
         private void btnThem_Click(object sender, EventArgs e)
         {
             try
             {
-                DatVeBLL.ThemDichVu(_maDon, _maVe, cboDichVu.SelectedValue as int?, (int)nudSoLuong.Value, DonGia);
+                var ds = DichVuMoiDaChon();
+                bool donDaThanhToan = DatVeBLL.TrangThaiDon(_maDon) == DatVeBLL.DaThanhToan;
+                decimal conPhaiThu = DatVeBLL.ThemDichVu(_maDon, _maVe, ds.Select(d => d.Ma).ToList());
                 DialogResult = DialogResult.OK;
                 Close();
+
+                // Đơn đã thanh toán: dịch vụ vẫn thêm được, phần tiền phát sinh thu tiếp qua màn thanh toán.
+                if (donDaThanhToan && conPhaiThu > 0 &&
+                    MsgBox.XacNhan($"Đã thêm {ds.Count} dịch vụ cho vé #{_maVe}.\nĐơn #{_maDon} đã thanh toán trước đó, còn phải thu thêm {DinhDang.Tien(conPhaiThu)}.\nThu tiền ngay?",
+                                   "Thu thêm tiền dịch vụ", "Thu tiền", "Để sau"))
+                    frmThanhToan.ThanhToan(Owner, _maDon);
             }
             catch (Exception ex)
             {

@@ -41,9 +41,13 @@ namespace QuanLyBanVeMayBay.GUI
                     dtpNgayBay.MinDate = DateTime.Today;
                     dtpNgayBay.Value = DateTime.Today.AddDays(1);
 
-                    bool muaTet = DatVeBLL.DangMuaTet;
-                    chkTet.Enabled = muaTet;
-                    if (!muaTet) chkTet.Text = "Ưu đãi Tết (chỉ áp dụng tháng 1–3)";
+                    // Đã bỏ ưu đãi Tết
+                    chkTet.Checked = false;
+                    chkTet.Visible = false;
+                    // Khứ hồi được tự động áp dụng khi đơn là cặp vé đi/về
+                    chkKhuHoi.Enabled = false;
+                    // Đổi khách liên hệ thì tính lại giá (ưu đãi khách hàng mới xét theo khách liên hệ)
+                    cboLienHe.SelectedIndexChanged += TuyChonGia_Changed;
 
                     HienChuyenBay(ChuyenBayBLL.LichBaySapToi(null, null), "Lịch bay sắp tới");
                     _daNap = true;
@@ -259,7 +263,7 @@ namespace QuanLyBanVeMayBay.GUI
 
         private void TuDongKhuHoi()
         {
-            if (DatVeBLL.LaCapKhuHoi(_gioVe)) chkKhuHoi.Checked = true;
+            chkKhuHoi.Checked = DatVeBLL.CoKhuHoi(_gioVe);
         }
 
         private void btnXoaVe_Click(object sender, EventArgs e)
@@ -271,7 +275,7 @@ namespace QuanLyBanVeMayBay.GUI
                 return;
             }
             _gioVe.Rows.Remove(r);
-            if (_gioVe.Rows.Count < 2) chkKhuHoi.Checked = false;
+            TuDongKhuHoi();
             CapNhatGheTrongDon();
             CapNhatThanhDuoi();
         }
@@ -290,9 +294,9 @@ namespace QuanLyBanVeMayBay.GUI
             _dangTinhGia = true;
             try
             {
-                DatVeBLL.TinhGiaGioVe(_gioVe, chkTet.Checked, chkKhuHoi.Checked, cboKhuyenMai.SelectedValue as int?);
+                DatVeBLL.TinhGiaGioVe(_gioVe, cboKhuyenMai.SelectedValue as int?, cboLienHe.SelectedValue as int?);
                 lblLoiGia.ForeColor = AppTheme.Muted;
-                lblLoiGia.Text = "Giá đã gồm ưu đãi hạng thành viên, khuyến mãi, Tết và khứ hồi (cộng dồn, tối đa 30%).";
+                lblLoiGia.Text = "Giá đã gồm ưu đãi hạng thành viên, khuyến mãi và khứ hồi (cộng dồn, tối đa 30%).";
                 return true;
             }
             catch (Exception ex)
@@ -313,13 +317,11 @@ namespace QuanLyBanVeMayBay.GUI
         {
             if (!TinhGia(false)) return;
 
-            decimal tong = DatVeBLL.TongThucTra(_gioVe);
-            if (!MsgBox.XacNhan($"Tạo đơn gồm {_gioVe.Rows.Count} vé, tổng {DinhDang.Tien(tong)}?", "Xác nhận đặt vé", "Đặt vé", "Xem lại")) return;
+            if (!MsgBox.XacNhan(NoiDungXacNhan(), "Xác nhận đặt vé", "Đặt vé", "Xem lại")) return;
 
             try
             {
-                DataRow kq = DatVeBLL.DatVe(cboLienHe.SelectedValue as int?, _gioVe, chkTet.Checked, chkKhuHoi.Checked,
-                    cboKhuyenMai.SelectedValue as int?);
+                DataRow kq = DatVeBLL.DatVe(cboLienHe.SelectedValue as int?, _gioVe, cboKhuyenMai.SelectedValue as int?);
                 int maDon = Convert.ToInt32(kq["MaDon"]);
 
                 stepBar.StepsDone = 2;
@@ -341,6 +343,29 @@ namespace QuanLyBanVeMayBay.GUI
             {
                 MsgBox.Loi(ex);
             }
+        }
+
+        /// <summary>Nội dung hộp xác nhận: thông tin từng vé + ưu đãi + tổng tiền.</summary>
+        private string NoiDungXacNhan()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Tạo đơn gồm {_gioVe.Rows.Count} vé:");
+            int i = 1;
+            foreach (DataRow r in _gioVe.Rows)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"Vé {i++}: {r["Tuyen"]}  ·  {r.Field<DateTime>("NgayGioKhoiHanh"):dd/MM/yyyy HH:mm}");
+                sb.AppendLine($"   Ghế {r["SoGhe"]}  ·  {r["HangVe"]}");
+                sb.AppendLine($"   Hành khách: {r["HanhKhach"]}" +
+                              (string.IsNullOrEmpty(r["NguoiGiamHo"] as string) ? "" : $"  (giám hộ: {r["NguoiGiamHo"]})"));
+                sb.AppendLine($"   Giá: {DinhDang.Tien(r["GiaGoc"])}  −{r["PhanTramGiam"]}%  →  {DinhDang.Tien(r["GiaThucTra"])}");
+            }
+            sb.AppendLine();
+            sb.AppendLine("Khách liên hệ: " + cboLienHe.Text);
+            if (cboKhuyenMai.SelectedValue is int) sb.AppendLine("Khuyến mãi: " + cboKhuyenMai.Text);
+            if (chkKhuHoi.Checked) sb.AppendLine("Ưu đãi khứ hồi: giảm 10% cho các cặp vé đi/về cùng hành khách");
+            sb.Append("Tổng số tiền phải thanh toán: " + DinhDang.Tien(DatVeBLL.TongThucTra(_gioVe)));
+            return sb.ToString();
         }
 
         private void tlpGia_Paint(object sender, PaintEventArgs e)
@@ -416,7 +441,7 @@ namespace QuanLyBanVeMayBay.GUI
             lblGiam.Text = giam > 0 ? "−" + DinhDang.Tien(giam) : "0 đ";
             lblTongCong.Text = DinhDang.Tien(thucTra);
 
-            string ve = $"Đơn: {_gioVe.Rows.Count}/{DatVeBLL.SoVeToiDaMoiDon} vé";
+            string ve = $"Đơn: {_gioVe.Rows.Count} vé";
             if (_buoc == 1)
             {
                 lblTomTat.Text = _chuyenBay == null
@@ -427,7 +452,7 @@ namespace QuanLyBanVeMayBay.GUI
             {
                 GheDTO ghe = seatMap.SelectedSeat;
                 lblTomTat.Text = (ghe == null ? "Chưa chọn ghế" : $"Ghế {ghe.SoGhe} · {ghe.TenHangVe}") + "  ·  " + ve +
-                                 (_gioVe.Rows.Count == 1 ? "  ·  Có thể quay lại bước 1 để thêm vé chiều về" : "");
+                                 (_gioVe.Rows.Count >= 1 ? "  ·  Có thể quay lại bước 1 để thêm vé (chiều về, chuyến khác)" : "");
             }
             else
             {

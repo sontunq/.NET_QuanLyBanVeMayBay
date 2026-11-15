@@ -44,8 +44,10 @@ namespace QuanLyBanVeMayBay.Utils
                 return;
             }
             var se = ex as SqlException;
-            if (se != null && se.Number >= 50000)
-                Show(LoaiThongBao.CanhBao, "Không thể thực hiện", se.Message, "Đã hiểu", null);
+            // Lấy đúng thông báo THROW nghiệp vụ (bỏ các dòng kỹ thuật đi kèm như lỗi 266 khi thủ tục tự ROLLBACK)
+            SqlError loiNghiepVu = se?.Errors.Cast<SqlError>().FirstOrDefault(x => x.Number >= 50000);
+            if (loiNghiepVu != null)
+                Show(LoaiThongBao.CanhBao, "Không thể thực hiện", loiNghiepVu.Message, "Đã hiểu", null);
             else
                 Show(LoaiThongBao.Loi, "Đã xảy ra lỗi", ex.Message, "Đóng", null);
         }

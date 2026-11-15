@@ -12,18 +12,16 @@ namespace QuanLyBanVeMayBay.BLL
         public decimal TyLe { get; set; }
         public bool CoThuPhi { get; set; }
         public decimal Phi { get; set; }
+        /// <summary>Tiền dịch vụ của vé, được hoàn đủ khi đơn đã thanh toán đủ.</summary>
+        public decimal TienDichVu { get; set; }
         public decimal TienHoan { get; set; }
     }
 
     public static class DatVeBLL
     {
-        public const int SoVeToiDaMoiDon = 2;
         public const string ChoThanhToan = "Chờ thanh toán";
         public const string DaThanhToan = "Đã thanh toán";
         public const string DaHuy = "Đã hủy";
-
-        /// <summary>Ưu đãi Tết chỉ áp dụng trong tháng 1–3.</summary>
-        public static bool DangMuaTet => DateTime.Today.Month <= 3;
 
         // =========================================================
         // Giỏ vé (đơn đang lập, chưa lưu CSDL)
@@ -57,10 +55,8 @@ namespace QuanLyBanVeMayBay.BLL
                 throw new LoiNghiepVu("Hãy bấm chọn một ghế trống trên sơ đồ trước.");
             if (maKH == null)
                 throw new LoiNghiepVu("Vui lòng chọn hành khách.");
-            if (gio.Rows.Count >= SoVeToiDaMoiDon)
-                throw new LoiNghiepVu($"Mỗi đơn đặt tối đa {SoVeToiDaMoiDon} vé. Hãy tiếp tục sang bước xác nhận để tạo đơn này trước.");
             if (gio.AsEnumerable().Any(r => r.Field<int>("MaChuyenBay") == chuyenBay.MaChuyenBay && r.Field<int>("MaKH") == maKH.Value))
-                throw new LoiNghiepVu("Hành khách này đã có vé trên chuyến bay này trong đơn.");
+                throw new LoiNghiepVu("Hành khách này đã có vé trên chuyến bay này trong đơn (mỗi hành khách chỉ 1 ghế trên một chuyến).\nĐể thêm vé, hãy chọn hành khách khác, hoặc quay lại bước 1 chọn chuyến khác (ví dụ chiều về).");
             if (gio.AsEnumerable().Any(r => r.Field<int>("MaChuyenBay") == chuyenBay.MaChuyenBay && r.Field<int>("MaGhe") == ghe.MaGhe))
                 throw new LoiNghiepVu("Ghế này đã có trong đơn.");
             if (maGiamHo != null && maGiamHo == maKH)
@@ -88,37 +84,36 @@ namespace QuanLyBanVeMayBay.BLL
             gio.Rows.Add(r);
         }
 
-        /// <summary>Hai vé cùng một hành khách, chiều đi và chiều về ngược nhau.</summary>
-        public static bool LaCapKhuHoi(DataTable gio)
+        /// <summary>
+        /// Chuyến chiều về của một vé trong giỏ: vé khác của CÙNG hành khách có tuyến ngược lại.
+        /// Cùng quy tắc với sp_THEMVEDON (SQL tự nhận diện khứ hồi, giảm 10% cho cả hai vé).
+        /// </summary>
+        public static int? ChuyenKhuHoiCua(DataTable gio, DataRow ve)
         {
-            if (gio.Rows.Count != 2) return false;
-            DataRow a = gio.Rows[0], b = gio.Rows[1];
-            string[] ta = a.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
-            string[] tb = b.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
-            return a.Field<int>("MaKH") == b.Field<int>("MaKH") && ta[0] == tb[1] && ta[1] == tb[0];
+            string[] t = ve.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
+            DataRow cap = gio.AsEnumerable().FirstOrDefault(x =>
+            {
+                if (x == ve || x.Field<int>("MaKH") != ve.Field<int>("MaKH")) return false;
+                string[] k = x.Field<string>("Tuyen").Split(new[] { " → " }, StringSplitOptions.None);
+                return t[0] == k[1] && t[1] == k[0];
+            });
+            return cap?.Field<int>("MaChuyenBay");
         }
 
-        /// <summary>Tính lại giá từng vé trong giỏ bằng sp_TINHTHUGIAVE.</summary>
-        public static void TinhGiaGioVe(DataTable gio, bool tet, bool khuHoi, int? maKM)
+        /// <summary>Giỏ có ít nhất một cặp vé khứ hồi.</summary>
+        public static bool CoKhuHoi(DataTable gio) =>
+            gio.AsEnumerable().Any(r => ChuyenKhuHoiCua(gio, r) != null);
+
+        /// <summary>Tính lại giá từng vé trong giỏ bằng sp_TINHTHUGIAVE (khứ hồi tự nhận diện theo từng vé).
+        /// Khách liên hệ mặc định là hành khách vé thứ nhất (dùng để xét ưu đãi khách hàng mới).</summary>
+        public static void TinhGiaGioVe(DataTable gio, int? maKM, int? maKHLienHe = null)
         {
             if (gio.Rows.Count == 0) return;
-            if (tet && !DangMuaTet)
-                throw new LoiNghiepVu("Ưu đãi Tết chỉ áp dụng trong tháng 1–3.");
-            if (khuHoi && gio.Rows.Count < 2)
-                throw new LoiNghiepVu("Ưu đãi khứ hồi cần 2 vé trong đơn.");
-
+            int lienHe = maKHLienHe ?? gio.Rows[0].Field<int>("MaKH");
             foreach (DataRow r in gio.Rows)
             {
-                int? maCBKhuHoi = null;
-                if (khuHoi)
-                {
-                    DataRow khac = gio.AsEnumerable().FirstOrDefault(x => x != r);
-                    if (khac != null) maCBKhuHoi = khac.Field<int>("MaChuyenBay");
-                }
-                int soVeTet = gio.AsEnumerable().Count(x => x.Field<int>("MaKH") == r.Field<int>("MaKH"));
-
                 DataRow g = DatVeDAL.TinhGia(r.Field<int>("MaChuyenBay"), r.Field<int>("MaHangVe"), r.Field<int>("MaKH"),
-                    tet, khuHoi, maKM, maCBKhuHoi, soVeTet);
+                    maKM, ChuyenKhuHoiCua(gio, r), lienHe);
                 r["GiaGoc"] = g["GiaGoc"];
                 r["PhanTramGiam"] = g["PhanTramGiam"];
                 r["TienGiam"] = g["TienGiam"];
@@ -129,16 +124,15 @@ namespace QuanLyBanVeMayBay.BLL
         public static decimal TongGiaGoc(DataTable gio) => gio.AsEnumerable().Sum(r => r.Field<decimal>("GiaGoc"));
         public static decimal TongThucTra(DataTable gio) => gio.AsEnumerable().Sum(r => r.Field<decimal>("GiaThucTra"));
 
-        /// <summary>Lưu đơn vào CSDL. Khách liên hệ mặc định là hành khách vé thứ nhất.</summary>
-        public static DataRow DatVe(int? maKHLienHe, DataTable gio, bool tet, bool khuHoi, int? maKM)
+        /// <summary>Lưu đơn nhiều vé vào CSDL. Khách liên hệ mặc định là hành khách vé thứ nhất.
+        /// Trả về dòng đầu của kết quả (MaDon, TongThanhToan, TrangThaiDon...).</summary>
+        public static DataRow DatVe(int? maKHLienHe, DataTable gio, int? maKM)
         {
             if (gio.Rows.Count == 0)
                 throw new LoiNghiepVu("Đơn chưa có vé nào.");
-            if (gio.Rows.Count > SoVeToiDaMoiDon)
-                throw new LoiNghiepVu($"Mỗi đơn đặt tối đa {SoVeToiDaMoiDon} vé.");
 
             int lienHe = maKHLienHe ?? gio.Rows[0].Field<int>("MaKH");
-            return DatVeDAL.DatVe(lienHe, gio.Rows.Cast<DataRow>().ToList(), tet, khuHoi, maKM, PhienDangNhap.MaTK);
+            return DatVeDAL.DatVe(lienHe, gio.Rows.Cast<DataRow>().ToList(), maKM, PhienDangNhap.MaTK).Rows[0];
         }
 
         // =========================================================
@@ -151,8 +145,11 @@ namespace QuanLyBanVeMayBay.BLL
             if (don == null)
                 throw new LoiNghiepVu("Không tìm thấy đơn #" + maDon + ".");
             string trangThai = don["TrangThai"].ToString();
-            if (trangThai != ChoThanhToan)
-                throw new LoiNghiepVu($"Đơn #{maDon} đang ở trạng thái \"{trangThai}\" nên không thể thanh toán.");
+            if (trangThai == DaHuy)
+                throw new LoiNghiepVu($"Đơn #{maDon} đã hủy nên không thể thanh toán.");
+            // Đơn đã thanh toán vẫn thu tiếp được nếu có dịch vụ thêm sau (sp_THANHTOANDON thu đúng phần còn thiếu)
+            if (Convert.ToDecimal(don["ConPhaiThu"]) <= 0)
+                throw new LoiNghiepVu($"Đơn #{maDon} đã thanh toán đủ, không còn khoản nào cần thu.");
             return don;
         }
 
@@ -181,18 +178,33 @@ namespace QuanLyBanVeMayBay.BLL
             return ve;
         }
 
-        /// <summary>Xem trước phí hủy theo đúng quy tắc của sp_HUYVE (DATEDIFF theo giờ).</summary>
-        public static PhiHuyDuKien TinhPhiHuy(DateTime khoiHanh, decimal giaThucTra, string trangThaiDon)
+        /// <summary>
+        /// Xem trước phí hủy theo đúng quy tắc của sp_HUYVE:
+        /// chỉ đơn "Đã thanh toán" mới tính phí (10% / 20% / 30% giá vé theo số giờ còn lại);
+        /// tiền hoàn = phần khách đã trả dư khi bỏ vé (và dịch vụ của vé) khỏi đơn, trừ phí hủy.
+        /// Nếu đơn còn nợ tiền dịch vụ thêm sau, khoản nợ được trừ vào tiền hoàn.
+        /// </summary>
+        public static PhiHuyDuKien TinhPhiHuy(DataRow ve)
         {
+            DateTime khoiHanh = Convert.ToDateTime(ve["NgayGioKhoiHanh"]);
+            decimal giaThucTra = Convert.ToDecimal(ve["GiaThucTra"]);
+            DataRow don = DatVeDAL.ThongTinDon(Convert.ToInt32(ve["MaDon"]));
+            decimal tienDichVu = DatVeDAL.TienDichVuCuaVe(Convert.ToInt32(ve["MaVe"]));
+            // Phần khách đã trả dư nếu bỏ vé này khỏi đơn = giá vé + dịch vụ của vé − số đơn còn nợ
+            decimal duSauHuy = don == null ? 0 : giaThucTra + tienDichVu - Convert.ToDecimal(don["ConPhaiThu"]);
+            bool coThuPhi = don != null && don["TrangThai"].ToString() == DaThanhToan && duSauHuy > 0;
+
             TimeSpan conLai = khoiHanh - DateTime.Now;
             int gio = (int)Math.Floor(conLai.TotalHours);
             decimal tyLe = gio < 24 ? 0.30m : gio < 72 ? 0.20m : 0.10m;
 
-            var kq = new PhiHuyDuKien { ConLai = conLai, TyLe = tyLe, CoThuPhi = trangThaiDon == DaThanhToan };
+            var kq = new PhiHuyDuKien { ConLai = conLai, TyLe = tyLe, CoThuPhi = coThuPhi };
             if (kq.CoThuPhi)
             {
-                kq.Phi = Math.Round(giaThucTra * tyLe, 0);
-                kq.TienHoan = Math.Max(0, giaThucTra - kq.Phi);
+                // ROUND của SQL làm tròn .5 ra xa số 0
+                kq.Phi = Math.Min(Math.Round(giaThucTra * tyLe, 0, MidpointRounding.AwayFromZero), duSauHuy);
+                kq.TienDichVu = tienDichVu;
+                kq.TienHoan = duSauHuy - kq.Phi;
             }
             return kq;
         }
@@ -207,14 +219,24 @@ namespace QuanLyBanVeMayBay.BLL
         // =========================================================
         // Dịch vụ, tra cứu
         // =========================================================
-        public static void ThemDichVu(int maDon, int maVe, int? maDichVu, int soLuong, decimal donGia)
+        /// <summary>
+        /// Thêm các dịch vụ được tick cho vé (mỗi dịch vụ 1 lần), kể cả khi đơn đã thanh toán.
+        /// Chạy chung một giao dịch. Trả về số tiền đơn còn phải thu sau khi thêm.
+        /// </summary>
+        public static decimal ThemDichVu(int maDon, int maVe, IList<int> dsMaDichVu)
         {
-            if (maDichVu == null)
-                throw new LoiNghiepVu("Vui lòng chọn dịch vụ.");
-            if (soLuong <= 0)
-                throw new LoiNghiepVu("Số lượng phải lớn hơn 0.");
-            DatVeDAL.ThemDichVu(maDon, maVe, maDichVu.Value, soLuong, donGia, PhienDangNhap.MaTK);
+            if (dsMaDichVu == null || dsMaDichVu.Count == 0)
+                throw new LoiNghiepVu("Vui lòng tick ít nhất một dịch vụ mới.");
+            HashSet<int> daCo = DatVeDAL.DichVuCuaVe(maVe);
+            if (dsMaDichVu.Any(daCo.Contains))
+                throw new LoiNghiepVu("Có dịch vụ vé này đã đăng ký rồi.");
+            DatVeDAL.ThemDichVu(maVe, dsMaDichVu, PhienDangNhap.MaTK);
+            return Convert.ToDecimal(DatVeDAL.ThongTinDon(maDon)["ConPhaiThu"]);
         }
+
+        public static HashSet<int> DichVuCuaVe(int maVe) => DatVeDAL.DichVuCuaVe(maVe);
+
+        public static string TrangThaiDon(int maDon) => DatVeDAL.ThongTinDon(maDon)?["TrangThai"].ToString();
 
         public static DataTable DanhSachDon(string trangThai, string tuKhoa) => DatVeDAL.DanhSachDon(trangThai, RongThanhNull(tuKhoa));
         public static DataTable VeTrongDon(int maDon) => DatVeDAL.VeTrongDon(maDon);

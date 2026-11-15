@@ -30,10 +30,13 @@ namespace QuanLyBanVeMayBay.GUI
         private frmThanhToan(int maDon, DataRow don) : this()
         {
             _maDon = maDon;
-            _tongTien = Convert.ToDecimal(don["TongThanhToan"]);
-            lblNhan.Text = "THANH TOÁN ĐƠN #" + maDon;
+            // Số tiền cần thu = tổng đơn − (đã thu − đã hoàn). Đơn đã thanh toán chỉ còn phần dịch vụ thêm sau.
+            _tongTien = Convert.ToDecimal(don["ConPhaiThu"]);
+            bool thuThem = don["TrangThai"].ToString() == DatVeBLL.DaThanhToan;
+            lblNhan.Text = (thuThem ? "THU THÊM DỊCH VỤ · ĐƠN #" : "THANH TOÁN ĐƠN #") + maDon;
             lblSoTien.Text = DinhDang.Tien(_tongTien);
-            lblMoTa.Text = $"{don["SoVe"]} vé  ·  Khách liên hệ: {don["KhachHangLienHe"]}";
+            lblMoTa.Text = $"{don["SoVe"]} vé  ·  Khách liên hệ: {don["KhachHangLienHe"]}" +
+                           (thuThem ? $"  ·  Đã thu {DinhDang.Tien(Convert.ToDecimal(don["DaThu"]) - Convert.ToDecimal(don["DaHoan"]))}" : "");
             lblTienVeGiaTri.Text = DinhDang.Tien(don["TongTienVe"]);
             lblDichVuGiaTri.Text = DinhDang.Tien(don["TongTienDichVu"]);
             decimal giam = don["TienGiamKM"] == DBNull.Value ? 0 : Convert.ToDecimal(don["TienGiamKM"]);

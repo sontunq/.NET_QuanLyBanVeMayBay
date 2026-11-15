@@ -6,42 +6,59 @@ namespace QuanLyBanVeMayBay.DAL
 {
     public static class DatVeDAL
     {
-        public static DataRow TinhGia(int maChuyenBay, int maHangVe, int maKH, bool tet, bool khuHoi,
-                                      int? maKM, int? maChuyenBayKhuHoi, int soVeTet)
+        /// <summary>Xem trước giá một vé (sp_TINHTHUGIAVE). Truyền chuyến chiều về nếu vé thuộc cặp khứ hồi.</summary>
+        public static DataRow TinhGia(int maChuyenBay, int maHangVe, int maKH, int? maKM, int? maChuyenBayKhuHoi, int? maKHLienHe)
         {
             return ExecuteProc("sp_TINHTHUGIAVE",
                 P("@MaChuyenBay", maChuyenBay), P("@MaHangVe", maHangVe), P("@MaKH", maKH),
-                P("@ApDungTet", tet), P("@ApDungKhuHoi", khuHoi), P("@MaKM", maKM),
-                P("@MaChuyenBayKhuHoi", maChuyenBayKhuHoi), P("@SoVeTetTrongDon", soVeTet)).Rows[0];
+                P("@MaKM", maKM), P("@MaChuyenBayKhuHoi", maChuyenBayKhuHoi), P("@MaKHLienHe", maKHLienHe)).Rows[0];
         }
 
-        public static DataRow DatVe(int maKHLienHe, IList<DataRow> gioVe, bool tet, bool khuHoi, int? maKM, int maTK)
+        /// <summary>
+        /// Đặt đơn nhiều vé: sp_TAODONNHIEUVE → sp_THEMVEDON (mỗi vé một lần) → sp_XACNHANDON.
+        /// Chạy chung một giao dịch: một vé lỗi thì cả đơn không được tạo.
+        /// Trả về các dòng vé của đơn (mỗi dòng có MaDon, TongThanhToan...).
+        /// </summary>
+        public static DataTable DatVe(int maKHLienHe, IList<DataRow> gioVe, int? maKM, int maTK)
         {
-            var ps = new List<SqlParameter>
+            return ChayTrongGiaoDich((cn, tx) =>
             {
-                P("@MaKHLienHe", maKHLienHe), P("@MaTKNhanVien", maTK),
-                P("@ApDungTet", tet), P("@ApDungKhuHoi", khuHoi), P("@MaKM", maKM),
-            };
-            for (int i = 0; i < gioVe.Count && i < 2; i++)
-            {
-                DataRow r = gioVe[i];
-                string n = (i + 1).ToString();
-                ps.Add(P("@MaKH" + n, r["MaKH"]));
-                ps.Add(P("@MaChuyenBay" + n, r["MaChuyenBay"]));
-                ps.Add(P("@MaGhe" + n, r["MaGhe"]));
-                ps.Add(P("@MaHangVe" + n, r["MaHangVe"]));
-                ps.Add(P("@MaNguoiGiamHo" + n, r["MaNguoiGiamHo"]));
-            }
-            return ExecuteProc("sp_DATVE", ps.ToArray()).Rows[0];
+                DataTable don = ExecuteProc(cn, tx, "sp_TAODONNHIEUVE",
+                    P("@MaKHLienHe", maKHLienHe), P("@MaTKNhanVien", maTK), P("@MaKM", maKM));
+                int maDon = Convert.ToInt32(don.Rows[0]["MaDon"]);
+
+                foreach (DataRow r in gioVe)
+                {
+                    ExecuteProc(cn, tx, "sp_THEMVEDON",
+                        P("@MaDon", maDon), P("@MaKH", r["MaKH"]), P("@MaChuyenBay", r["MaChuyenBay"]),
+                        P("@MaGhe", r["MaGhe"]), P("@MaHangVe", r["MaHangVe"]), P("@MaNguoiGiamHo", r["MaNguoiGiamHo"]));
+                }
+
+                ExecuteNonQuery(cn, tx, @"INSERT INTO NHATKYHOATDONG(MaTK, HanhDong, DoiTuong, NoiDung)
+VALUES(@MaTK, N'Đặt vé', N'DONDATVE', CONCAT(N'Tạo đơn đặt vé #', @MaDon, N' (', @SoVe, N' vé)'))",
+                    P("@MaTK", maTK), P("@MaDon", maDon), P("@SoVe", gioVe.Count));
+
+                return ExecuteProc(cn, tx, "sp_XACNHANDON", P("@MaDon", maDon));
+            });
         }
 
+        /// <summary>Thông tin đơn kèm số tiền đã thu, đã hoàn, phí hủy đã giữ và số tiền còn phải thu
+        /// (cùng công thức với sp_THANHTOANDON).</summary>
         public static DataRow ThongTinDon(int maDon)
         {
             DataTable dt = ExecuteQuery(@"
 SELECT dd.MaDon, dd.TrangThai, dd.TongTienVe, dd.TongTienDichVu, dd.TienGiamKM, dd.TongThanhToan,
        kh.HoTen AS KhachHangLienHe,
-       (SELECT COUNT(*) FROM VE WHERE MaDon = dd.MaDon AND TrangThai <> N'Đã hủy') AS SoVe
-FROM DONDATVE dd JOIN KHACHHANG kh ON kh.MaKH = dd.MaKHLienHe
+       (SELECT COUNT(*) FROM VE WHERE MaDon = dd.MaDon AND TrangThai <> N'Đã hủy') AS SoVe,
+       tt.DaThu, tt.DaHoan, ph.PhiHuy,
+       dd.TongThanhToan - (tt.DaThu - tt.DaHoan - ph.PhiHuy) AS ConPhaiThu
+FROM DONDATVE dd
+JOIN KHACHHANG kh ON kh.MaKH = dd.MaKHLienHe
+CROSS APPLY (SELECT ISNULL(SUM(CASE WHEN TrangThai = N'Thành công' THEN SoTien END), 0) AS DaThu,
+                    ISNULL(SUM(CASE WHEN TrangThai = N'Đã hoàn' THEN SoTien END), 0) AS DaHoan
+             FROM THANHTOAN WHERE MaDon = dd.MaDon) tt
+CROSS APPLY (SELECT ISNULL(SUM(h.PhiHuy), 0) AS PhiHuy
+             FROM HUYVE h JOIN VE v ON v.MaVe = h.MaVe WHERE v.MaDon = dd.MaDon) ph
 WHERE dd.MaDon = @id", P("@id", maDon));
             return dt.Rows.Count == 0 ? null : dt.Rows[0];
         }
@@ -59,45 +76,36 @@ WHERE dd.MaDon = @id", P("@id", maDon));
             return dt.Rows.Count == 0 ? null : dt.Rows[0];
         }
 
+        /// <summary>Tổng tiền dịch vụ đã gắn vào một vé (sp_HUYVE hoàn cả phần này khi đơn đã thanh toán đủ).</summary>
+        public static decimal TienDichVuCuaVe(int maVe)
+        {
+            object kq = ExecuteScalar("SELECT SUM(ThanhTien) FROM VEDICHVU WHERE MaVe = @id", P("@id", maVe));
+            return kq == null ? 0 : Convert.ToDecimal(kq);
+        }
+
         public static DataRow HuyVe(int maVe, string lyDo, int maTK)
         {
             return ExecuteProc("sp_HUYVE", P("@MaVe", maVe), P("@LyDo", lyDo), P("@MaTKNhanVien", maTK)).Rows[0];
         }
 
-        // Thêm dịch vụ: theo ghi chú trong script, phần này làm bằng câu lệnh có tham số từ ứng dụng.
-        private const string SqlThemDichVu = @"
-SET XACT_ABORT ON;
-BEGIN TRANSACTION;
-
-IF NOT EXISTS (SELECT 1 FROM DONDATVE WITH (UPDLOCK, HOLDLOCK)
-               WHERE MaDon = @MaDon AND TrangThai = N'Chờ thanh toán')
-    THROW 50090, N'Chỉ thêm dịch vụ cho đơn đang chờ thanh toán.', 1;
-
-IF NOT EXISTS (SELECT 1 FROM VE WHERE MaVe = @MaVe AND MaDon = @MaDon AND TrangThai <> N'Đã hủy')
-    THROW 50091, N'Vé không thuộc đơn hoặc đã bị hủy.', 1;
-
-IF EXISTS (SELECT 1 FROM VEDICHVU WHERE MaVe = @MaVe AND MaDichVu = @MaDichVu)
-    UPDATE VEDICHVU SET SoLuong = SoLuong + @SoLuong WHERE MaVe = @MaVe AND MaDichVu = @MaDichVu;
-ELSE
-    INSERT INTO VEDICHVU(MaVe, MaDichVu, SoLuong, DonGia) VALUES(@MaVe, @MaDichVu, @SoLuong, @DonGia);
-
-UPDATE DONDATVE
-SET TongTienDichVu = ISNULL((SELECT SUM(vd.ThanhTien) FROM VEDICHVU vd JOIN VE v ON v.MaVe = vd.MaVe
-                             WHERE v.MaDon = @MaDon AND v.TrangThai <> N'Đã hủy'), 0)
-WHERE MaDon = @MaDon;
-
-UPDATE DONDATVE SET TongThanhToan = TongTienVe + TongTienDichVu WHERE MaDon = @MaDon;
-
-INSERT INTO NHATKYHOATDONG(MaTK, HanhDong, DoiTuong, NoiDung)
-VALUES(@MaTK, N'Thêm dịch vụ', N'VEDICHVU', CONCAT(N'Thêm dịch vụ #', @MaDichVu, N' cho vé #', @MaVe));
-
-COMMIT TRANSACTION;";
-
-        public static void ThemDichVu(int maDon, int maVe, int maDichVu, int soLuong, decimal donGia, int maTK)
+        /// <summary>Thêm dịch vụ cho vé (sp_THEMDICHVUVE, đơn giá lấy từ bảng DICHVU). Đơn đã thanh toán vẫn thêm được;
+        /// tiền phát sinh được thu sau bằng sp_THANHTOANDON.</summary>
+        public static void ThemDichVu(int maVe, IList<int> dsMaDichVu, int maTK)
         {
-            ExecuteNonQuery(SqlThemDichVu,
-                P("@MaDon", maDon), P("@MaVe", maVe), P("@MaDichVu", maDichVu),
-                P("@SoLuong", soLuong), P("@DonGia", donGia), P("@MaTK", maTK));
+            ChayTrongGiaoDich((cn, tx) =>
+            {
+                foreach (int maDichVu in dsMaDichVu)
+                    ExecuteProc(cn, tx, "sp_THEMDICHVUVE",
+                        P("@MaVe", maVe), P("@MaDichVu", maDichVu), P("@SoLuong", 1), P("@MaTKNhanVien", maTK));
+                return 0;
+            });
+        }
+
+        /// <summary>Mã các dịch vụ vé đã đăng ký.</summary>
+        public static HashSet<int> DichVuCuaVe(int maVe)
+        {
+            return new HashSet<int>(ExecuteQuery("SELECT MaDichVu FROM VEDICHVU WHERE MaVe = @id", P("@id", maVe))
+                .AsEnumerable().Select(r => r.Field<int>("MaDichVu")));
         }
 
         public static DataTable DanhSachDon(string trangThai, string tuKhoa)

@@ -1,9 +1,9 @@
-﻿/* PROJECT: QUAN LY BAN VE MAY BAY */
---CREATE DATABASE QuanLyBanVeMayBay2;
+﻿-- Cơ sở dữ liệu quản lý bán vé máy bay
+-- CREATE DATABASE QuanLyBanVeMayBay2;
 USE QuanLyBanVeMayBay2;
 
 
-/* TABLE: TAIKHOAN */
+-- Bảng tài khoản
 CREATE TABLE TAIKHOAN
 (
     MaTK INT IDENTITY(1,1) PRIMARY KEY,
@@ -20,7 +20,7 @@ CREATE TABLE TAIKHOAN
 );
 
 
-/* TABLE: NHATKYHOATDONG */
+-- Bảng nhật ký hoạt động
 CREATE TABLE NHATKYHOATDONG
 (
     MaNK INT IDENTITY(1,1) PRIMARY KEY,
@@ -32,7 +32,7 @@ CREATE TABLE NHATKYHOATDONG
 );
 
 
-/* TABLE: SANBAY */
+-- Bảng sân bay
 CREATE TABLE SANBAY
 (
     MaSanBay CHAR(3) PRIMARY KEY,
@@ -44,7 +44,7 @@ CREATE TABLE SANBAY
 );
 
 
-/* TABLE: HANGVE */
+-- Bảng hạng vé
 CREATE TABLE HANGVE
 (
     MaHangVe INT IDENTITY(1,1) PRIMARY KEY,
@@ -60,7 +60,7 @@ CREATE TABLE HANGVE
 );
 
 
-/* TABLE: MAYBAY */
+-- Bảng máy bay
 CREATE TABLE MAYBAY
 (
     MaMayBay INT IDENTITY(1,1) PRIMARY KEY,
@@ -72,7 +72,7 @@ CREATE TABLE MAYBAY
 );
 
 
-/* TABLE: GHE */
+-- Bảng ghế
 CREATE TABLE GHE
 (
     MaGhe INT IDENTITY(1,1) PRIMARY KEY,
@@ -86,7 +86,7 @@ CREATE TABLE GHE
 );
 
 
-/* TABLE: DICHVU */
+-- Bảng dịch vụ
 CREATE TABLE DICHVU
 (
     MaDichVu INT IDENTITY(1,1) PRIMARY KEY,
@@ -100,7 +100,7 @@ CREATE TABLE DICHVU
 );
 
 
-/* TABLE: CHUYENBAY */
+-- Bảng chuyến bay
 CREATE TABLE CHUYENBAY
 (
     MaChuyenBay INT IDENTITY(1,1) PRIMARY KEY,
@@ -117,7 +117,7 @@ CREATE TABLE CHUYENBAY
 );
 
 
-/* TABLE: GIAVE */
+-- Bảng giá vé
 CREATE TABLE GIAVE
 (
     MaChuyenBay INT NOT NULL REFERENCES CHUYENBAY(MaChuyenBay),
@@ -127,7 +127,7 @@ CREATE TABLE GIAVE
 );
 
 
-/* TABLE: GHECHUYENBAY */
+-- Bảng ghế chuyến bay
 CREATE TABLE GHECHUYENBAY
 (
     MaChuyenBay INT NOT NULL REFERENCES CHUYENBAY(MaChuyenBay),
@@ -138,7 +138,7 @@ CREATE TABLE GHECHUYENBAY
 );
 
 
-/* TABLE: HANGTHANHVIEN */
+-- Bảng hạng thành viên
 CREATE TABLE HANGTHANHVIEN
 (
     MaHangTV INT IDENTITY(1,1) PRIMARY KEY,
@@ -149,7 +149,7 @@ CREATE TABLE HANGTHANHVIEN
 );
 
 
-/* TABLE: KHACHHANG */
+-- Bảng khách hàng
 CREATE TABLE KHACHHANG
 (
     MaKH INT IDENTITY(1,1) PRIMARY KEY,
@@ -170,7 +170,7 @@ CREATE TABLE KHACHHANG
 );
 
 
-/* TABLE: KHUYENMAI */
+-- Bảng khuyến mãi
 CREATE TABLE KHUYENMAI
 (
     MaKM INT IDENTITY(1,1) PRIMARY KEY,
@@ -187,7 +187,7 @@ CREATE TABLE KHUYENMAI
 );
 
 
-/* TABLE: DONDATVE */
+-- Bảng đơn đặt vé
 CREATE TABLE DONDATVE
 (
     MaDon INT IDENTITY(1,1) PRIMARY KEY,
@@ -204,7 +204,7 @@ CREATE TABLE DONDATVE
 );
 
 
-/* TABLE: VE */
+-- Bảng vé
 CREATE TABLE VE
 (
     MaVe INT IDENTITY(1,1) PRIMARY KEY,
@@ -236,7 +236,7 @@ ON VE(MaChuyenBay, MaKH)
 WHERE TrangThai <> N'Đã hủy';
 
 
-/* TABLE: VEDICHVU */
+-- Bảng dịch vụ của vé
 CREATE TABLE VEDICHVU
 (
     MaVe INT NOT NULL REFERENCES VE(MaVe),
@@ -248,7 +248,7 @@ CREATE TABLE VEDICHVU
 );
 
 
-/* TABLE: THANHTOAN */
+-- Bảng thanh toán
 CREATE TABLE THANHTOAN
 (
     MaThanhToan INT IDENTITY(1,1) PRIMARY KEY,
@@ -264,7 +264,7 @@ CREATE TABLE THANHTOAN
 );
 
 
-/* TABLE: HUYVE */
+-- Bảng hủy vé
 CREATE TABLE HUYVE
 (
     MaHuy INT IDENTITY(1,1) PRIMARY KEY,
@@ -280,10 +280,10 @@ CREATE TABLE HUYVE
 INSERT INTO TAIKHOAN (TenDangNhap, MatKhau, HoTen, Email, SoDienThoai, VaiTro)
 VALUES
 ('admin','admin123',N'Quản trị hệ thống','admin@gmail.com','0900000001',N'Admin'),
-('nv01','123456',N'Phạm Sơn Tùng','nv01@gmail.com','0900000002',N'NhanVien'),
-('nv02','123456',N'Vũ Quang Thái','nv02@gmail.com','0900000003',N'NhanVien'),
-('nv03','123456',N'Đoàn Thị Kim Ngân','nv03@gmail.com','0900000004',N'NhanVien'),
-('nv04','123456',N'Trịnh Thị Thanh Xuân','nv04@gmail.com','0900000005',N'NhanVien');
+('nv01','123456',N'Phạm Sơn Tùng','pst@gmail.com','0900000002',N'NhanVien'),
+('nv02','123456',N'Vũ Quang Thái','vqt@gmail.com','0900000003',N'NhanVien'),
+('nv03','123456',N'Đoàn Thị Kim Ngân','dtkn@gmail.com','0900000004',N'NhanVien'),
+('nv04','123456',N'Trịnh Thị Thanh Xuân','tttx@gmail.com','0900000005',N'NhanVien');
 
 
 INSERT INTO SANBAY (MaSanBay, TenSanBay, ThanhPho, QuocGia)
@@ -321,23 +321,233 @@ VALUES
 ('VN-B787-01',N'Boeing',N'787-9');
 
 
-/* Seat layout (kiểu A321, chia hạng theo HÀNG như máy bay thật), 56 ghế/máy bay:
-   - Hàng 1-2 : Thương gia, 2-2 (A C | D F)
-   - Hàng 3-4 : Phổ thông đặc biệt, 3-3 (A B C | D E F)
-   - Hàng 5-10: Phổ thông, 3-3 (A B C | D E F) */
+-- Ghế mẫu: hàng 1-2 thương gia, 3-4 phổ thông đặc biệt, 5-10 phổ thông
 INSERT INTO GHE (MaMayBay, SoGhe, SoHang, CotGhe, MaHangVe)
-SELECT mb.MaMayBay,
-       CONCAT(r.SoHang, c.CotGhe),
-       r.SoHang,
-       c.CotGhe,
-       CASE WHEN r.SoHang <= 2 THEN 3
-            WHEN r.SoHang <= 4 THEN 2
-            ELSE 1 END
-FROM MAYBAY mb
-CROSS JOIN (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10)) AS r(SoHang)
-CROSS JOIN (VALUES ('A'),('B'),('C'),('D'),('E'),('F')) AS c(CotGhe)
-WHERE r.SoHang > 2 OR c.CotGhe IN ('A','C','D','F')
-
+VALUES
+    (1,'1A',1,'A',3),
+    (1,'1C',1,'C',3),
+    (1,'1D',1,'D',3),
+    (1,'1F',1,'F',3),
+    (1,'2A',2,'A',3),
+    (1,'2C',2,'C',3),
+    (1,'2D',2,'D',3),
+    (1,'2F',2,'F',3),
+    (1,'3A',3,'A',2),
+    (1,'3B',3,'B',2),
+    (1,'3C',3,'C',2),
+    (1,'3D',3,'D',2),
+    (1,'3E',3,'E',2),
+    (1,'3F',3,'F',2),
+    (1,'4A',4,'A',2),
+    (1,'4B',4,'B',2),
+    (1,'4C',4,'C',2),
+    (1,'4D',4,'D',2),
+    (1,'4E',4,'E',2),
+    (1,'4F',4,'F',2),
+    (1,'5A',5,'A',1),
+    (1,'5B',5,'B',1),
+    (1,'5C',5,'C',1),
+    (1,'5D',5,'D',1),
+    (1,'5E',5,'E',1),
+    (1,'5F',5,'F',1),
+    (1,'6A',6,'A',1),
+    (1,'6B',6,'B',1),
+    (1,'6C',6,'C',1),
+    (1,'6D',6,'D',1),
+    (1,'6E',6,'E',1),
+    (1,'6F',6,'F',1),
+    (1,'7A',7,'A',1),
+    (1,'7B',7,'B',1),
+    (1,'7C',7,'C',1),
+    (1,'7D',7,'D',1),
+    (1,'7E',7,'E',1),
+    (1,'7F',7,'F',1),
+    (1,'8A',8,'A',1),
+    (1,'8B',8,'B',1),
+    (1,'8C',8,'C',1),
+    (1,'8D',8,'D',1),
+    (1,'8E',8,'E',1),
+    (1,'8F',8,'F',1),
+    (1,'9A',9,'A',1),
+    (1,'9B',9,'B',1),
+    (1,'9C',9,'C',1),
+    (1,'9D',9,'D',1),
+    (1,'9E',9,'E',1),
+    (1,'9F',9,'F',1),
+    (1,'10A',10,'A',1),
+    (1,'10B',10,'B',1),
+    (1,'10C',10,'C',1),
+    (1,'10D',10,'D',1),
+    (1,'10E',10,'E',1),
+    (1,'10F',10,'F',1),
+    (2,'1A',1,'A',3),
+    (2,'1C',1,'C',3),
+    (2,'1D',1,'D',3),
+    (2,'1F',1,'F',3),
+    (2,'2A',2,'A',3),
+    (2,'2C',2,'C',3),
+    (2,'2D',2,'D',3),
+    (2,'2F',2,'F',3),
+    (2,'3A',3,'A',2),
+    (2,'3B',3,'B',2),
+    (2,'3C',3,'C',2),
+    (2,'3D',3,'D',2),
+    (2,'3E',3,'E',2),
+    (2,'3F',3,'F',2),
+    (2,'4A',4,'A',2),
+    (2,'4B',4,'B',2),
+    (2,'4C',4,'C',2),
+    (2,'4D',4,'D',2),
+    (2,'4E',4,'E',2),
+    (2,'4F',4,'F',2),
+    (2,'5A',5,'A',1),
+    (2,'5B',5,'B',1),
+    (2,'5C',5,'C',1),
+    (2,'5D',5,'D',1),
+    (2,'5E',5,'E',1),
+    (2,'5F',5,'F',1),
+    (2,'6A',6,'A',1),
+    (2,'6B',6,'B',1),
+    (2,'6C',6,'C',1),
+    (2,'6D',6,'D',1),
+    (2,'6E',6,'E',1),
+    (2,'6F',6,'F',1),
+    (2,'7A',7,'A',1),
+    (2,'7B',7,'B',1),
+    (2,'7C',7,'C',1),
+    (2,'7D',7,'D',1),
+    (2,'7E',7,'E',1),
+    (2,'7F',7,'F',1),
+    (2,'8A',8,'A',1),
+    (2,'8B',8,'B',1),
+    (2,'8C',8,'C',1),
+    (2,'8D',8,'D',1),
+    (2,'8E',8,'E',1),
+    (2,'8F',8,'F',1),
+    (2,'9A',9,'A',1),
+    (2,'9B',9,'B',1),
+    (2,'9C',9,'C',1),
+    (2,'9D',9,'D',1),
+    (2,'9E',9,'E',1),
+    (2,'9F',9,'F',1),
+    (2,'10A',10,'A',1),
+    (2,'10B',10,'B',1),
+    (2,'10C',10,'C',1),
+    (2,'10D',10,'D',1),
+    (2,'10E',10,'E',1),
+    (2,'10F',10,'F',1),
+    (3,'1A',1,'A',3),
+    (3,'1C',1,'C',3),
+    (3,'1D',1,'D',3),
+    (3,'1F',1,'F',3),
+    (3,'2A',2,'A',3),
+    (3,'2C',2,'C',3),
+    (3,'2D',2,'D',3),
+    (3,'2F',2,'F',3),
+    (3,'3A',3,'A',2),
+    (3,'3B',3,'B',2),
+    (3,'3C',3,'C',2),
+    (3,'3D',3,'D',2),
+    (3,'3E',3,'E',2),
+    (3,'3F',3,'F',2),
+    (3,'4A',4,'A',2),
+    (3,'4B',4,'B',2),
+    (3,'4C',4,'C',2),
+    (3,'4D',4,'D',2),
+    (3,'4E',4,'E',2),
+    (3,'4F',4,'F',2),
+    (3,'5A',5,'A',1),
+    (3,'5B',5,'B',1),
+    (3,'5C',5,'C',1),
+    (3,'5D',5,'D',1),
+    (3,'5E',5,'E',1),
+    (3,'5F',5,'F',1),
+    (3,'6A',6,'A',1),
+    (3,'6B',6,'B',1),
+    (3,'6C',6,'C',1),
+    (3,'6D',6,'D',1),
+    (3,'6E',6,'E',1),
+    (3,'6F',6,'F',1),
+    (3,'7A',7,'A',1),
+    (3,'7B',7,'B',1),
+    (3,'7C',7,'C',1),
+    (3,'7D',7,'D',1),
+    (3,'7E',7,'E',1),
+    (3,'7F',7,'F',1),
+    (3,'8A',8,'A',1),
+    (3,'8B',8,'B',1),
+    (3,'8C',8,'C',1),
+    (3,'8D',8,'D',1),
+    (3,'8E',8,'E',1),
+    (3,'8F',8,'F',1),
+    (3,'9A',9,'A',1),
+    (3,'9B',9,'B',1),
+    (3,'9C',9,'C',1),
+    (3,'9D',9,'D',1),
+    (3,'9E',9,'E',1),
+    (3,'9F',9,'F',1),
+    (3,'10A',10,'A',1),
+    (3,'10B',10,'B',1),
+    (3,'10C',10,'C',1),
+    (3,'10D',10,'D',1),
+    (3,'10E',10,'E',1),
+    (3,'10F',10,'F',1),
+    (4,'1A',1,'A',3),
+    (4,'1C',1,'C',3),
+    (4,'1D',1,'D',3),
+    (4,'1F',1,'F',3),
+    (4,'2A',2,'A',3),
+    (4,'2C',2,'C',3),
+    (4,'2D',2,'D',3),
+    (4,'2F',2,'F',3),
+    (4,'3A',3,'A',2),
+    (4,'3B',3,'B',2),
+    (4,'3C',3,'C',2),
+    (4,'3D',3,'D',2),
+    (4,'3E',3,'E',2),
+    (4,'3F',3,'F',2),
+    (4,'4A',4,'A',2),
+    (4,'4B',4,'B',2),
+    (4,'4C',4,'C',2),
+    (4,'4D',4,'D',2),
+    (4,'4E',4,'E',2),
+    (4,'4F',4,'F',2),
+    (4,'5A',5,'A',1),
+    (4,'5B',5,'B',1),
+    (4,'5C',5,'C',1),
+    (4,'5D',5,'D',1),
+    (4,'5E',5,'E',1),
+    (4,'5F',5,'F',1),
+    (4,'6A',6,'A',1),
+    (4,'6B',6,'B',1),
+    (4,'6C',6,'C',1),
+    (4,'6D',6,'D',1),
+    (4,'6E',6,'E',1),
+    (4,'6F',6,'F',1),
+    (4,'7A',7,'A',1),
+    (4,'7B',7,'B',1),
+    (4,'7C',7,'C',1),
+    (4,'7D',7,'D',1),
+    (4,'7E',7,'E',1),
+    (4,'7F',7,'F',1),
+    (4,'8A',8,'A',1),
+    (4,'8B',8,'B',1),
+    (4,'8C',8,'C',1),
+    (4,'8D',8,'D',1),
+    (4,'8E',8,'E',1),
+    (4,'8F',8,'F',1),
+    (4,'9A',9,'A',1),
+    (4,'9B',9,'B',1),
+    (4,'9C',9,'C',1),
+    (4,'9D',9,'D',1),
+    (4,'9E',9,'E',1),
+    (4,'9F',9,'F',1),
+    (4,'10A',10,'A',1),
+    (4,'10B',10,'B',1),
+    (4,'10C',10,'C',1),
+    (4,'10D',10,'D',1),
+    (4,'10E',10,'E',1),
+    (4,'10F',10,'F',1);
 
 INSERT INTO DICHVU (TenDichVu, LoaiDichVu, DonGia, MoTa)
 VALUES
@@ -366,196 +576,248 @@ VALUES
 (N'Ưu đãi mùa hè',5,500000,'2026-05-01','2026-08-31',100),
 (N'Ưu đãi khách hàng mới',3,300000,'2026-01-01','2027-12-31',200);
 
+-- Không còn áp dụng ưu đãi Tết
+UPDATE KHUYENMAI SET TrangThai=N'Tạm dừng' WHERE TenKM=N'Ưu đãi Tết';
 
-/* Generate 40 customers with valid-format data (same rules as the app):
-   - HoTen: Vietnamese name, letters only
-   - CCCD: 12 digits = province code (001 Hà Nội, 079 TP.HCM, 048 Đà Nẵng)
-           + gender/century digit (0 = male 1900s, 1 = female 1900s) + 2-digit birth year + 6-digit serial
-   - Hộ chiếu: C + 7 digits
-   - SoDienThoai: +84 + 9 digits (mobile prefix 91); Email: @gmail.com */
+
+-- 40 khách hàng mẫu viết tay
 INSERT INTO KHACHHANG
 (HoTen, LoaiGiayTo, SoGiayTo, NgaySinh, GioiTinh, SoDienThoai, Email, DiaChi, MaHangTV, TongChiTieu)
-SELECT
-    CONCAT(
-        CHOOSE(n % 10 + 1, N'Nguyễn', N'Trần', N'Lê', N'Phạm', N'Hoàng', N'Huỳnh', N'Phan', N'Vũ', N'Võ', N'Đặng'), N' ',
-        CASE WHEN n % 2 = 0
-             THEN CHOOSE((n / 2) % 5 + 1, N'Thị', N'Ngọc', N'Thu', N'Minh', N'Thanh')
-             ELSE CHOOSE((n / 2) % 5 + 1, N'Văn', N'Minh', N'Đức', N'Quốc', N'Hữu') END, N' ',
-        CASE WHEN n % 2 = 0
-             THEN CHOOSE((n * 7) % 15 + 1, N'Anh', N'Chi', N'Dung', N'Giang', N'Hà', N'Hạnh', N'Hoa', N'Lan',
-                         N'Linh', N'Mai', N'My', N'Ngân', N'Phương', N'Thảo', N'Trang')
-             ELSE CHOOSE((n * 7) % 15 + 1, N'An', N'Bảo', N'Cường', N'Dũng', N'Hải', N'Hùng', N'Khang', N'Long',
-                         N'Nam', N'Phúc', N'Quân', N'Sơn', N'Thành', N'Tuấn', N'Việt') END),
-    CASE WHEN n % 5 = 0 THEN N'Hộ chiếu' ELSE N'CCCD' END,
-    CASE WHEN n % 5 = 0
-         THEN CONCAT('C', RIGHT(CONCAT('0000000', n), 7))
-         ELSE CONCAT(CASE n % 3 WHEN 0 THEN '001' WHEN 1 THEN '079' ELSE '048' END,
-                     CASE WHEN n % 2 = 0 THEN '1' ELSE '0' END,
-                     RIGHT(CONCAT('00', 2000 - (20 + n % 35)), 2),
-                     RIGHT(CONCAT('000000', n), 6)) END,
-    DATEADD(YEAR, -(20 + n % 35), CONVERT(DATE,'2000-01-01')),
-    CASE WHEN n % 2 = 0 THEN N'Nữ' ELSE N'Nam' END,
-    CONCAT('+8491', RIGHT(CONCAT('0000000', n), 7)),
-    CONCAT('khachhang', RIGHT(CONCAT('000', n), 3), '@gmail.com'),
-    CASE WHEN n % 3 = 0 THEN N'Hà Nội' WHEN n % 3 = 1 THEN N'TP. Hồ Chí Minh' ELSE N'Đà Nẵng' END,
-    1, 0
-FROM (VALUES
-    (1),
-    (2),
-    (3),
-    (4),
-    (5),
-    (6),
-    (7),
-    (8),
-    (9),
-    (10),
-    (11),
-    (12),
-    (13),
-    (14),
-    (15),
-    (16),
-    (17),
-    (18),
-    (19),
-    (20),
-    (21),
-    (22),
-    (23),
-    (24),
-    (25),
-    (26),
-    (27),
-    (28),
-    (29),
-    (30),
-    (31),
-    (32),
-    (33),
-    (34),
-    (35),
-    (36),
-    (37),
-    (38),
-    (39),
-    (40)
-) AS N(n)
+VALUES
+    (N'Trần Văn Long',N'CCCD','079079000001','1979-01-01',N'Nam','+84910000001','khachhang001@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Lê Ngọc Trang',N'CCCD','048178000002','1978-01-01',N'Nữ','+84910000002','khachhang002@gmail.com',N'Đà Nẵng',1,0),
+    (N'Phạm Minh Khang',N'CCCD','001077000003','1977-01-01',N'Nam','+84910000003','khachhang003@gmail.com',N'Hà Nội',1,0),
+    (N'Hoàng Thu Thảo',N'CCCD','079176000004','1976-01-01',N'Nữ','+84910000004','khachhang004@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Huỳnh Đức Hùng',N'Hộ chiếu','C0000005','1975-01-01',N'Nam','+84910000005','khachhang005@gmail.com',N'Đà Nẵng',1,0),
+    (N'Phan Minh Phương',N'CCCD','001174000006','1974-01-01',N'Nữ','+84910000006','khachhang006@gmail.com',N'Hà Nội',1,0),
+    (N'Vũ Quốc Hải',N'CCCD','079073000007','1973-01-01',N'Nam','+84910000007','khachhang007@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Võ Thanh Ngân',N'CCCD','048172000008','1972-01-01',N'Nữ','+84910000008','khachhang008@gmail.com',N'Đà Nẵng',1,0),
+    (N'Đặng Hữu Dũng',N'CCCD','001071000009','1971-01-01',N'Nam','+84910000009','khachhang009@gmail.com',N'Hà Nội',1,0),
+    (N'Nguyễn Thị My',N'Hộ chiếu','C0000010','1970-01-01',N'Nữ','+84910000010','khachhang010@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Trần Văn Cường',N'CCCD','048069000011','1969-01-01',N'Nam','+84910000011','khachhang011@gmail.com',N'Đà Nẵng',1,0),
+    (N'Lê Ngọc Mai',N'CCCD','001168000012','1968-01-01',N'Nữ','+84910000012','khachhang012@gmail.com',N'Hà Nội',1,0),
+    (N'Phạm Minh Bảo',N'CCCD','079067000013','1967-01-01',N'Nam','+84910000013','khachhang013@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Hoàng Thu Linh',N'CCCD','048166000014','1966-01-01',N'Nữ','+84910000014','khachhang014@gmail.com',N'Đà Nẵng',1,0),
+    (N'Huỳnh Đức An',N'Hộ chiếu','C0000015','1965-01-01',N'Nam','+84910000015','khachhang015@gmail.com',N'Hà Nội',1,0),
+    (N'Phan Minh Lan',N'CCCD','079164000016','1964-01-01',N'Nữ','+84910000016','khachhang016@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Vũ Quốc Việt',N'CCCD','048063000017','1963-01-01',N'Nam','+84910000017','khachhang017@gmail.com',N'Đà Nẵng',1,0),
+    (N'Võ Thanh Hoa',N'CCCD','001162000018','1962-01-01',N'Nữ','+84910000018','khachhang018@gmail.com',N'Hà Nội',1,0),
+    (N'Đặng Hữu Tuấn',N'CCCD','079061000019','1961-01-01',N'Nam','+84910000019','khachhang019@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Nguyễn Thị Hạnh',N'Hộ chiếu','C0000020','1960-01-01',N'Nữ','+84910000020','khachhang020@gmail.com',N'Đà Nẵng',1,0),
+    (N'Trần Văn Thành',N'CCCD','001059000021','1959-01-01',N'Nam','+84910000021','khachhang021@gmail.com',N'Hà Nội',1,0),
+    (N'Lê Ngọc Hà',N'CCCD','079158000022','1958-01-01',N'Nữ','+84910000022','khachhang022@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Phạm Minh Sơn',N'CCCD','048057000023','1957-01-01',N'Nam','+84910000023','khachhang023@gmail.com',N'Đà Nẵng',1,0),
+    (N'Hoàng Thu Giang',N'CCCD','001156000024','1956-01-01',N'Nữ','+84910000024','khachhang024@gmail.com',N'Hà Nội',1,0),
+    (N'Huỳnh Đức Quân',N'Hộ chiếu','C0000025','1955-01-01',N'Nam','+84910000025','khachhang025@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Phan Minh Dung',N'CCCD','048154000026','1954-01-01',N'Nữ','+84910000026','khachhang026@gmail.com',N'Đà Nẵng',1,0),
+    (N'Vũ Quốc Phúc',N'CCCD','001053000027','1953-01-01',N'Nam','+84910000027','khachhang027@gmail.com',N'Hà Nội',1,0),
+    (N'Võ Thanh Chi',N'CCCD','079152000028','1952-01-01',N'Nữ','+84910000028','khachhang028@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Đặng Hữu Nam',N'CCCD','048051000029','1951-01-01',N'Nam','+84910000029','khachhang029@gmail.com',N'Đà Nẵng',1,0),
+    (N'Nguyễn Thị Anh',N'Hộ chiếu','C0000030','1950-01-01',N'Nữ','+84910000030','khachhang030@gmail.com',N'Hà Nội',1,0),
+    (N'Trần Văn Long',N'CCCD','079049000031','1949-01-01',N'Nam','+84910000031','khachhang031@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Lê Ngọc Trang',N'CCCD','048148000032','1948-01-01',N'Nữ','+84910000032','khachhang032@gmail.com',N'Đà Nẵng',1,0),
+    (N'Phạm Minh Khang',N'CCCD','001047000033','1947-01-01',N'Nam','+84910000033','khachhang033@gmail.com',N'Hà Nội',1,0),
+    (N'Hoàng Thu Thảo',N'CCCD','079146000034','1946-01-01',N'Nữ','+84910000034','khachhang034@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Huỳnh Đức Hùng',N'Hộ chiếu','C0000035','1980-01-01',N'Nam','+84910000035','khachhang035@gmail.com',N'Đà Nẵng',1,0),
+    (N'Phan Minh Phương',N'CCCD','001179000036','1979-01-01',N'Nữ','+84910000036','khachhang036@gmail.com',N'Hà Nội',1,0),
+    (N'Vũ Quốc Hải',N'CCCD','079078000037','1978-01-01',N'Nam','+84910000037','khachhang037@gmail.com',N'TP. Hồ Chí Minh',1,0),
+    (N'Võ Thanh Ngân',N'CCCD','048177000038','1977-01-01',N'Nữ','+84910000038','khachhang038@gmail.com',N'Đà Nẵng',1,0),
+    (N'Đặng Hữu Dũng',N'CCCD','001076000039','1976-01-01',N'Nam','+84910000039','khachhang039@gmail.com',N'Hà Nội',1,0),
+    (N'Nguyễn Thị My',N'Hộ chiếu','C0000040','1975-01-01',N'Nữ','+84910000040','khachhang040@gmail.com',N'TP. Hồ Chí Minh',1,0);
 
-
-/* Build one flight for each allowed route on allowed routes.
-   Dates are relative to current date to keep search/demo useful; each allowed direction appears once. */
-;WITH Routes AS
-(
-    SELECT * FROM (VALUES
-      (1,'HAN','SGN',125),(2,'SGN','HAN',125),
-      (3,'HAN','DAD',80),(4,'DAD','HAN',80),
-      (5,'HAN','PQC',130),(6,'PQC','HAN',130),
-      (7,'SGN','DAD',85),(8,'DAD','SGN',85),
-      (9,'SGN','PQC',60),(10,'PQC','SGN',60),
-      (11,'HAN','CXR',115),(12,'CXR','HAN',115),
-      (13,'SGN','DLI',55),(14,'DLI','SGN',55),
-      (15,'HAN','VCA',130),(16,'VCA','HAN',130),
-      (17,'HPH','VCA',110),(18,'VCA','HPH',110),
-      (19,'HAN','NRT',300),(20,'NRT','HAN',300),
-      (21,'SGN','NRT',330),(22,'NRT','SGN',330),
-      (23,'HAN','ICN',270),(24,'ICN','HAN',270),
-      (25,'SGN','ICN',300),(26,'ICN','SGN',300),
-      (27,'HAN','HKG',150),(28,'HKG','HAN',150),
-      (29,'SGN','HKG',170),(30,'HKG','SGN',170),
-      (31,'HAN','SIN',190),(32,'SIN','HAN',190),
-      (33,'SGN','SIN',150),(34,'SIN','SGN',150),
-      (35,'HAN','SYD',570),(36,'SYD','HAN',570),
-      (37,'SGN','SYD',510),(38,'SYD','SGN',510),
-      (39,'HAN','SVO',600),(40,'SVO','HAN',600),
-      (41,'SGN','SVO',620),(42,'SVO','SGN',620),
-      (43,'HAN','MAN',780),(44,'MAN','HAN',780),
-      (45,'SGN','MAN',800),(46,'MAN','SGN',800)
-    ) R(RouteID, Di, Den, Phut)
-),
-Seq AS
-(
-    SELECT n FROM (VALUES
-        (1),
-        (2),
-        (3),
-        (4),
-        (5),
-        (6),
-        (7),
-        (8),
-        (9),
-        (10),
-        (11),
-        (12),
-        (13),
-        (14),
-        (15),
-        (16),
-        (17),
-        (18),
-        (19),
-        (20),
-        (21),
-        (22),
-        (23),
-        (24),
-        (25),
-        (26),
-        (27),
-        (28),
-        (29),
-        (30),
-        (31),
-        (32),
-        (33),
-        (34),
-        (35),
-        (36),
-        (37),
-        (38),
-        (39),
-        (40),
-        (41),
-        (42),
-        (43),
-        (44),
-        (45),
-        (46)
-    ) AS X(n)
-),
-Chosen AS
-(
-    SELECT n, (n - 1) % 46 + 1 AS RouteID,
-           DATEADD(DAY, (n - 1) % 28 + 1, CONVERT(DATE,GETDATE())) AS NgayBay,
-           ((n * 3) % 12 + 6) AS GioBay,
-           ((n * 7) % 4) + 1 AS MayBayID
-    FROM Seq
-)
+-- 46 chuyến bay mẫu viết tay
 INSERT INTO CHUYENBAY
 (MaMayBay, MaSanBayDi, MaSanBayDen, NgayGioKhoiHanh, ThoiGianBayPhut, TrangThai, NguoiTao)
-SELECT c.MayBayID, r.Di, r.Den,
-       DATEADD(HOUR,c.GioBay,CONVERT(DATETIME2,c.NgayBay)),
-       r.Phut, N'Đang mở bán', 1
-FROM Chosen c
-JOIN Routes r ON r.RouteID = c.RouteID
+VALUES
+    (4,'HAN','SGN','2026-11-16T09:00:00',125,N'Đang mở bán',1),
+    (3,'SGN','HAN','2026-11-17T12:00:00',125,N'Đang mở bán',1),
+    (2,'HAN','DAD','2026-11-18T15:00:00',80,N'Đang mở bán',1),
+    (1,'DAD','HAN','2026-11-19T06:00:00',80,N'Đang mở bán',1),
+    (4,'HAN','PQC','2026-11-20T09:00:00',130,N'Đang mở bán',1),
+    (3,'PQC','HAN','2026-11-21T12:00:00',130,N'Đang mở bán',1),
+    (2,'SGN','DAD','2026-11-22T15:00:00',85,N'Đang mở bán',1),
+    (1,'DAD','SGN','2026-11-23T06:00:00',85,N'Đang mở bán',1),
+    (4,'SGN','PQC','2026-11-24T09:00:00',60,N'Đang mở bán',1),
+    (3,'PQC','SGN','2026-11-25T12:00:00',60,N'Đang mở bán',1),
+    (2,'HAN','CXR','2026-11-26T15:00:00',115,N'Đang mở bán',1),
+    (1,'CXR','HAN','2026-11-27T06:00:00',115,N'Đang mở bán',1),
+    (4,'SGN','DLI','2026-11-28T09:00:00',55,N'Đang mở bán',1),
+    (3,'DLI','SGN','2026-11-29T12:00:00',55,N'Đang mở bán',1),
+    (2,'HAN','VCA','2026-11-30T15:00:00',130,N'Đang mở bán',1),
+    (1,'VCA','HAN','2026-12-01T06:00:00',130,N'Đang mở bán',1),
+    (4,'HPH','VCA','2026-12-02T09:00:00',110,N'Đang mở bán',1),
+    (3,'VCA','HPH','2026-12-03T12:00:00',110,N'Đang mở bán',1),
+    (2,'HAN','NRT','2026-12-04T15:00:00',300,N'Đang mở bán',1),
+    (1,'NRT','HAN','2026-12-05T06:00:00',300,N'Đang mở bán',1),
+    (4,'SGN','NRT','2026-12-06T09:00:00',330,N'Đang mở bán',1),
+    (3,'NRT','SGN','2026-12-07T12:00:00',330,N'Đang mở bán',1),
+    (2,'HAN','ICN','2026-12-08T15:00:00',270,N'Đang mở bán',1),
+    (1,'ICN','HAN','2026-12-09T06:00:00',270,N'Đang mở bán',1),
+    (4,'SGN','ICN','2026-12-10T09:00:00',300,N'Đang mở bán',1),
+    (3,'ICN','SGN','2026-12-11T12:00:00',300,N'Đang mở bán',1),
+    (2,'HAN','HKG','2026-12-12T15:00:00',150,N'Đang mở bán',1),
+    (1,'HKG','HAN','2026-12-13T06:00:00',150,N'Đang mở bán',1),
+    (4,'SGN','HKG','2026-11-16T09:00:00',170,N'Đang mở bán',1),
+    (3,'HKG','SGN','2026-11-17T12:00:00',170,N'Đang mở bán',1),
+    (2,'HAN','SIN','2026-11-18T15:00:00',190,N'Đang mở bán',1),
+    (1,'SIN','HAN','2026-11-19T06:00:00',190,N'Đang mở bán',1),
+    (4,'SGN','SIN','2026-11-20T09:00:00',150,N'Đang mở bán',1),
+    (3,'SIN','SGN','2026-11-21T12:00:00',150,N'Đang mở bán',1),
+    (2,'HAN','SYD','2026-11-22T15:00:00',570,N'Đang mở bán',1),
+    (1,'SYD','HAN','2026-11-23T06:00:00',570,N'Đang mở bán',1),
+    (4,'SGN','SYD','2026-11-24T09:00:00',510,N'Đang mở bán',1),
+    (3,'SYD','SGN','2026-11-25T12:00:00',510,N'Đang mở bán',1),
+    (2,'HAN','SVO','2026-11-26T15:00:00',600,N'Đang mở bán',1),
+    (1,'SVO','HAN','2026-11-27T06:00:00',600,N'Đang mở bán',1),
+    (4,'SGN','SVO','2026-11-28T09:00:00',620,N'Đang mở bán',1),
+    (3,'SVO','SGN','2026-11-29T12:00:00',620,N'Đang mở bán',1),
+    (2,'HAN','MAN','2026-11-30T15:00:00',780,N'Đang mở bán',1),
+    (1,'MAN','HAN','2026-12-01T06:00:00',780,N'Đang mở bán',1),
+    (4,'SGN','MAN','2026-12-02T09:00:00',800,N'Đang mở bán',1),
+    (3,'MAN','SGN','2026-12-03T12:00:00',800,N'Đang mở bán',1);
 GO
 
-/* Create fares and seat state for every flight.
-   Economy fare is route-sensitive; premium and business are multipliers. */
+-- Giá vé mẫu viết tay
 INSERT INTO GIAVE (MaChuyenBay, MaHangVe, DonGia)
-SELECT cb.MaChuyenBay, hv.MaHangVe,
-       CONVERT(MONEY,
-         CASE
-           WHEN cb.MaSanBayDen IN ('NRT','ICN','HKG','SIN') OR cb.MaSanBayDi IN ('NRT','ICN','HKG','SIN')
-             THEN CASE WHEN hv.MaHangVe = 1 THEN 2500000 WHEN hv.MaHangVe = 2 THEN 4200000 ELSE 8500000 END
-           WHEN cb.MaSanBayDen IN ('SYD','SVO','MAN') OR cb.MaSanBayDi IN ('SYD','SVO','MAN')
-             THEN CASE WHEN hv.MaHangVe = 1 THEN 6500000 WHEN hv.MaHangVe = 2 THEN 9500000 ELSE 18000000 END
-           ELSE CASE WHEN hv.MaHangVe = 1 THEN 900000 WHEN hv.MaHangVe = 2 THEN 1500000 ELSE 2800000 END
-         END)
-FROM CHUYENBAY cb
-CROSS JOIN HANGVE hv
-WHERE hv.MaHangVe IN (1,2,3);
+VALUES
+    (1,1,900000),
+    (1,2,1500000),
+    (1,3,2800000),
+    (2,1,900000),
+    (2,2,1500000),
+    (2,3,2800000),
+    (3,1,900000),
+    (3,2,1500000),
+    (3,3,2800000),
+    (4,1,900000),
+    (4,2,1500000),
+    (4,3,2800000),
+    (5,1,900000),
+    (5,2,1500000),
+    (5,3,2800000),
+    (6,1,900000),
+    (6,2,1500000),
+    (6,3,2800000),
+    (7,1,900000),
+    (7,2,1500000),
+    (7,3,2800000),
+    (8,1,900000),
+    (8,2,1500000),
+    (8,3,2800000),
+    (9,1,900000),
+    (9,2,1500000),
+    (9,3,2800000),
+    (10,1,900000),
+    (10,2,1500000),
+    (10,3,2800000),
+    (11,1,900000),
+    (11,2,1500000),
+    (11,3,2800000),
+    (12,1,900000),
+    (12,2,1500000),
+    (12,3,2800000),
+    (13,1,900000),
+    (13,2,1500000),
+    (13,3,2800000),
+    (14,1,900000),
+    (14,2,1500000),
+    (14,3,2800000),
+    (15,1,900000),
+    (15,2,1500000),
+    (15,3,2800000),
+    (16,1,900000),
+    (16,2,1500000),
+    (16,3,2800000),
+    (17,1,900000),
+    (17,2,1500000),
+    (17,3,2800000),
+    (18,1,900000),
+    (18,2,1500000),
+    (18,3,2800000),
+    (19,1,2500000),
+    (19,2,4200000),
+    (19,3,8500000),
+    (20,1,2500000),
+    (20,2,4200000),
+    (20,3,8500000),
+    (21,1,2500000),
+    (21,2,4200000),
+    (21,3,8500000),
+    (22,1,2500000),
+    (22,2,4200000),
+    (22,3,8500000),
+    (23,1,2500000),
+    (23,2,4200000),
+    (23,3,8500000),
+    (24,1,2500000),
+    (24,2,4200000),
+    (24,3,8500000),
+    (25,1,2500000),
+    (25,2,4200000),
+    (25,3,8500000),
+    (26,1,2500000),
+    (26,2,4200000),
+    (26,3,8500000),
+    (27,1,2500000),
+    (27,2,4200000),
+    (27,3,8500000),
+    (28,1,2500000),
+    (28,2,4200000),
+    (28,3,8500000),
+    (29,1,2500000),
+    (29,2,4200000),
+    (29,3,8500000),
+    (30,1,2500000),
+    (30,2,4200000),
+    (30,3,8500000),
+    (31,1,2500000),
+    (31,2,4200000),
+    (31,3,8500000),
+    (32,1,2500000),
+    (32,2,4200000),
+    (32,3,8500000),
+    (33,1,2500000),
+    (33,2,4200000),
+    (33,3,8500000),
+    (34,1,2500000),
+    (34,2,4200000),
+    (34,3,8500000),
+    (35,1,6500000),
+    (35,2,9500000),
+    (35,3,18000000),
+    (36,1,6500000),
+    (36,2,9500000),
+    (36,3,18000000),
+    (37,1,6500000),
+    (37,2,9500000),
+    (37,3,18000000),
+    (38,1,6500000),
+    (38,2,9500000),
+    (38,3,18000000),
+    (39,1,6500000),
+    (39,2,9500000),
+    (39,3,18000000),
+    (40,1,6500000),
+    (40,2,9500000),
+    (40,3,18000000),
+    (41,1,6500000),
+    (41,2,9500000),
+    (41,3,18000000),
+    (42,1,6500000),
+    (42,2,9500000),
+    (42,3,18000000),
+    (43,1,6500000),
+    (43,2,9500000),
+    (43,3,18000000),
+    (44,1,6500000),
+    (44,2,9500000),
+    (44,3,18000000),
+    (45,1,6500000),
+    (45,2,9500000),
+    (45,3,18000000),
+    (46,1,6500000),
+    (46,2,9500000),
+    (46,3,18000000);
 GO
 
 INSERT INTO GHECHUYENBAY (MaChuyenBay, MaGhe, TrangThai)
@@ -564,7 +826,7 @@ FROM CHUYENBAY cb
 JOIN GHE g ON g.MaMayBay = cb.MaMayBay;
 GO
 
-/* Compact, internally consistent demo transactions: 10 orders, 12 tickets. */
+-- 10 đơn và 12 vé mẫu
 INSERT INTO DONDATVE
 (MaKHLienHe,MaTKNhanVien,MaKM,NgayDat,TongTienVe,TongTienDichVu,TienGiamKM,TongThanhToan,TrangThai)
 VALUES
@@ -580,57 +842,24 @@ VALUES
 (10,2,3,DATEADD(DAY,-4,SYSDATETIME()),873000,0,27000,873000,N'Đã thanh toán');
 GO
 
-DECLARE @SeedVe TABLE
-(
-    MaDon INT NOT NULL,
-    MaChuyenBay INT NOT NULL,
-    MaHangVe INT NOT NULL,
-    MaKH INT NOT NULL,
-    PhanTramGiamHang INT NOT NULL,
-    PhanTramGiamTet INT NOT NULL,
-    PhanTramGiamKhuHoi INT NOT NULL,
-    PhanTramGiamKM INT NOT NULL,
-    TongPhanTramGiam INT NOT NULL,
-    GiaGoc MONEY NOT NULL,
-    GiaThucTra MONEY NOT NULL,
-    TrangThai NVARCHAR(20) NOT NULL
-);
-
-INSERT INTO @SeedVe VALUES
-(1,1,1,1,0,0,0,0,0,900000,900000,N'Đã đặt'),
-(2,2,1,2,0,0,0,0,0,900000,900000,N'Đã đặt'),
-(3,3,1,3,0,0,0,0,0,900000,900000,N'Đã đặt'),
-(4,4,1,4,0,0,0,0,0,900000,900000,N'Đã đặt'),
-(5,5,1,5,0,0,10,0,10,900000,810000,N'Đã đặt'),
-(5,6,1,5,0,0,10,0,10,900000,810000,N'Đã đặt'),
-(6,19,1,6,0,0,10,0,10,2500000,2250000,N'Đã đặt'),
-(6,20,1,6,0,0,10,0,10,2500000,2250000,N'Đã đặt'),
-(7,7,1,7,0,0,0,0,0,900000,900000,N'Đã đặt'),
-(8,8,1,8,0,0,0,0,0,900000,900000,N'Đã đặt'),
-(9,9,1,9,0,0,0,0,0,900000,900000,N'Đã hủy'),
-(10,10,1,10,0,0,0,3,3,900000,873000,N'Đã đặt');
-
+-- 12 vé mẫu viết tay
 INSERT INTO VE
 (MaDon,MaChuyenBay,MaGhe,MaHangVe,MaKH,MaNguoiGiamHo,GiaGoc,
  PhanTramGiamHang,PhanTramGiamTet,PhanTramGiamKhuHoi,PhanTramGiamKM,
  TongPhanTramGiam,TienGiam,GiaThucTra,TrangThai)
-SELECT sv.MaDon,sv.MaChuyenBay,g.MaGhe,sv.MaHangVe,sv.MaKH,NULL,sv.GiaGoc,
-       sv.PhanTramGiamHang,sv.PhanTramGiamTet,sv.PhanTramGiamKhuHoi,sv.PhanTramGiamKM,
-       sv.TongPhanTramGiam,sv.GiaGoc-sv.GiaThucTra,sv.GiaThucTra,sv.TrangThai
-FROM @SeedVe sv
-JOIN CHUYENBAY cb ON cb.MaChuyenBay=sv.MaChuyenBay
-CROSS APPLY
-(
-    SELECT TOP 1 gg.MaGhe
-    FROM GHE gg
-    WHERE gg.MaMayBay=cb.MaMayBay AND gg.MaHangVe=sv.MaHangVe
-      AND NOT EXISTS
-      (
-        SELECT 1 FROM VE vx
-        WHERE vx.MaChuyenBay=sv.MaChuyenBay AND vx.MaGhe=gg.MaGhe AND vx.TrangThai<>N'Đã hủy'
-      )
-    ORDER BY gg.MaGhe
-) g;
+VALUES
+    (1,1,189,1,1,NULL,900000,0,0,0,0,0,0,900000,N'Đã đặt'),
+    (2,2,133,1,2,NULL,900000,0,0,0,0,0,0,900000,N'Đã đặt'),
+    (3,3,77,1,3,NULL,900000,0,0,0,0,0,0,900000,N'Đã đặt'),
+    (4,4,21,1,4,NULL,900000,0,0,0,0,0,0,900000,N'Đã đặt'),
+    (5,5,189,1,5,NULL,900000,0,0,10,0,10,90000,810000,N'Đã đặt'),
+    (5,6,133,1,5,NULL,900000,0,0,10,0,10,90000,810000,N'Đã đặt'),
+    (6,19,77,1,6,NULL,2500000,0,0,10,0,10,250000,2250000,N'Đã đặt'),
+    (6,20,21,1,6,NULL,2500000,0,0,10,0,10,250000,2250000,N'Đã đặt'),
+    (7,7,77,1,7,NULL,900000,0,0,0,0,0,0,900000,N'Đã đặt'),
+    (8,8,21,1,8,NULL,900000,0,0,0,0,0,0,900000,N'Đã đặt'),
+    (9,9,189,1,9,NULL,900000,0,0,0,0,0,0,900000,N'Đã hủy'),
+    (10,10,133,1,10,NULL,900000,0,0,0,3,3,27000,873000,N'Đã đặt');
 GO
 
 INSERT INTO VEDICHVU(MaVe,MaDichVu,SoLuong,DonGia)
@@ -670,27 +899,47 @@ UPDATE DONDATVE SET TrangThai=N'Đã hủy' WHERE MaDon=9;
 UPDATE KHUYENMAI SET SoLuotDaDung=1 WHERE MaKM=3;
 
 
-/* Reconcile sample customer spending and membership dates with successful purchases/refunds. */
-;WITH PaymentByOrder AS
+-- Cập nhật chi tiêu mẫu theo giao dịch
+CREATE TABLE #ThanhToanDau
 (
-    SELECT MaDon, MIN(NgayThanhToan) AS NgayThanhToanDau
-    FROM THANHTOAN
-    WHERE TrangThai=N'Thành công'
-    GROUP BY MaDon
-), SpendByCustomer AS
+    MaDon INT PRIMARY KEY,
+    NgayThanhToanDau DATETIME2
+);
+INSERT INTO #ThanhToanDau(MaDon,NgayThanhToanDau)
+SELECT MaDon,MIN(NgayThanhToan)
+FROM THANHTOAN
+WHERE TrangThai=N'Thành công'
+GROUP BY MaDon;
+
+CREATE TABLE #ChiTieuMau
 (
-    SELECT v.MaKH,
-           SUM(CASE WHEN p.MaDon IS NOT NULL
-                    THEN v.GiaThucTra+ISNULL(dv.TienDV,0)-ISNULL(ref.TienHoan,0)
-                    ELSE 0 END) AS TongChiTieu,
-           MIN(p.NgayThanhToanDau) AS NgayDauTien
-    FROM VE v
-    JOIN DONDATVE dd ON dd.MaDon=v.MaDon
-    LEFT JOIN PaymentByOrder p ON p.MaDon=dd.MaDon
-    OUTER APPLY (SELECT SUM(vd.ThanhTien) AS TienDV FROM VEDICHVU vd WHERE vd.MaVe=v.MaVe) dv
-    OUTER APPLY (SELECT SUM(h.TienHoan) AS TienHoan FROM HUYVE h WHERE h.MaVe=v.MaVe) ref
-    GROUP BY v.MaKH
-)
+    MaKH INT PRIMARY KEY,
+    TongChiTieu MONEY,
+    NgayDauTien DATETIME2 NULL
+);
+INSERT INTO #ChiTieuMau(MaKH,TongChiTieu,NgayDauTien)
+SELECT v.MaKH,
+       SUM(CASE WHEN p.MaDon IS NOT NULL
+                THEN v.GiaThucTra+ISNULL(dv.TienDV,0)-ISNULL(h.TienHoan,0)
+                ELSE 0 END),
+       MIN(p.NgayThanhToanDau)
+FROM VE v
+JOIN DONDATVE dd ON dd.MaDon=v.MaDon
+LEFT JOIN #ThanhToanDau p ON p.MaDon=dd.MaDon
+LEFT JOIN
+(
+    SELECT MaVe,SUM(ThanhTien) AS TienDV
+    FROM VEDICHVU
+    GROUP BY MaVe
+) dv ON dv.MaVe=v.MaVe
+LEFT JOIN
+(
+    SELECT MaVe,SUM(TienHoan) AS TienHoan
+    FROM HUYVE
+    GROUP BY MaVe
+) h ON h.MaVe=v.MaVe
+GROUP BY v.MaKH;
+
 UPDATE kh
 SET TongChiTieu=ISNULL(x.TongChiTieu,0),
     NgayGiaoDichDauTien=x.NgayDauTien,
@@ -700,7 +949,10 @@ SET TongChiTieu=ISNULL(x.TongChiTieu,0),
                                WHERE h.DiemChiTieuToiThieu<=ISNULL(x.TongChiTieu,0)
                                ORDER BY h.DiemChiTieuToiThieu DESC),1) END
 FROM KHACHHANG kh
-LEFT JOIN SpendByCustomer x ON x.MaKH=kh.MaKH;
+LEFT JOIN #ChiTieuMau x ON x.MaKH=kh.MaKH;
+
+DROP TABLE #ChiTieuMau;
+DROP TABLE #ThanhToanDau;
 GO
 
 
@@ -733,7 +985,7 @@ VALUES
 GO
 
 
-/* VIEW: V_CHUYENBAYCHITIET */
+-- View chi tiết chuyến bay
 CREATE VIEW V_CHUYENBAYCHITIET
 AS
 SELECT cb.MaChuyenBay, sb1.MaSanBay AS MaSanBayDi, sb1.TenSanBay AS SanBayDi,
@@ -744,20 +996,13 @@ SELECT cb.MaChuyenBay, sb1.MaSanBay AS MaSanBayDi, sb1.TenSanBay AS SanBayDi,
        ISNULL(gv.GiaThapNhat,0) AS GiaThapNhat,
        ISNULL(gc.SoGheTrong,0) AS SoGheTrong
 FROM CHUYENBAY cb
-JOIN SANBAY sb1 ON cb.MaSanBayDi = sb1.MaSanBay
-JOIN SANBAY sb2 ON cb.MaSanBayDen = sb2.MaSanBay
-JOIN MAYBAY mb ON cb.MaMayBay = mb.MaMayBay
-OUTER APPLY
-(
-    SELECT MIN(DonGia) AS GiaThapNhat
-    FROM GIAVE WHERE MaChuyenBay = cb.MaChuyenBay
-) gv
-OUTER APPLY
-(
-    SELECT COUNT(*) AS SoGheTrong
-    FROM GHECHUYENBAY
-    WHERE MaChuyenBay = cb.MaChuyenBay AND TrangThai = N'Trống'
-) gc;
+JOIN SANBAY sb1 ON cb.MaSanBayDi=sb1.MaSanBay
+JOIN SANBAY sb2 ON cb.MaSanBayDen=sb2.MaSanBay
+JOIN MAYBAY mb ON cb.MaMayBay=mb.MaMayBay
+LEFT JOIN (SELECT MaChuyenBay,MIN(DonGia) AS GiaThapNhat FROM GIAVE GROUP BY MaChuyenBay) gv
+       ON gv.MaChuyenBay=cb.MaChuyenBay
+LEFT JOIN (SELECT MaChuyenBay,COUNT(*) AS SoGheTrong FROM GHECHUYENBAY WHERE TrangThai=N'Trống' GROUP BY MaChuyenBay) gc
+       ON gc.MaChuyenBay=cb.MaChuyenBay;
 GO
 
 /* VIEW: V_VECHITIET */
@@ -794,26 +1039,26 @@ WHERE tt.TrangThai IN (N'Thành công',N'Đã hoàn')
 GROUP BY YEAR(tt.NgayThanhToan), MONTH(tt.NgayThanhToan);
 GO
 
-/* VIEW: V_DOANHTHUTHEOCHUYENBAY */
+-- View doanh thu theo chuyến bay
 CREATE VIEW V_DOANHTHUTHEOCHUYENBAY
 AS
 SELECT cb.MaChuyenBay, sb1.ThanhPho AS ThanhPhoDi, sb2.ThanhPho AS ThanhPhoDen,
        cb.NgayGioKhoiHanh,
-       COUNT(CASE WHEN v.TrangThai <> N'Đã hủy' THEN 1 END) AS SoVeConHieuLuc,
-       SUM(CASE WHEN v.TrangThai <> N'Đã hủy' THEN v.GiaThucTra ELSE 0 END) AS DoanhThuVe,
+       COUNT(CASE WHEN v.TrangThai<>N'Đã hủy' THEN 1 END) AS SoVeConHieuLuc,
+       SUM(CASE WHEN v.TrangThai<>N'Đã hủy' THEN v.GiaThucTra ELSE 0 END) AS DoanhThuVe,
        ISNULL(dv.TongTienDichVu,0) AS DoanhThuDichVu
 FROM CHUYENBAY cb
-JOIN SANBAY sb1 ON cb.MaSanBayDi = sb1.MaSanBay
-JOIN SANBAY sb2 ON cb.MaSanBayDen = sb2.MaSanBay
-LEFT JOIN VE v ON cb.MaChuyenBay = v.MaChuyenBay
-OUTER APPLY
+JOIN SANBAY sb1 ON cb.MaSanBayDi=sb1.MaSanBay
+JOIN SANBAY sb2 ON cb.MaSanBayDen=sb2.MaSanBay
+LEFT JOIN VE v ON cb.MaChuyenBay=v.MaChuyenBay
+LEFT JOIN
 (
-    SELECT SUM(vd.ThanhTien) AS TongTienDichVu
-    FROM VE v2
-    JOIN VEDICHVU vd ON vd.MaVe = v2.MaVe
-    WHERE v2.MaChuyenBay = cb.MaChuyenBay AND v2.TrangThai <> N'Đã hủy'
-) dv
-GROUP BY cb.MaChuyenBay, sb1.ThanhPho, sb2.ThanhPho, cb.NgayGioKhoiHanh, dv.TongTienDichVu;
+    SELECT v2.MaChuyenBay,SUM(vd.ThanhTien) AS TongTienDichVu
+    FROM VE v2 JOIN VEDICHVU vd ON vd.MaVe=v2.MaVe
+    WHERE v2.TrangThai<>N'Đã hủy'
+    GROUP BY v2.MaChuyenBay
+) dv ON dv.MaChuyenBay=cb.MaChuyenBay
+GROUP BY cb.MaChuyenBay,sb1.ThanhPho,sb2.ThanhPho,cb.NgayGioKhoiHanh,dv.TongTienDichVu;
 GO
 
 /* VIEW: V_KHACHHANGTHANHVIEN */
@@ -845,7 +1090,7 @@ JOIN GHE g ON gcb.MaGhe = g.MaGhe
 JOIN HANGVE hv ON g.MaHangVe = hv.MaHangVe;
 GO
 
-/* VIEW: V_LICHSUGIAODICH */
+-- View lịch sử giao dịch
 CREATE VIEW V_LICHSUGIAODICH
 AS
 SELECT dd.MaDon, dd.NgayDat, dd.MaKHLienHe, kh.HoTen AS KhachHangLienHe,
@@ -853,24 +1098,21 @@ SELECT dd.MaDon, dd.NgayDat, dd.MaKHLienHe, kh.HoTen AS KhachHangLienHe,
        ISNULL(tt.TongDaThu,0) AS TongDaThu,
        ISNULL(hv.TongTienHoan,0) AS TongTienHoan
 FROM DONDATVE dd
-JOIN KHACHHANG kh ON dd.MaKHLienHe = kh.MaKH
-OUTER APPLY
+JOIN KHACHHANG kh ON dd.MaKHLienHe=kh.MaKH
+LEFT JOIN (SELECT MaDon,SUM(SoTien) AS TongDaThu FROM THANHTOAN WHERE TrangThai=N'Thành công' GROUP BY MaDon) tt
+       ON tt.MaDon=dd.MaDon
+LEFT JOIN
 (
-    SELECT SUM(SoTien) AS TongDaThu
-    FROM THANHTOAN
-    WHERE MaDon = dd.MaDon AND TrangThai = N'Thành công'
-) tt
-OUTER APPLY
-(
-    SELECT SUM(HUYVE.TienHoan) AS TongTienHoan
-    FROM HUYVE
-    JOIN VE ON VE.MaVe = HUYVE.MaVe
-    WHERE VE.MaDon = dd.MaDon
-) hv;
+    SELECT v.MaDon,SUM(h.TienHoan) AS TongTienHoan
+    FROM HUYVE h JOIN VE v ON v.MaVe=h.MaVe
+    GROUP BY v.MaDon
+) hv ON hv.MaDon=dd.MaDon;
 GO
 
 
-/* PROCEDURE: sp_DANGNHAP */
+-- Thủ tục đăng nhập
+
+-- (4) thủ tục đơn giản: đăng nhập
 CREATE PROCEDURE sp_DANGNHAP
     @TenDangNhap VARCHAR(50),
     @MatKhau VARCHAR(100)
@@ -885,8 +1127,7 @@ BEGIN
 END;
 GO
 
-
-/* PROCEDURE: sp_TIMKIEMCHUYENBAY */
+-- (4) thủ tục đơn giản: tìm chuyến bay
 CREATE PROCEDURE sp_TIMKIEMCHUYENBAY
     @MaSanBayDi CHAR(3),
     @MaSanBayDen CHAR(3),
@@ -907,7 +1148,7 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_TAOCHUYENBAY */
+-- (4) thủ tục đơn giản: tạo chuyến bay
 CREATE PROCEDURE sp_TAOCHUYENBAY
     @MaMayBay INT,
     @MaSanBayDi CHAR(3),
@@ -922,7 +1163,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- TRANSACTION: TAOCHUYENBAY - Chi COMMIT khi cac buoc thanh cong.
+        -- bắt đầu giao dịch tạo chuyến bay
         BEGIN TRANSACTION;
         IF @NgayGioKhoiHanh <= SYSDATETIME()
             THROW 50010, N'Giờ khởi hành phải ở tương lai.', 1;
@@ -958,7 +1199,7 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_TAOMAYBAYVAGHE */
+-- (4) thủ tục đơn giản: tạo máy bay và ghế
 CREATE PROCEDURE sp_TAOMAYBAYVAGHE
     @SoHieu VARCHAR(20),
     @HangSanXuat NVARCHAR(60),
@@ -980,7 +1221,7 @@ BEGIN
         THROW 50021, N'Số hiệu máy bay đã tồn tại.', 1;
 
     BEGIN TRY
-        -- TRANSACTION: TAOMAYBAYVAGHE - Chi COMMIT khi cac buoc thanh cong.
+        -- bắt đầu giao dịch tạo máy bay
         BEGIN TRANSACTION;
         INSERT INTO MAYBAY(SoHieu,HangSanXuat,LoaiMayBay)
         VALUES(@SoHieu,@HangSanXuat,@LoaiMayBay);
@@ -993,10 +1234,20 @@ BEGIN
                 CASE WHEN @Hang <= @SoHangThuongGia THEN 3
                      WHEN @Hang <= @SoHangThuongGia + @SoHangPTDB THEN 2
                      ELSE 1 END;
-            INSERT INTO GHE(MaMayBay,SoGhe,SoHang,CotGhe,MaHangVe)
-            SELECT @MaMayBay,CONCAT(@Hang,C.Cot),@Hang,C.Cot,@MaHangVe
-            FROM (VALUES ('A'),('B'),('C'),('D'),('E'),('F')) AS C(Cot)
-            WHERE @MaHangVe <> 3 OR C.Cot IN ('A','C','D','F');
+            IF @MaHangVe=3
+                INSERT INTO GHE(MaMayBay,SoGhe,SoHang,CotGhe,MaHangVe)
+                VALUES (@MaMayBay,CONCAT(@Hang,'A'),@Hang,'A',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'C'),@Hang,'C',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'D'),@Hang,'D',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'F'),@Hang,'F',@MaHangVe);
+            ELSE
+                INSERT INTO GHE(MaMayBay,SoGhe,SoHang,CotGhe,MaHangVe)
+                VALUES (@MaMayBay,CONCAT(@Hang,'A'),@Hang,'A',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'B'),@Hang,'B',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'C'),@Hang,'C',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'D'),@Hang,'D',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'E'),@Hang,'E',@MaHangVe),
+                       (@MaMayBay,CONCAT(@Hang,'F'),@Hang,'F',@MaHangVe);
 
             SET @Hang = @Hang + 1;
         END;
@@ -1010,9 +1261,99 @@ BEGIN
 END;
 GO
 
-/* NGHIEP VU: sp_DATVE nhan thong tin mot hoac hai ve bang tham so thong thuong.
-   Dich vu duoc them bang INSERT co tham so tu C# va cap nhat tong tien don. Tong giam gia toi da 30%. */
-/* PROCEDURE: sp_DATVE */
+-- (5) tính thử giá vé
+CREATE PROCEDURE sp_TINHTHUGIAVE
+    @MaChuyenBay INT,
+    @MaHangVe INT,
+    @MaKH INT,
+    @ApDungTet BIT = 0,
+    @ApDungKhuHoi BIT = 0,
+    @MaKM INT = NULL,
+    @MaChuyenBayKhuHoi INT = NULL,
+    @SoVeTetTrongDon INT = 1,
+    @MaKHLienHe INT = NULL   -- khách liên hệ của đơn; NULL thì coi hành khách là khách liên hệ
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Bước 1: khai báo biến
+    DECLARE @NgayHienTai DATE=CONVERT(DATE,GETDATE());
+    DECLARE @GiaGoc MONEY,@TienGiam MONEY=0,@GiaThucTra MONEY=0;
+    DECLARE @GiamHang INT=0,@GiamTet INT=0,@GiamKhuHoi INT=0,@GiamKM INT=0,@TongGiam INT=0;
+    DECLARE @PhanTramKM INT=0,@GiamToiDa MONEY=NULL,@TenKM NVARCHAR(100)=NULL;
+
+    -- Bước 2: kiểm tra dữ liệu chính
+    IF NOT EXISTS(SELECT 1 FROM KHACHHANG WHERE MaKH=@MaKH)
+        THROW 50071, N'Khách hàng không tồn tại.', 1;
+    IF NOT EXISTS(SELECT 1 FROM CHUYENBAY WHERE MaChuyenBay=@MaChuyenBay AND TrangThai=N'Đang mở bán' AND NgayGioKhoiHanh>SYSDATETIME())
+        THROW 50072, N'Chuyến bay không tồn tại, đã đóng hoặc đã khởi hành.', 1;
+
+    SELECT @GiaGoc=gv.DonGia
+    FROM GIAVE gv JOIN HANGVE hv ON hv.MaHangVe=gv.MaHangVe
+    WHERE gv.MaChuyenBay=@MaChuyenBay AND gv.MaHangVe=@MaHangVe AND hv.TrangThai=N'Hoạt động';
+    IF @GiaGoc IS NULL
+        THROW 50073, N'Không tìm thấy giá cho hạng vé đã chọn.', 1;
+
+    -- Bước 3: giảm theo hạng thành viên
+    SELECT @GiamHang=CASE WHEN kh.NgayKetThucThanhVien IS NOT NULL AND kh.NgayKetThucThanhVien<SYSDATETIME()
+                          THEN 0 ELSE ISNULL(htv.PhanTramGiam,0) END
+    FROM KHACHHANG kh JOIN HANGTHANHVIEN htv ON htv.MaHangTV=kh.MaHangTV
+    WHERE kh.MaKH=@MaKH;
+
+    -- Bước 4: ưu đãi Tết đã bỏ, giữ tham số để không làm hỏng C# cũ
+    SET @GiamTet=0;
+
+    -- Bước 5: SQL tự nhận diện khứ hồi nếu có chuyến chiều về
+    IF @MaChuyenBayKhuHoi IS NOT NULL AND EXISTS
+    (
+        SELECT 1 FROM CHUYENBAY a JOIN CHUYENBAY b ON b.MaChuyenBay=@MaChuyenBayKhuHoi
+        WHERE a.MaChuyenBay=@MaChuyenBay
+          AND a.MaSanBayDi=b.MaSanBayDen AND a.MaSanBayDen=b.MaSanBayDi
+          AND b.TrangThai=N'Đang mở bán' AND b.NgayGioKhoiHanh>SYSDATETIME()
+    )
+        SET @GiamKhuHoi=10;
+
+    -- Bước 6: kiểm tra khuyến mãi
+    IF @MaKM IS NOT NULL
+    BEGIN
+        SELECT @TenKM=TenKM,@PhanTramKM=PhanTramGiam,@GiamToiDa=GiamToiDa
+        FROM KHUYENMAI
+        WHERE MaKM=@MaKM AND TrangThai=N'Hoạt động'
+          AND @NgayHienTai BETWEEN NgayBatDau AND NgayKetThuc
+          AND (SoLuotToiDa IS NULL OR SoLuotDaDung<SoLuotToiDa);
+
+        IF @TenKM IS NULL
+            THROW 50079, N'Mã khuyến mãi không hợp lệ, hết hạn hoặc hết lượt.', 1;
+        IF @TenKM=N'Ưu đãi Tết'
+            THROW 50080, N'Ưu đãi Tết được áp dụng riêng, không chọn trong danh sách khuyến mãi.', 1;
+        -- Cùng quy tắc với sp_TAODONNHIEUVE: xét theo khách liên hệ của đơn
+        IF @TenKM=N'Ưu đãi khách hàng mới' AND EXISTS(SELECT 1 FROM DONDATVE WHERE MaKHLienHe=ISNULL(@MaKHLienHe,@MaKH))
+            THROW 50081, N'Ưu đãi khách hàng mới chỉ áp dụng cho lần đặt vé đầu tiên.', 1;
+
+        IF @GiamToiDa IS NULL SET @GiamKM=@PhanTramKM;
+        ELSE IF @GiaGoc*@PhanTramKM/100.0>@GiamToiDa SET @GiamKM=CONVERT(INT,@GiamToiDa*100.0/@GiaGoc);
+        ELSE SET @GiamKM=@PhanTramKM;
+    END;
+
+    -- Bước 7: tổng giảm tối đa 30%
+    SET @TongGiam=@GiamHang+@GiamKhuHoi+@GiamKM;
+    IF @TongGiam>30 SET @TongGiam=30;
+    IF @TongGiam<0 SET @TongGiam=0;
+    SET @TienGiam=ROUND(@GiaGoc*@TongGiam/100.0,2);
+    SET @GiaThucTra=@GiaGoc-@TienGiam;
+
+    SELECT @GiaGoc AS GiaGoc,
+           @GiamHang AS PhanTramGiamHang,
+           @GiamTet AS PhanTramGiamTet,
+           @GiamKhuHoi AS PhanTramGiamKhuHoi,
+           @GiamKM AS PhanTramGiamKM,
+           @TongGiam AS PhanTramGiam,
+           @TienGiam AS TienGiam,
+           @GiaThucTra AS GiaThucTra;
+END;
+GO
+
+-- (6) đặt vé, giữ giao diện cũ
 CREATE PROCEDURE sp_DATVE
     @MaKHLienHe INT,
     @MaTKNhanVien INT,
@@ -1033,289 +1374,132 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @DanhSachVe TABLE
+    -- Bước 1: gom vé vào bảng tạm
+    CREATE TABLE #DanhSachVe
     (
-        SoThuTuVe INT PRIMARY KEY,
-        MaChuyenBay INT NOT NULL,
-        MaGhe INT NOT NULL,
-        MaHangVe INT NOT NULL,
-        MaKH INT NOT NULL,
-        MaNguoiGiamHo INT NULL
+        STT INT PRIMARY KEY, MaChuyenBay INT, MaGhe INT, MaHangVe INT, MaKH INT, MaNguoiGiamHo INT NULL
     );
-
-    INSERT INTO @DanhSachVe(SoThuTuVe, MaChuyenBay, MaGhe, MaHangVe, MaKH, MaNguoiGiamHo)
-    VALUES (1, @MaChuyenBay1, @MaGhe1, @MaHangVe1, @MaKH1, @MaNguoiGiamHo1);
-
+    INSERT INTO #DanhSachVe VALUES(1,@MaChuyenBay1,@MaGhe1,@MaHangVe1,@MaKH1,@MaNguoiGiamHo1);
     IF @MaKH2 IS NOT NULL OR @MaChuyenBay2 IS NOT NULL OR @MaGhe2 IS NOT NULL OR @MaHangVe2 IS NOT NULL OR @MaNguoiGiamHo2 IS NOT NULL
     BEGIN
         IF @MaKH2 IS NULL OR @MaChuyenBay2 IS NULL OR @MaGhe2 IS NULL OR @MaHangVe2 IS NULL
             THROW 50030, N'Thông tin vé thứ hai chưa đầy đủ.', 1;
-
-        INSERT INTO @DanhSachVe(SoThuTuVe, MaChuyenBay, MaGhe, MaHangVe, MaKH, MaNguoiGiamHo)
-        VALUES (2, @MaChuyenBay2, @MaGhe2, @MaHangVe2, @MaKH2, @MaNguoiGiamHo2);
+        INSERT INTO #DanhSachVe VALUES(2,@MaChuyenBay2,@MaGhe2,@MaHangVe2,@MaKH2,@MaNguoiGiamHo2);
     END;
-    IF NOT EXISTS (SELECT 1 FROM KHACHHANG WHERE MaKH=@MaKHLienHe)
+
+    -- Bước 2: kiểm tra khách hàng, nhân viên, chuyến bay, ghế
+    IF NOT EXISTS(SELECT 1 FROM KHACHHANG WHERE MaKH=@MaKHLienHe)
         THROW 50030, N'Khách hàng liên hệ không tồn tại.', 1;
-    IF NOT EXISTS (SELECT 1 FROM TAIKHOAN WHERE MaTK=@MaTKNhanVien AND TrangThai=N'Hoạt động')
+    IF NOT EXISTS(SELECT 1 FROM TAIKHOAN WHERE MaTK=@MaTKNhanVien AND TrangThai=N'Hoạt động')
         THROW 50030, N'Tài khoản nhân viên không hợp lệ hoặc đã bị khóa.', 1;
-    IF EXISTS
-    (
-        SELECT 1 FROM @DanhSachVe d
-        LEFT JOIN KHACHHANG kh ON kh.MaKH=d.MaKH
-        LEFT JOIN KHACHHANG ng ON ng.MaKH=d.MaNguoiGiamHo
-        WHERE kh.MaKH IS NULL OR (d.MaNguoiGiamHo IS NOT NULL AND ng.MaKH IS NULL)
-    )
+    IF EXISTS(SELECT 1 FROM #DanhSachVe d LEFT JOIN KHACHHANG kh ON kh.MaKH=d.MaKH LEFT JOIN KHACHHANG ng ON ng.MaKH=d.MaNguoiGiamHo WHERE kh.MaKH IS NULL OR (d.MaNguoiGiamHo IS NOT NULL AND ng.MaKH IS NULL))
         THROW 50030, N'Hành khách hoặc người giám hộ không tồn tại.', 1;
-    IF EXISTS
-    (
-        SELECT 1 FROM @DanhSachVe d
-        JOIN HANGVE hv ON hv.MaHangVe=d.MaHangVe
-        WHERE hv.TrangThai<>N'Hoạt động'
-    )
+    IF EXISTS(SELECT 1 FROM #DanhSachVe d JOIN HANGVE hv ON hv.MaHangVe=d.MaHangVe WHERE hv.TrangThai<>N'Hoạt động')
         THROW 50030, N'Hạng vé đã ngừng hoạt động.', 1;
-    IF EXISTS
-    (
-        SELECT 1 FROM @DanhSachVe d
-        LEFT JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay
-        WHERE cb.MaChuyenBay IS NULL OR cb.TrangThai <> N'Đang mở bán'
-           OR cb.NgayGioKhoiHanh <= SYSDATETIME()
-    )
+    IF EXISTS(SELECT 1 FROM #DanhSachVe d LEFT JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay WHERE cb.MaChuyenBay IS NULL OR cb.TrangThai<>N'Đang mở bán' OR cb.NgayGioKhoiHanh<=SYSDATETIME())
         THROW 50031, N'Chuyến bay không tồn tại, không còn mở bán hoặc đã khởi hành.', 1;
-    IF EXISTS
-    (
-        SELECT 1 FROM @DanhSachVe d
-        LEFT JOIN GHE g ON g.MaGhe=d.MaGhe
-        LEFT JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay
-        LEFT JOIN GIAVE gv ON gv.MaChuyenBay=d.MaChuyenBay AND gv.MaHangVe=d.MaHangVe
-        WHERE g.MaGhe IS NULL OR cb.MaChuyenBay IS NULL OR gv.MaChuyenBay IS NULL
-           OR g.MaMayBay <> cb.MaMayBay OR g.MaHangVe <> d.MaHangVe
-    )
+    IF EXISTS(SELECT 1 FROM #DanhSachVe d LEFT JOIN GHE g ON g.MaGhe=d.MaGhe LEFT JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay LEFT JOIN GIAVE gv ON gv.MaChuyenBay=d.MaChuyenBay AND gv.MaHangVe=d.MaHangVe WHERE g.MaGhe IS NULL OR cb.MaChuyenBay IS NULL OR gv.MaChuyenBay IS NULL OR g.MaMayBay<>cb.MaMayBay OR g.MaHangVe<>d.MaHangVe)
         THROW 50032, N'Ghế, máy bay hoặc hạng vé không hợp lệ.', 1;
+
+    -- Bước 3: kiểm tra tuổi và người giám hộ
     IF EXISTS
     (
-        SELECT 1
-        FROM @DanhSachVe d
-        JOIN KHACHHANG kh ON kh.MaKH=d.MaKH
-        JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay
+        SELECT 1 FROM #DanhSachVe d JOIN KHACHHANG kh ON kh.MaKH=d.MaKH JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay
         WHERE DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
               - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),kh.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END < 16
-          AND (d.MaNguoiGiamHo IS NULL OR d.MaNguoiGiamHo=d.MaKH
-               OR NOT EXISTS
-               (
-                   SELECT 1 FROM KHACHHANG ng
-                   WHERE ng.MaKH=d.MaNguoiGiamHo
-                     AND DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
-                         - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),ng.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END >= 18
-               ))
+          AND (d.MaNguoiGiamHo IS NULL OR d.MaNguoiGiamHo=d.MaKH OR NOT EXISTS
+               (SELECT 1 FROM KHACHHANG ng WHERE ng.MaKH=d.MaNguoiGiamHo
+                  AND DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
+                    - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),ng.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END >=18))
     )
         THROW 50033, N'Hành khách dưới 16 tuổi cần người giám hộ từ 18 tuổi.', 1;
-    IF EXISTS (SELECT MaChuyenBay,MaGhe FROM @DanhSachVe GROUP BY MaChuyenBay,MaGhe HAVING COUNT(*)>1)
+    IF EXISTS(SELECT MaChuyenBay,MaGhe FROM #DanhSachVe GROUP BY MaChuyenBay,MaGhe HAVING COUNT(*)>1)
         THROW 50034, N'Đơn có ghế bị chọn trùng.', 1;
-    IF EXISTS (SELECT MaChuyenBay,MaKH FROM @DanhSachVe GROUP BY MaChuyenBay,MaKH HAVING COUNT(*)>1)
+    IF EXISTS(SELECT MaChuyenBay,MaKH FROM #DanhSachVe GROUP BY MaChuyenBay,MaKH HAVING COUNT(*)>1)
         THROW 50035, N'Một hành khách không thể có hai vé cùng chuyến bay.', 1;
 
     BEGIN TRY
-        -- TRANSACTION: DATVE - Chi COMMIT khi cac buoc thanh cong.
         BEGIN TRANSACTION;
 
-        IF EXISTS
-        (
-            SELECT 1 FROM @DanhSachVe d
-            LEFT JOIN GHECHUYENBAY gc WITH (UPDLOCK,HOLDLOCK)
-              ON gc.MaChuyenBay=d.MaChuyenBay AND gc.MaGhe=d.MaGhe
-            WHERE gc.MaGhe IS NULL OR gc.TrangThai <> N'Trống'
-        )
+        -- Bước 4: khóa và kiểm tra ghế
+        IF EXISTS(SELECT 1 FROM #DanhSachVe d LEFT JOIN GHECHUYENBAY gc WITH(UPDLOCK,HOLDLOCK) ON gc.MaChuyenBay=d.MaChuyenBay AND gc.MaGhe=d.MaGhe WHERE gc.MaGhe IS NULL OR gc.TrangThai<>N'Trống')
             THROW 50036, N'Có ghế không còn trống hoặc bị khóa.', 1;
 
-        DECLARE @NgayHienTai DATE=CONVERT(DATE,GETDATE());
-        IF @ApDungTet=1 AND MONTH(@NgayHienTai) NOT BETWEEN 1 AND 3
-            THROW 50037, N'Khuyến mãi Tết chỉ áp dụng khi mua vé trong tháng 1 đến tháng 3.', 1;
-
-        IF @ApDungTet=1 AND EXISTS
+        -- Bước 5: bỏ ưu đãi Tết; tự nhận diện khứ hồi
+        DECLARE @CoKhuHoi BIT=0;
+        IF EXISTS
         (
-            SELECT d.MaKH
-            FROM @DanhSachVe d
-            GROUP BY d.MaKH
-            HAVING
-              (SELECT COUNT(*)
-               FROM VE v
-               JOIN DONDATVE dd ON dd.MaDon=v.MaDon
-               WHERE v.MaKH=d.MaKH AND v.PhanTramGiamTet>0
-                 AND YEAR(dd.NgayDat)=YEAR(GETDATE())
-                 AND MONTH(dd.NgayDat) BETWEEN 1 AND 3
-                 AND v.TrangThai<>N'Đã hủy') + COUNT(*) > 2
-        )
-            THROW 50038, N'Mỗi khách hàng chỉ được áp dụng ưu đãi Tết tối đa 2 chuyến trong năm.', 1;
+            SELECT 1 FROM #DanhSachVe a JOIN CHUYENBAY ca ON ca.MaChuyenBay=a.MaChuyenBay
+            JOIN #DanhSachVe b ON b.STT<>a.STT AND b.MaKH=a.MaKH
+            JOIN CHUYENBAY cb ON cb.MaChuyenBay=b.MaChuyenBay
+            WHERE ca.MaSanBayDi=cb.MaSanBayDen AND ca.MaSanBayDen=cb.MaSanBayDi
+        ) SET @CoKhuHoi=1;
 
-        IF @ApDungKhuHoi=1
+        -- Bước 6: kiểm tra khuyến mãi
+        DECLARE @NgayHienTai DATE=CONVERT(DATE,GETDATE()),@TenKM NVARCHAR(100)=NULL,@PhanTramKM INT=0,@GiamToiDa MONEY=NULL;
+        IF @MaKM IS NOT NULL
         BEGIN
-            IF (SELECT COUNT(*) FROM @DanhSachVe) <> 2
-               OR NOT EXISTS
-               (
-                 SELECT 1
-                 FROM @DanhSachVe a
-                 JOIN CHUYENBAY ca ON ca.MaChuyenBay=a.MaChuyenBay
-                 JOIN @DanhSachVe b ON b.MaChuyenBay<>a.MaChuyenBay AND b.MaKH=a.MaKH
-                 JOIN CHUYENBAY cb ON cb.MaChuyenBay=b.MaChuyenBay
-                 WHERE ca.MaSanBayDi=cb.MaSanBayDen
-                   AND ca.MaSanBayDen=cb.MaSanBayDi
-               )
-                THROW 50039, N'Giảm giá khứ hồi cần đúng hai vé cùng hành khách có tuyến bay đảo chiều.', 1;
+            SELECT @TenKM=TenKM,@PhanTramKM=PhanTramGiam,@GiamToiDa=GiamToiDa
+            FROM KHUYENMAI WITH(UPDLOCK,HOLDLOCK)
+            WHERE MaKM=@MaKM AND TrangThai=N'Hoạt động' AND @NgayHienTai BETWEEN NgayBatDau AND NgayKetThuc
+              AND (SoLuotToiDa IS NULL OR SoLuotDaDung<SoLuotToiDa);
+            IF @TenKM IS NULL
+                THROW 50040, N'Mã khuyến mãi không hợp lệ, hết hạn hoặc hết lượt.', 1;
+            IF @TenKM=N'Ưu đãi Tết'
+                THROW 50041, N'Ưu đãi Tết được áp dụng riêng, không chọn trong danh sách khuyến mãi.', 1;
+            IF @TenKM=N'Ưu đãi khách hàng mới' AND EXISTS(SELECT 1 FROM DONDATVE WHERE MaKHLienHe=@MaKHLienHe)
+                THROW 50042, N'Ưu đãi khách hàng mới chỉ áp dụng cho lần đặt vé đầu tiên.', 1;
         END;
 
-        IF @MaKM IS NOT NULL AND EXISTS
-        (
-            SELECT 1 FROM KHUYENMAI
-            WHERE MaKM=@MaKM AND TenKM=N'Ưu đãi Tết'
-        )
-            THROW 50041, N'Ưu đãi Tết được áp dụng riêng, không chọn trong danh sách khuyến mãi.', 1;
-
-        IF @MaKM IS NOT NULL AND NOT EXISTS
-        (
-            SELECT 1 FROM KHUYENMAI WITH (UPDLOCK,HOLDLOCK)
-            WHERE MaKM=@MaKM AND TrangThai=N'Hoạt động'
-              AND @NgayHienTai BETWEEN NgayBatDau AND NgayKetThuc
-              AND (SoLuotToiDa IS NULL OR SoLuotDaDung < SoLuotToiDa)
-        )
-            THROW 50040, N'Mã khuyến mãi không hợp lệ, hết hạn hoặc hết lượt.', 1;
-
+        -- Bước 7: tạo đơn
         INSERT INTO DONDATVE(MaKHLienHe,MaTKNhanVien,MaKM,TrangThai)
         VALUES(@MaKHLienHe,@MaTKNhanVien,@MaKM,N'Chờ thanh toán');
         DECLARE @MaDon INT=SCOPE_IDENTITY();
 
-        DECLARE @VeGia TABLE
+        -- Bước 8: tính giá từng vé
+        CREATE TABLE #VeGia
         (
-            SoThuTuVe INT PRIMARY KEY,
-            MaChuyenBay INT NOT NULL,
-            MaGhe INT NOT NULL,
-            MaHangVe INT NOT NULL,
-            MaKH INT NOT NULL,
-            MaNguoiGiamHo INT NULL,
-            GiaGoc MONEY NOT NULL,
-            GiamHang INT NOT NULL,
-            GiamTet INT NOT NULL,
-            GiamKhuHoi INT NOT NULL,
-            GiamKM INT NOT NULL,
-            TongGiam INT NOT NULL,
-            TienGiam MONEY NOT NULL,
-            GiaThucTra MONEY NOT NULL
+            STT INT PRIMARY KEY,MaChuyenBay INT,MaGhe INT,MaHangVe INT,MaKH INT,MaNguoiGiamHo INT NULL,
+            GiaGoc MONEY,GiamHang INT,GiamTet INT,GiamKhuHoi INT,GiamKM INT,TongGiam INT,TienGiam MONEY,GiaThucTra MONEY
         );
-        
-        INSERT INTO @VeGia
-        (
-            SoThuTuVe, MaChuyenBay, MaGhe, MaHangVe, MaKH, MaNguoiGiamHo, GiaGoc,
-            GiamHang, GiamTet, GiamKhuHoi, GiamKM, TongGiam, TienGiam, GiaThucTra
-        ) SELECT
-            d.SoThuTuVe, d.MaChuyenBay, d.MaGhe, d.MaHangVe, d.MaKH, d.MaNguoiGiamHo,
-            gv.DonGia, rt.GiamHang, rt.GiamTet, rt.GiamKhuHoi, rt.GiamKM, rt.TongGiam,
-            ROUND(gv.DonGia * rt.TongGiam / 100.0, 2) AS TienGiam,
-            gv.DonGia - ROUND(gv.DonGia * rt.TongGiam / 100.0, 2) AS GiaThucTra
+        DECLARE @STT INT=1,@SoVe INT; SELECT @SoVe=COUNT(*) FROM #DanhSachVe;
+        DECLARE @CB INT,@Ghe INT,@HV INT,@KH INT,@NGH INT,@Gia MONEY,@GH INT,@GKH INT,@GKM INT,@TG INT,@Tien MONEY;
+        WHILE @STT<=@SoVe
+        BEGIN
+            SELECT @CB=MaChuyenBay,@Ghe=MaGhe,@HV=MaHangVe,@KH=MaKH,@NGH=MaNguoiGiamHo FROM #DanhSachVe WHERE STT=@STT;
+            SELECT @Gia=DonGia FROM GIAVE WHERE MaChuyenBay=@CB AND MaHangVe=@HV;
+            SELECT @GH=CASE WHEN kh.NgayKetThucThanhVien IS NOT NULL AND kh.NgayKetThucThanhVien<SYSDATETIME() THEN 0 ELSE ISNULL(htv.PhanTramGiam,0) END
+            FROM KHACHHANG kh JOIN HANGTHANHVIEN htv ON htv.MaHangTV=kh.MaHangTV WHERE kh.MaKH=@KH;
+            SET @GKH=CASE WHEN @CoKhuHoi=1 THEN 10 ELSE 0 END; SET @GKM=0;
+            IF @MaKM IS NOT NULL
+            BEGIN
+                IF @GiamToiDa IS NULL SET @GKM=@PhanTramKM;
+                ELSE IF @Gia*@PhanTramKM/100.0>@GiamToiDa SET @GKM=CONVERT(INT,@GiamToiDa*100.0/@Gia);
+                ELSE SET @GKM=@PhanTramKM;
+            END;
+            SET @TG=@GH+@GKH+@GKM; IF @TG>30 SET @TG=30;
+            SET @Tien=ROUND(@Gia*@TG/100.0,2);
+            INSERT INTO #VeGia VALUES(@STT,@CB,@Ghe,@HV,@KH,@NGH,@Gia,@GH,0,@GKH,@GKM,@TG,@Tien,@Gia-@Tien);
+            SET @STT=@STT+1;
+        END;
 
-        FROM @DanhSachVe d
-        JOIN GIAVE gv
-            ON gv.MaChuyenBay = d.MaChuyenBay
-           AND gv.MaHangVe = d.MaHangVe
-        JOIN KHACHHANG kh
-            ON kh.MaKH = d.MaKH
-        LEFT JOIN HANGTHANHVIEN htv
-            ON htv.MaHangTV = kh.MaHangTV
-        LEFT JOIN KHUYENMAI km
-            ON km.MaKM = @MaKM
+        -- Bước 9: lưu vé, giữ ghế, tính tổng
+        INSERT INTO VE(MaDon,MaChuyenBay,MaGhe,MaHangVe,MaKH,MaNguoiGiamHo,GiaGoc,PhanTramGiamHang,PhanTramGiamTet,PhanTramGiamKhuHoi,PhanTramGiamKM,TongPhanTramGiam,TienGiam,GiaThucTra,TrangThai)
+        SELECT @MaDon,MaChuyenBay,MaGhe,MaHangVe,MaKH,MaNguoiGiamHo,GiaGoc,GiamHang,0,GiamKhuHoi,GiamKM,TongGiam,TienGiam,GiaThucTra,N'Đã đặt' FROM #VeGia;
+        UPDATE gc SET TrangThai=N'Đã đặt' FROM GHECHUYENBAY gc JOIN #DanhSachVe d ON d.MaChuyenBay=gc.MaChuyenBay AND d.MaGhe=gc.MaGhe;
 
-        CROSS APPLY
-        (
-            SELECT
-                CONVERT(INT,
-                    CASE
-                        WHEN kh.NgayKetThucThanhVien IS NOT NULL
-                         AND kh.NgayKetThucThanhVien < SYSDATETIME()
-                        THEN 0
-                        ELSE ISNULL(htv.PhanTramGiam, 0)
-                    END
-                ) AS GiamHang,
-
-                CONVERT(INT,
-                    CASE WHEN @ApDungTet = 1 THEN 10 ELSE 0 END
-                ) AS GiamTet,
-
-                CONVERT(INT,
-                    CASE WHEN @ApDungKhuHoi = 1 THEN 10 ELSE 0 END
-                ) AS GiamKhuHoi,
-
-                CONVERT(INT,
-                    CASE
-                        WHEN @MaKM IS NULL THEN 0
-                        WHEN km.GiamToiDa IS NULL
-                            THEN ISNULL(km.PhanTramGiam, 0)
-                        WHEN gv.DonGia * km.PhanTramGiam / 100.0
-                             > km.GiamToiDa
-                            THEN km.GiamToiDa * 100.0 / gv.DonGia
-                        ELSE ISNULL(km.PhanTramGiam, 0)
-                    END
-                ) AS GiamKM
-        ) AS br
-
-        CROSS APPLY
-        (
-            SELECT
-                br.GiamHang,
-                br.GiamTet,
-                br.GiamKhuHoi,
-                br.GiamKM,
-
-                CONVERT(INT,
-                    CASE
-                        WHEN br.GiamHang + br.GiamTet
-                           + br.GiamKhuHoi + br.GiamKM > 30
-                        THEN 30
-                        ELSE br.GiamHang + br.GiamTet
-                           + br.GiamKhuHoi + br.GiamKM
-                    END
-                ) AS TongGiam
-        ) AS rt;
-
-        INSERT INTO VE
-        (MaDon,MaChuyenBay,MaGhe,MaHangVe,MaKH,MaNguoiGiamHo,GiaGoc,
-         PhanTramGiamHang,PhanTramGiamTet,PhanTramGiamKhuHoi,PhanTramGiamKM,
-         TongPhanTramGiam,TienGiam,GiaThucTra,TrangThai)
-        SELECT @MaDon,MaChuyenBay,MaGhe,MaHangVe,MaKH,MaNguoiGiamHo,GiaGoc,
-               GiamHang,GiamTet,GiamKhuHoi,GiamKM,TongGiam,TienGiam,GiaThucTra,N'Đã đặt'
-        FROM @VeGia;
-
-        UPDATE gc SET TrangThai=N'Đã đặt'
-        FROM GHECHUYENBAY gc
-        JOIN @DanhSachVe d ON gc.MaChuyenBay=d.MaChuyenBay AND gc.MaGhe=d.MaGhe;
-
-        DECLARE @TongTienVe MONEY, @TongTienDichVu MONEY,
-                @TongGiamKM MONEY=0, @TongThanhToan MONEY;
-        SELECT @TongTienVe=SUM(GiaThucTra) FROM VE WHERE MaDon=@MaDon;
-        SET @TongTienDichVu=0;
-        SELECT @TongGiamKM=ISNULL(SUM(TienGiam),0)
-        FROM @VeGia;
-
-        SET @TongThanhToan=@TongTienVe+@TongTienDichVu;
-        UPDATE DONDATVE
-        SET TongTienVe=@TongTienVe,TongTienDichVu=@TongTienDichVu,
-            TienGiamKM=@TongGiamKM,TongThanhToan=@TongThanhToan
-        WHERE MaDon=@MaDon;
-
-        IF @MaKM IS NOT NULL
-            UPDATE KHUYENMAI SET SoLuotDaDung=SoLuotDaDung+1 WHERE MaKM=@MaKM;
-
-        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung)
-        VALUES(@MaTKNhanVien,N'Đặt vé',N'DONDATVE',CONCAT(N'Tạo đơn đặt vé #',@MaDon));
-
+        DECLARE @TongTienVe MONEY,@TongGiam MONEY;
+        SELECT @TongTienVe=SUM(GiaThucTra),@TongGiam=SUM(TienGiam) FROM VE WHERE MaDon=@MaDon;
+        UPDATE DONDATVE SET TongTienVe=@TongTienVe,TongTienDichVu=0,TienGiamKM=ISNULL(@TongGiam,0),TongThanhToan=@TongTienVe WHERE MaDon=@MaDon;
+        IF @MaKM IS NOT NULL UPDATE KHUYENMAI SET SoLuotDaDung=SoLuotDaDung+1 WHERE MaKM=@MaKM;
+        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung) VALUES(@MaTKNhanVien,N'Đặt vé',N'DONDATVE',CONCAT(N'Tạo đơn đặt vé #',@MaDon));
         COMMIT TRANSACTION;
-        /* KET QUA: Mot tap du lieu duy nhat; moi dong la mot ve trong don.
-           Cac cot tong tien cua don duoc lap lai tren moi dong de C# doc bang ExecuteReader thong thuong. */
-        SELECT
-            v.MaDon, v.MaVe, v.MaChuyenBay, v.MaGhe, v.MaHangVe, v.MaKH, 
-            v.GiaGoc, v.TongPhanTramGiam, v.TienGiam, v.GiaThucTra,
-            dd.TongTienVe, dd.TongTienDichVu, dd.TienGiamKM, dd.TongThanhToan, dd.TrangThai AS TrangThaiDon
-        FROM VE v
-        JOIN DONDATVE dd ON dd.MaDon=v.MaDon
-        WHERE v.MaDon=@MaDon
-        ORDER BY v.MaVe;
+
+        -- Bước 10: trả đúng result set cũ
+        SELECT v.MaDon,v.MaVe,v.MaChuyenBay,v.MaGhe,v.MaHangVe,v.MaKH,
+               v.GiaGoc,v.TongPhanTramGiam,v.TienGiam,v.GiaThucTra,
+               dd.TongTienVe,dd.TongTienDichVu,dd.TienGiamKM,dd.TongThanhToan,dd.TrangThai AS TrangThaiDon
+        FROM VE v JOIN DONDATVE dd ON dd.MaDon=v.MaDon WHERE v.MaDon=@MaDon ORDER BY v.MaVe;
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT>0 ROLLBACK TRANSACTION;
@@ -1324,8 +1508,7 @@ BEGIN
 END;
 GO
 
-
-/* PROCEDURE: sp_THANHTOANDON */
+-- (7) thanh toán đơn
 CREATE PROCEDURE sp_THANHTOANDON
     @MaDon INT,
     @SoTien MONEY,
@@ -1336,58 +1519,60 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- TRANSACTION: THANHTOANDON - Chi COMMIT khi cac buoc thanh cong.
         BEGIN TRANSACTION;
 
-        DECLARE @TongThanhToan MONEY, @TrangThai NVARCHAR(30);
-        SELECT @TongThanhToan=TongThanhToan,@TrangThai=TrangThai
-        FROM DONDATVE WITH (UPDLOCK,HOLDLOCK) WHERE MaDon=@MaDon;
-
+        -- Bước 1: lấy tổng đơn và số tiền đã thu
+        DECLARE @TongThanhToan MONEY,@TrangThai NVARCHAR(30),@TongDaThu MONEY=0,@TongDaHoan MONEY=0,@TongPhiHuy MONEY=0,@ConPhaiThu MONEY;
+        SELECT @TongThanhToan=TongThanhToan,@TrangThai=TrangThai FROM DONDATVE WITH(UPDLOCK,HOLDLOCK) WHERE MaDon=@MaDon;
         IF @TongThanhToan IS NULL THROW 50050, N'Không tìm thấy đơn đặt vé.', 1;
-        IF @TrangThai<>N'Chờ thanh toán' THROW 50051, N'Đơn không ở trạng thái chờ thanh toán.', 1;
-        IF @SoTien<>@TongThanhToan THROW 50052, N'Số tiền thanh toán phải bằng tổng thanh toán.', 1;
-        IF @PhuongThuc NOT IN (N'Tiền mặt',N'Chuyển khoản',N'Thẻ')
-            THROW 50053, N'Phương thức thanh toán không hợp lệ.', 1;
-        IF NOT EXISTS (SELECT 1 FROM TAIKHOAN WHERE MaTK=@MaTKNhanVien AND TrangThai=N'Hoạt động')
-            THROW 50053, N'Tài khoản nhân viên không hợp lệ hoặc đã bị khóa.', 1;
-        IF EXISTS (SELECT 1 FROM VE WHERE MaDon=@MaDon AND TrangThai=N'Đã hủy')
-            THROW 50054, N'Đơn có vé đã hủy; hãy xử lý lại đơn trước khi thanh toán.', 1;
+        IF @TrangThai=N'Đã hủy' THROW 50051, N'Đơn không ở trạng thái chờ thanh toán.', 1;
+        SELECT @TongDaThu=ISNULL(SUM(CASE WHEN TrangThai=N'Thành công' THEN SoTien ELSE 0 END),0),
+               @TongDaHoan=ISNULL(SUM(CASE WHEN TrangThai=N'Đã hoàn' THEN SoTien ELSE 0 END),0)
+        FROM THANHTOAN WHERE MaDon=@MaDon;
+        -- Phí hủy đã giữ lại là tiền của vé đã hủy, không được tính như tiền khách trả dư
+        SELECT @TongPhiHuy=ISNULL(SUM(h.PhiHuy),0) FROM HUYVE h JOIN VE v ON v.MaVe=h.MaVe WHERE v.MaDon=@MaDon;
+        SET @ConPhaiThu=@TongThanhToan-(@TongDaThu-@TongDaHoan-@TongPhiHuy);
+        IF @ConPhaiThu<=0 THROW 50051, N'Đơn không ở trạng thái chờ thanh toán.', 1;
+        IF @SoTien<>@ConPhaiThu THROW 50052, N'Số tiền thanh toán phải bằng tổng thanh toán.', 1;
+        IF @PhuongThuc NOT IN(N'Tiền mặt',N'Chuyển khoản',N'Thẻ') THROW 50053, N'Phương thức thanh toán không hợp lệ.', 1;
+        IF NOT EXISTS(SELECT 1 FROM TAIKHOAN WHERE MaTK=@MaTKNhanVien AND TrangThai=N'Hoạt động') THROW 50053, N'Tài khoản nhân viên không hợp lệ hoặc đã bị khóa.', 1;
+        -- Vé đã hủy được loại khỏi tổng đơn (sp_HUYVE tính lại), nên đơn vẫn thanh toán được phần còn lại
 
+        -- Bước 2: ghi nhận khoản thu
         INSERT INTO THANHTOAN(MaDon,SoTien,PhuongThuc,MaTKNhanVien,TrangThai,GhiChu)
         VALUES(@MaDon,@SoTien,@PhuongThuc,@MaTKNhanVien,N'Thành công',@GhiChu);
         UPDATE DONDATVE SET TrangThai=N'Đã thanh toán' WHERE MaDon=@MaDon;
 
-        DECLARE @ChiTieu TABLE(MaKH INT PRIMARY KEY, SoTien MONEY);
-        INSERT INTO @ChiTieu(MaKH,SoTien)
-        SELECT v.MaKH,SUM(v.GiaThucTra+ISNULL(dv.TienDV,0))
-        FROM VE v
-        OUTER APPLY
-        (
-            SELECT SUM(vd.ThanhTien) AS TienDV
-            FROM VEDICHVU vd WHERE vd.MaVe=v.MaVe
-        ) dv
-        WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy'
-        GROUP BY v.MaKH;
+        -- Bước 3: cộng chi tiêu; lần đầu tính vé+dich vụ, lần sau là dịch vụ phát sinh
+        CREATE TABLE #ChiTieu(MaKH INT PRIMARY KEY,SoTien MONEY);
+        IF @TongDaThu=0
+        BEGIN
+            INSERT INTO #ChiTieu
+            SELECT v.MaKH,SUM(v.GiaThucTra+ISNULL(dv.TienDV,0))
+            FROM VE v
+            LEFT JOIN (SELECT MaVe,SUM(ThanhTien) AS TienDV FROM VEDICHVU GROUP BY MaVe) dv ON dv.MaVe=v.MaVe
+            WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy' GROUP BY v.MaKH;
+        END
+        ELSE
+        BEGIN
+            -- Khoản thanh toán bổ sung là dịch vụ mới; phân theo dịch vụ hiện có của hành khách
+            DECLARE @TongDV MONEY; SELECT @TongDV=SUM(vd.ThanhTien) FROM VE v JOIN VEDICHVU vd ON vd.MaVe=v.MaVe WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+            INSERT INTO #ChiTieu
+            SELECT v.MaKH,CASE WHEN @TongDV>0 THEN ROUND(@SoTien*SUM(vd.ThanhTien)/@TongDV,2) ELSE 0 END
+            FROM VE v JOIN VEDICHVU vd ON vd.MaVe=v.MaVe
+            WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy' GROUP BY v.MaKH;
+        END;
 
-        UPDATE kh
-        SET NgayGiaoDichDauTien=ISNULL(kh.NgayGiaoDichDauTien,SYSDATETIME()),
-            NgayKetThucThanhVien=CASE WHEN kh.NgayGiaoDichDauTien IS NULL
-                                      THEN DATEADD(YEAR,1,SYSDATETIME())
-                                      ELSE kh.NgayKetThucThanhVien END,
-            TongChiTieu=kh.TongChiTieu+c.SoTien
-        FROM KHACHHANG kh JOIN @ChiTieu c ON c.MaKH=kh.MaKH;
+        -- Bước 4: cập nhật hạng thành viên
+        UPDATE kh SET NgayGiaoDichDauTien=ISNULL(kh.NgayGiaoDichDauTien,SYSDATETIME()),
+                      NgayKetThucThanhVien=CASE WHEN kh.NgayGiaoDichDauTien IS NULL THEN DATEADD(YEAR,1,SYSDATETIME()) ELSE kh.NgayKetThucThanhVien END,
+                      TongChiTieu=kh.TongChiTieu+c.SoTien
+        FROM KHACHHANG kh JOIN #ChiTieu c ON c.MaKH=kh.MaKH;
+        UPDATE kh SET MaHangTV=CASE WHEN kh.NgayKetThucThanhVien IS NULL OR kh.NgayKetThucThanhVien<SYSDATETIME() THEN 1
+                                    ELSE ISNULL((SELECT TOP 1 h.MaHangTV FROM HANGTHANHVIEN h WHERE h.DiemChiTieuToiThieu<=kh.TongChiTieu ORDER BY h.DiemChiTieuToiThieu DESC),1) END
+        FROM KHACHHANG kh JOIN #ChiTieu c ON c.MaKH=kh.MaKH;
 
-        UPDATE kh
-        SET MaHangTV=CASE
-            WHEN kh.NgayKetThucThanhVien IS NULL OR kh.NgayKetThucThanhVien<SYSDATETIME() THEN 1
-            ELSE ISNULL((SELECT TOP 1 h.MaHangTV FROM HANGTHANHVIEN h
-                         WHERE h.DiemChiTieuToiThieu<=kh.TongChiTieu
-                         ORDER BY h.DiemChiTieuToiThieu DESC),1) END
-        FROM KHACHHANG kh JOIN @ChiTieu c ON c.MaKH=kh.MaKH;
-
-        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung)
-        VALUES(@MaTKNhanVien,N'Thanh toán',N'DONDATVE',CONCAT(N'Thanh toán đơn #',@MaDon));
-
+        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung) VALUES(@MaTKNhanVien,N'Thanh toán',N'DONDATVE',CONCAT(N'Thanh toán đơn #',@MaDon));
         COMMIT TRANSACTION;
         SELECT N'Thanh toán thành công' AS KetQua,@MaDon AS MaDon;
     END TRY
@@ -1398,7 +1583,7 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_HUYVE */
+-- (8) hủy vé
 CREATE PROCEDURE sp_HUYVE
     @MaVe INT,
     @LyDo NVARCHAR(250),
@@ -1407,81 +1592,92 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- TRANSACTION: HUYVE - Chi COMMIT khi cac buoc thanh cong.
         BEGIN TRANSACTION;
 
-        DECLARE @MaDon INT,@MaKH INT,@MaChuyenBay INT,@MaGhe INT,@GiaThucTra MONEY,
-                @TrangThaiVe NVARCHAR(20),@NgayKhoiHanh DATETIME2,@ChoPhepHuy BIT,
-                @PhiHuy MONEY,@TienHoan MONEY,@MaHangVe INT,
-                @TrangThaiDon NVARCHAR(30),@DaThanhToan MONEY;
-
-        SELECT @MaDon=v.MaDon,@MaKH=v.MaKH,@MaChuyenBay=v.MaChuyenBay,@MaGhe=v.MaGhe,
-               @GiaThucTra=v.GiaThucTra,@TrangThaiVe=v.TrangThai,@MaHangVe=v.MaHangVe,
-               @NgayKhoiHanh=cb.NgayGioKhoiHanh,@ChoPhepHuy=hv.ChoPhepHuy,@TrangThaiDon=dd.TrangThai
-        FROM VE v WITH (UPDLOCK,HOLDLOCK)
-        JOIN CHUYENBAY cb ON cb.MaChuyenBay=v.MaChuyenBay
-        JOIN HANGVE hv ON hv.MaHangVe=v.MaHangVe
-        JOIN DONDATVE dd ON dd.MaDon=v.MaDon
-        WHERE v.MaVe=@MaVe;
-
+        -- Bước 1: lấy thông tin vé
+        DECLARE @MaDon INT,@MaKH INT,@MaChuyenBay INT,@MaGhe INT,@GiaThucTra MONEY,@TrangThaiVe NVARCHAR(20),
+                @NgayKhoiHanh DATETIME2,@ChoPhepHuy BIT,@PhiHuy MONEY=0,@TienHoanVe MONEY=0,@TienDichVu MONEY=0,
+                @TienHoan MONEY=0,@TrangThaiDon NVARCHAR(30),@TongDaThu MONEY=0,@TongDaHoan MONEY=0,@TongDon MONEY=0;
+        SELECT @MaDon=v.MaDon,@MaKH=v.MaKH,@MaChuyenBay=v.MaChuyenBay,@MaGhe=v.MaGhe,@GiaThucTra=v.GiaThucTra,
+               @TrangThaiVe=v.TrangThai,@NgayKhoiHanh=cb.NgayGioKhoiHanh,@ChoPhepHuy=hv.ChoPhepHuy,
+               @TrangThaiDon=dd.TrangThai,@TongDon=dd.TongThanhToan
+        FROM VE v WITH(UPDLOCK,HOLDLOCK) JOIN CHUYENBAY cb ON cb.MaChuyenBay=v.MaChuyenBay
+        JOIN HANGVE hv ON hv.MaHangVe=v.MaHangVe JOIN DONDATVE dd ON dd.MaDon=v.MaDon WHERE v.MaVe=@MaVe;
         IF @MaDon IS NULL THROW 50060, N'Không tìm thấy vé.', 1;
-        IF @TrangThaiVe=N'Đã hủy' OR EXISTS(SELECT 1 FROM HUYVE WHERE MaVe=@MaVe)
-            THROW 50061, N'Vé đã được hủy trước đó.', 1;
-        IF @TrangThaiVe=N'Đã bay' OR @NgayKhoiHanh<=SYSDATETIME()
-            THROW 50062, N'Không thể hủy vé đã khởi hành hoặc đã bay.', 1;
-        IF @ChoPhepHuy=0
-            THROW 50063, N'Hạng vé này không cho phép hủy.', 1;
+        IF @TrangThaiVe=N'Đã hủy' OR EXISTS(SELECT 1 FROM HUYVE WHERE MaVe=@MaVe) THROW 50061, N'Vé đã được hủy trước đó.', 1;
+        IF @TrangThaiVe=N'Đã bay' OR @NgayKhoiHanh<=SYSDATETIME() THROW 50062, N'Không thể hủy vé đã khởi hành hoặc đã bay.', 1;
+        IF @ChoPhepHuy=0 THROW 50063, N'Hạng vé này không cho phép hủy.', 1;
 
-        DECLARE @GioConLai INT=DATEDIFF(HOUR,SYSDATETIME(),@NgayKhoiHanh);
-        IF @GioConLai < 24 SET @PhiHuy=ROUND(@GiaThucTra*0.30,0);
-        ELSE IF @GioConLai < 72 SET @PhiHuy=ROUND(@GiaThucTra*0.20,0);
-        ELSE SET @PhiHuy=ROUND(@GiaThucTra*0.10,0);
-        SET @TienHoan=@GiaThucTra-@PhiHuy;
-        IF @TienHoan<0 SET @TienHoan=0;
+        -- Bước 2: số tiền khách thực trả cho các vé/dịch vụ còn hiệu lực
+        --         = đã thu − đã hoàn − phí hủy đã giữ của các vé hủy trước
+        DECLARE @TongPhiHuyCu MONEY=0,@DaTraThuc MONEY=0,@DuSauHuy MONEY=0;
+        SELECT @TongDaThu=ISNULL(SUM(CASE WHEN TrangThai=N'Thành công' THEN SoTien ELSE 0 END),0),
+               @TongDaHoan=ISNULL(SUM(CASE WHEN TrangThai=N'Đã hoàn' THEN SoTien ELSE 0 END),0)
+        FROM THANHTOAN WHERE MaDon=@MaDon;
+        SELECT @TongPhiHuyCu=ISNULL(SUM(h.PhiHuy),0) FROM HUYVE h JOIN VE v ON v.MaVe=h.MaVe WHERE v.MaDon=@MaDon;
+        SELECT @TienDichVu=ISNULL(SUM(ThanhTien),0) FROM VEDICHVU WHERE MaVe=@MaVe;
+        SET @DaTraThuc=@TongDaThu-@TongDaHoan-@TongPhiHuyCu;
+        -- Phần khách đã trả dư nếu bỏ vé này (và dịch vụ của vé) ra khỏi đơn
+        SET @DuSauHuy=@DaTraThuc-(@TongDon-@GiaThucTra-@TienDichVu);
 
-        IF @TrangThaiDon=N'Đã thanh toán'
+        -- Bước 3: đơn đã thanh toán thì tính phí hủy trên giá vé; hoàn phần khách đã trả dư sau khi trừ phí.
+        --         Đơn đã thanh toán nhưng còn nợ tiền dịch vụ thêm sau: khoản nợ được trừ vào tiền hoàn.
+        IF @TrangThaiDon=N'Đã thanh toán' AND @DuSauHuy>0
         BEGIN
-            INSERT INTO HUYVE(MaVe,LyDo,PhiHuy,TienHoan,MaTKNhanVien)
-            VALUES(@MaVe,@LyDo,@PhiHuy,@TienHoan,@MaTKNhanVien);
-
-            IF @TienHoan > 0
-                INSERT INTO THANHTOAN(MaDon,SoTien,PhuongThuc,MaTKNhanVien,TrangThai,GhiChu)
-                VALUES(@MaDon,@TienHoan,N'Tiền mặt',@MaTKNhanVien,N'Đã hoàn',CONCAT(N'Hoàn tiền vé #',@MaVe));
+            DECLARE @GioConLai INT=DATEDIFF(HOUR,SYSDATETIME(),@NgayKhoiHanh);
+            IF @GioConLai<24 SET @PhiHuy=ROUND(@GiaThucTra*0.30,0);
+            ELSE IF @GioConLai<72 SET @PhiHuy=ROUND(@GiaThucTra*0.20,0);
+            ELSE SET @PhiHuy=ROUND(@GiaThucTra*0.10,0);
+            IF @PhiHuy>@DuSauHuy SET @PhiHuy=@DuSauHuy;
+            SET @TienHoan=@DuSauHuy-@PhiHuy;
+            SET @TienHoanVe=@TienHoan;
         END
         ELSE
         BEGIN
-            INSERT INTO HUYVE(MaVe,LyDo,PhiHuy,TienHoan,MaTKNhanVien)
-            VALUES(@MaVe,@LyDo,0,0,@MaTKNhanVien);
+            SET @PhiHuy=0; SET @TienHoanVe=0; SET @TienHoan=0;
         END;
 
+        -- Bước 4: ghi hủy và hoàn tiền
+        INSERT INTO HUYVE(MaVe,LyDo,PhiHuy,TienHoan,MaTKNhanVien) VALUES(@MaVe,@LyDo,@PhiHuy,@TienHoan,@MaTKNhanVien);
+        IF @TienHoan>0
+            INSERT INTO THANHTOAN(MaDon,SoTien,PhuongThuc,MaTKNhanVien,TrangThai,GhiChu)
+            VALUES(@MaDon,@TienHoan,N'Tiền mặt',@MaTKNhanVien,N'Đã hoàn',CONCAT(N'Hoàn tiền vé #',@MaVe));
+
+        -- Bước 5: xóa dịch vụ của vé, hủy vé, trả ghế
+        DELETE FROM VEDICHVU WHERE MaVe=@MaVe;
         UPDATE VE SET TrangThai=N'Đã hủy' WHERE MaVe=@MaVe;
-        UPDATE GHECHUYENBAY SET TrangThai=N'Trống'
-        WHERE MaChuyenBay=@MaChuyenBay AND MaGhe=@MaGhe;
+        UPDATE GHECHUYENBAY SET TrangThai=N'Trống' WHERE MaChuyenBay=@MaChuyenBay AND MaGhe=@MaGhe;
 
-        IF @TrangThaiDon=N'Đã thanh toán'
+        -- Bước 5b: đơn chưa thanh toán thì tính lại khứ hồi cho các vé còn lại
+        --          (hủy một chiều thì chiều kia không còn là khứ hồi), giống sp_XOAVEDON
+        IF @TrangThaiDon<>N'Đã thanh toán'
         BEGIN
-            UPDATE KHACHHANG
-            SET TongChiTieu=CASE WHEN TongChiTieu>=@TienHoan THEN TongChiTieu-@TienHoan ELSE 0 END
-            WHERE MaKH=@MaKH;
-
-            DECLARE @TongChiTieuSau MONEY,@NgayHetHanSau DATETIME2;
-            SELECT @TongChiTieuSau=TongChiTieu,@NgayHetHanSau=NgayKetThucThanhVien
-            FROM KHACHHANG WHERE MaKH=@MaKH;
-
-            UPDATE KHACHHANG
-            SET MaHangTV=CASE WHEN @NgayHetHanSau IS NULL OR @NgayHetHanSau<SYSDATETIME() THEN 1
-                              ELSE ISNULL((SELECT TOP 1 MaHangTV FROM HANGTHANHVIEN
-                                           WHERE DiemChiTieuToiThieu<=@TongChiTieuSau
-                                           ORDER BY DiemChiTieuToiThieu DESC),1) END
-            WHERE MaKH=@MaKH;
+            UPDATE v SET PhanTramGiamKhuHoi=CASE WHEN EXISTS(SELECT 1 FROM VE v2 JOIN CHUYENBAY c2 ON c2.MaChuyenBay=v2.MaChuyenBay JOIN CHUYENBAY c1 ON c1.MaChuyenBay=v.MaChuyenBay WHERE v2.MaDon=@MaDon AND v2.MaKH=v.MaKH AND v2.MaVe<>v.MaVe AND v2.TrangThai<>N'Đã hủy' AND c1.MaSanBayDi=c2.MaSanBayDen AND c1.MaSanBayDen=c2.MaSanBayDi) THEN 10 ELSE 0 END
+            FROM VE v WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+            UPDATE VE SET TongPhanTramGiam=CASE WHEN PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM>30 THEN 30 ELSE PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM END
+            WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy';
+            UPDATE VE SET TienGiam=ROUND(GiaGoc*TongPhanTramGiam/100.0,2),GiaThucTra=GiaGoc-ROUND(GiaGoc*TongPhanTramGiam/100.0,2)
+            WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy';
         END;
 
-        IF NOT EXISTS(SELECT 1 FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy')
-            UPDATE DONDATVE SET TrangThai=N'Đã hủy' WHERE MaDon=@MaDon;
+        -- Bước 6: tính lại tổng đơn
+        DECLARE @TongVe MONEY=0,@TongDV MONEY=0;
+        SELECT @TongVe=ISNULL(SUM(GiaThucTra),0) FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy';
+        SELECT @TongDV=ISNULL(SUM(vd.ThanhTien),0) FROM VE v JOIN VEDICHVU vd ON vd.MaVe=v.MaVe WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+        DECLARE @TongGiamConLai MONEY; SELECT @TongGiamConLai=ISNULL(SUM(TienGiam),0) FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy';
+        UPDATE DONDATVE SET TongTienVe=@TongVe,TongTienDichVu=@TongDV,TienGiamKM=@TongGiamConLai,TongThanhToan=@TongVe+@TongDV WHERE MaDon=@MaDon;
 
-        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung)
-        VALUES(@MaTKNhanVien,N'Hủy vé',N'VE',CONCAT(N'Hủy vé #',@MaVe));
+        -- Bước 7: trừ chi tiêu đã hoàn và xét lại hạng
+        IF @TienHoan>0
+        BEGIN
+            UPDATE KHACHHANG SET TongChiTieu=CASE WHEN TongChiTieu>=@TienHoan THEN TongChiTieu-@TienHoan ELSE 0 END WHERE MaKH=@MaKH;
+            UPDATE kh SET MaHangTV=CASE WHEN kh.NgayKetThucThanhVien IS NULL OR kh.NgayKetThucThanhVien<SYSDATETIME() THEN 1
+                                        ELSE ISNULL((SELECT TOP 1 MaHangTV FROM HANGTHANHVIEN WHERE DiemChiTieuToiThieu<=kh.TongChiTieu ORDER BY DiemChiTieuToiThieu DESC),1) END
+            FROM KHACHHANG kh WHERE kh.MaKH=@MaKH;
+        END;
+        IF NOT EXISTS(SELECT 1 FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy') UPDATE DONDATVE SET TrangThai=N'Đã hủy' WHERE MaDon=@MaDon;
 
+        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung) VALUES(@MaTKNhanVien,N'Hủy vé',N'VE',CONCAT(N'Hủy vé #',@MaVe));
         COMMIT TRANSACTION;
         SELECT @MaVe AS MaVe,@PhiHuy AS PhiHuy,@TienHoan AS TienHoan,N'Hủy vé thành công' AS KetQua;
     END TRY
@@ -1492,7 +1688,7 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_TRACUUVE */
+-- (9) tra cứu vé
 CREATE PROCEDURE sp_TRACUUVE
     @MaVe INT=NULL,
     @MaChuyenBay INT=NULL,
@@ -1511,8 +1707,7 @@ BEGIN
 END;
 GO
 
-
-/* PROCEDURE: sp_THONGKEDASHBOARD */
+-- (9) thống kê tổng quan
 CREATE PROCEDURE sp_THONGKEDASHBOARD
     @Nam INT=NULL,
     @Thang INT=NULL
@@ -1535,7 +1730,7 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_XETHANGTHANHVIEN */
+-- (9) xét hạng thành viên
 CREATE PROCEDURE sp_XETHANGTHANHVIEN
     @MaKH INT
 AS
@@ -1559,9 +1754,7 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_LAYDULIEUCOMBOBOX
-   Tra ve bo cot thong nhat: Ma, Ten, MoTa, GiaTri.
-   C# dung DisplayMember = "Ten", ValueMember = "Ma". */
+-- (9) dữ liệu hộp chọn
 CREATE PROCEDURE sp_LAYDULIEUCOMBOBOX
     @LoaiData VARCHAR(30)
 AS
@@ -1627,168 +1820,162 @@ BEGIN
 END;
 GO
 
-/* PROCEDURE: sp_TINHTHUGIAVE
-   Tinh gia du kien cho mot ve. Khi dat ve, sp_DATVE se kiem tra va tinh lai gia chinh thuc.
-   @SoVeTetTrongDon la tong so ve cua cung mot khach se dung uu dai Tet trong don hien tai. */
-CREATE PROCEDURE sp_TINHTHUGIAVE
-    @MaChuyenBay INT,
-    @MaHangVe INT,
-    @MaKH INT,
-    @ApDungTet BIT = 0,
-    @ApDungKhuHoi BIT = 0,
-    @MaKM INT = NULL,
-    @MaChuyenBayKhuHoi INT = NULL,
-    @SoVeTetTrongDon INT = 1
+-- (9) phụ: tạo đơn nhiều vé
+CREATE PROCEDURE sp_TAODONNHIEUVE
+    @MaKHLienHe INT,
+    @MaTKNhanVien INT,
+    @MaKM INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    DECLARE @NgayHienTai DATE=CONVERT(DATE,GETDATE());
-    DECLARE @GiaGoc MONEY;
-    DECLARE @GiamHang INT=0;
-    DECLARE @GiamTet INT=0;
-    DECLARE @GiamKhuHoi INT=0;
-    DECLARE @GiamKM INT=0;
-    DECLARE @TongGiam INT=0;
-    DECLARE @TienGiam MONEY=0;
-    DECLARE @GiaThucTra MONEY=0;
-    DECLARE @PhanTramKM INT=0;
-    DECLARE @GiamToiDa MONEY=NULL;
-    DECLARE @TenKM NVARCHAR(100)=NULL;
-
-    IF NOT EXISTS
-    (
-        SELECT 1 FROM KHACHHANG WHERE MaKH=@MaKH
-    )
-        THROW 50071, N'Khách hàng không tồn tại.', 1;
-
-    IF NOT EXISTS
-    (
-        SELECT 1 FROM CHUYENBAY
-        WHERE MaChuyenBay=@MaChuyenBay
-          AND TrangThai=N'Đang mở bán'
-          AND NgayGioKhoiHanh>SYSDATETIME()
-    )
-        THROW 50072, N'Chuyến bay không tồn tại, đã đóng hoặc đã khởi hành.', 1;
-
-    SELECT @GiaGoc=gv.DonGia
-    FROM GIAVE gv
-    JOIN HANGVE hv ON hv.MaHangVe=gv.MaHangVe
-    WHERE gv.MaChuyenBay=@MaChuyenBay
-      AND gv.MaHangVe=@MaHangVe
-      AND hv.TrangThai=N'Hoạt động';
-
-    IF @GiaGoc IS NULL
-        THROW 50073, N'Không tìm thấy giá cho hạng vé đã chọn.', 1;
-
-    SELECT @GiamHang=
-        CASE WHEN kh.NgayKetThucThanhVien IS NOT NULL
-                   AND kh.NgayKetThucThanhVien<SYSDATETIME()
-             THEN 0 ELSE ISNULL(htv.PhanTramGiam,0) END
-    FROM KHACHHANG kh
-    JOIN HANGTHANHVIEN htv ON htv.MaHangTV=kh.MaHangTV
-    WHERE kh.MaKH=@MaKH;
-
-    IF @ApDungTet=1
-    BEGIN
-        IF MONTH(@NgayHienTai) NOT BETWEEN 1 AND 3
-            THROW 50074, N'Ưu đãi Tết chỉ áp dụng khi mua vé trong tháng 1 đến tháng 3.', 1;
-
-        IF @SoVeTetTrongDon<1 OR @SoVeTetTrongDon>2
-            THROW 50075, N'Mỗi khách chỉ được áp dụng ưu đãi Tết tối đa hai vé trong một đơn.', 1;
-
-        IF
-        (
-            SELECT COUNT(*)
-            FROM VE v
-            JOIN DONDATVE dd ON dd.MaDon=v.MaDon
-            WHERE v.MaKH=@MaKH
-              AND v.PhanTramGiamTet>0
-              AND YEAR(dd.NgayDat)=YEAR(GETDATE())
-              AND MONTH(dd.NgayDat) BETWEEN 1 AND 3
-              AND v.TrangThai<>N'Đã hủy'
-        ) + @SoVeTetTrongDon > 2
-            THROW 50076, N'Khách hàng đã sử dụng hết lượt ưu đãi Tết.', 1;
-
-        SET @GiamTet=10;
-    END;
-
-    IF @ApDungKhuHoi=1
-    BEGIN
-        IF @MaChuyenBayKhuHoi IS NULL
-            THROW 50077, N'Cần chọn chuyến bay khứ hồi để kiểm tra giảm giá.', 1;
-
-        IF NOT EXISTS
-        (
-            SELECT 1
-            FROM CHUYENBAY cb1
-            JOIN CHUYENBAY cb2 ON cb2.MaChuyenBay=@MaChuyenBayKhuHoi
-            WHERE cb1.MaChuyenBay=@MaChuyenBay
-              AND cb1.MaSanBayDi=cb2.MaSanBayDen
-              AND cb1.MaSanBayDen=cb2.MaSanBayDi
-              AND cb2.TrangThai=N'Đang mở bán'
-              AND cb2.NgayGioKhoiHanh>SYSDATETIME()
-        )
-            THROW 50078, N'Hai chuyến bay không phải tuyến khứ hồi hợp lệ.', 1;
-
-        SET @GiamKhuHoi=10;
-    END;
-
+    IF NOT EXISTS(SELECT 1 FROM KHACHHANG WHERE MaKH=@MaKHLienHe) THROW 50100, N'Khách hàng liên hệ không tồn tại.', 1;
+    IF NOT EXISTS(SELECT 1 FROM TAIKHOAN WHERE MaTK=@MaTKNhanVien AND TrangThai=N'Hoạt động') THROW 50101, N'Tài khoản nhân viên không hợp lệ hoặc đã bị khóa.', 1;
     IF @MaKM IS NOT NULL
     BEGIN
-        SELECT @TenKM=TenKM,
-               @PhanTramKM=PhanTramGiam,
-               @GiamToiDa=GiamToiDa
-        FROM KHUYENMAI
-        WHERE MaKM=@MaKM
-          AND TrangThai=N'Hoạt động'
-          AND @NgayHienTai BETWEEN NgayBatDau AND NgayKetThuc
-          AND (SoLuotToiDa IS NULL OR SoLuotDaDung<SoLuotToiDa);
-
-        IF @TenKM IS NULL
-            THROW 50079, N'Mã khuyến mãi không hợp lệ, hết hạn hoặc hết lượt.', 1;
-
-        IF @TenKM=N'Ưu đãi Tết'
-            THROW 50080, N'Ưu đãi Tết được áp dụng riêng, không chọn trong danh sách khuyến mãi.', 1;
-
-        IF @GiamToiDa IS NULL
-            SET @GiamKM=@PhanTramKM;
-        ELSE IF @GiaGoc*@PhanTramKM/100.0>@GiamToiDa
-            SET @GiamKM=CONVERT(INT,@GiamToiDa*100.0/@GiaGoc);
-        ELSE
-            SET @GiamKM=@PhanTramKM;
+        IF NOT EXISTS(SELECT 1 FROM KHUYENMAI WHERE MaKM=@MaKM AND TrangThai=N'Hoạt động' AND CONVERT(DATE,GETDATE()) BETWEEN NgayBatDau AND NgayKetThuc AND (SoLuotToiDa IS NULL OR SoLuotDaDung<SoLuotToiDa))
+            THROW 50102, N'Mã khuyến mãi không hợp lệ, hết hạn hoặc hết lượt.', 1;
+        IF EXISTS(SELECT 1 FROM KHUYENMAI WHERE MaKM=@MaKM AND TenKM=N'Ưu đãi Tết') THROW 50103, N'Ưu đãi Tết đã ngừng áp dụng.', 1;
+        IF EXISTS(SELECT 1 FROM KHUYENMAI WHERE MaKM=@MaKM AND TenKM=N'Ưu đãi khách hàng mới') AND EXISTS(SELECT 1 FROM DONDATVE WHERE MaKHLienHe=@MaKHLienHe)
+            THROW 50104, N'Ưu đãi khách hàng mới chỉ áp dụng cho lần đặt vé đầu tiên.', 1;
     END;
-
-    SET @TongGiam=@GiamHang+@GiamTet+@GiamKhuHoi+@GiamKM;
-    IF @TongGiam>30 SET @TongGiam=30;
-    IF @TongGiam<0 SET @TongGiam=0;
-
-    SET @GiaThucTra=@GiaGoc-ROUND(@GiaGoc*@TongGiam/100.0,2);
-    SET @TienGiam=@GiaGoc-@GiaThucTra;
-
-    SELECT
-        @GiaGoc AS GiaGoc,
-        @GiamHang AS PhanTramGiamHang,
-        @GiamTet AS PhanTramGiamTet,
-        @GiamKhuHoi AS PhanTramGiamKhuHoi,
-        @GiamKM AS PhanTramGiamKM,
-        @TongGiam AS PhanTramGiam,
-        @TienGiam AS TienGiam,
-        @GiaThucTra AS GiaThucTra;
+    INSERT INTO DONDATVE(MaKHLienHe,MaTKNhanVien,MaKM,TrangThai) VALUES(@MaKHLienHe,@MaTKNhanVien,@MaKM,N'Chờ thanh toán');
+    DECLARE @MaDon INT=SCOPE_IDENTITY();
+    IF @MaKM IS NOT NULL UPDATE KHUYENMAI SET SoLuotDaDung=SoLuotDaDung+1 WHERE MaKM=@MaKM;
+    SELECT @MaDon AS MaDon;
 END;
 GO
 
-/* QUICK TESTS
-   Login:
-   EXEC sp_DANGNHAP 'admin','admin123';
+-- (9) phụ: thêm vé vào đơn
+CREATE PROCEDURE sp_THEMVEDON
+    @MaDon INT,
+    @MaKH INT,
+    @MaChuyenBay INT,
+    @MaGhe INT,
+    @MaHangVe INT,
+    @MaNguoiGiamHo INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        DECLARE @MaKM INT,@TrangThaiDon NVARCHAR(30),@GiaGoc MONEY,@GiamHang INT=0,@GiamKM INT=0,@TongGiam INT=0,@TienGiam MONEY=0,@GiaThucTra MONEY=0;
+        SELECT @MaKM=MaKM,@TrangThaiDon=TrangThai FROM DONDATVE WITH(UPDLOCK,HOLDLOCK) WHERE MaDon=@MaDon;
+        IF @TrangThaiDon IS NULL THROW 50110, N'Không tìm thấy đơn đặt vé.', 1;
+        IF @TrangThaiDon<>N'Chờ thanh toán' THROW 50111, N'Chỉ được thêm vé khi đơn đang chờ thanh toán.', 1;
+        IF NOT EXISTS(SELECT 1 FROM KHACHHANG WHERE MaKH=@MaKH) THROW 50112, N'Hành khách không tồn tại.', 1;
+        IF NOT EXISTS(SELECT 1 FROM HANGVE WHERE MaHangVe=@MaHangVe AND TrangThai=N'Hoạt động') THROW 50112, N'Hạng vé đã ngừng hoạt động.', 1;
+        IF NOT EXISTS(SELECT 1 FROM CHUYENBAY WHERE MaChuyenBay=@MaChuyenBay AND TrangThai=N'Đang mở bán' AND NgayGioKhoiHanh>SYSDATETIME()) THROW 50113, N'Chuyến bay không còn mở bán hoặc đã khởi hành.', 1;
+        IF EXISTS
+        (
+            SELECT 1 FROM KHACHHANG kh JOIN CHUYENBAY cb ON cb.MaChuyenBay=@MaChuyenBay
+            WHERE kh.MaKH=@MaKH
+              AND DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
+                  - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),kh.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END < 16
+              AND (@MaNguoiGiamHo IS NULL OR @MaNguoiGiamHo=@MaKH OR NOT EXISTS
+                  (SELECT 1 FROM KHACHHANG ng WHERE ng.MaKH=@MaNguoiGiamHo
+                   AND DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
+                       - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),ng.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END >=18))
+        ) THROW 50117, N'Hành khách dưới 16 tuổi cần người giám hộ từ 18 tuổi.', 1;
+        IF NOT EXISTS(SELECT 1 FROM GHE g JOIN CHUYENBAY cb ON cb.MaChuyenBay=@MaChuyenBay JOIN GHECHUYENBAY gc ON gc.MaChuyenBay=@MaChuyenBay AND gc.MaGhe=g.MaGhe WHERE g.MaGhe=@MaGhe AND g.MaMayBay=cb.MaMayBay AND g.MaHangVe=@MaHangVe AND gc.TrangThai=N'Trống') THROW 50114, N'Ghế không còn trống hoặc không đúng hạng vé.', 1;
+        IF EXISTS(SELECT 1 FROM VE WHERE MaChuyenBay=@MaChuyenBay AND MaGhe=@MaGhe AND TrangThai<>N'Đã hủy') THROW 50115, N'Ghế đã có người đặt.', 1;
+        IF EXISTS(SELECT 1 FROM VE WHERE MaChuyenBay=@MaChuyenBay AND MaKH=@MaKH AND TrangThai<>N'Đã hủy') THROW 50116, N'Hành khách đã có vé trên chuyến bay này.', 1;
+        SELECT @GiaGoc=DonGia FROM GIAVE WHERE MaChuyenBay=@MaChuyenBay AND MaHangVe=@MaHangVe;
+        SELECT @GiamHang=CASE WHEN kh.NgayKetThucThanhVien IS NOT NULL AND kh.NgayKetThucThanhVien<SYSDATETIME() THEN 0 ELSE h.PhanTramGiam END FROM KHACHHANG kh JOIN HANGTHANHVIEN h ON h.MaHangTV=kh.MaHangTV WHERE kh.MaKH=@MaKH;
+        IF @MaKM IS NOT NULL
+        BEGIN
+            DECLARE @PT INT,@Max MONEY; SELECT @PT=PhanTramGiam,@Max=GiamToiDa FROM KHUYENMAI WHERE MaKM=@MaKM;
+            IF @Max IS NULL SET @GiamKM=@PT; ELSE IF @GiaGoc*@PT/100.0>@Max SET @GiamKM=CONVERT(INT,@Max*100.0/@GiaGoc); ELSE SET @GiamKM=@PT;
+        END;
+        SET @TongGiam=@GiamHang+@GiamKM; IF @TongGiam>30 SET @TongGiam=30;
+        SET @TienGiam=ROUND(@GiaGoc*@TongGiam/100.0,2); SET @GiaThucTra=@GiaGoc-@TienGiam;
+        INSERT INTO VE(MaDon,MaChuyenBay,MaGhe,MaHangVe,MaKH,MaNguoiGiamHo,GiaGoc,PhanTramGiamHang,PhanTramGiamTet,PhanTramGiamKhuHoi,PhanTramGiamKM,TongPhanTramGiam,TienGiam,GiaThucTra,TrangThai)
+        VALUES(@MaDon,@MaChuyenBay,@MaGhe,@MaHangVe,@MaKH,@MaNguoiGiamHo,@GiaGoc,@GiamHang,0,0,@GiamKM,@TongGiam,@TienGiam,@GiaThucTra,N'Đã đặt');
+        DECLARE @MaVe INT=SCOPE_IDENTITY();
+        UPDATE GHECHUYENBAY SET TrangThai=N'Đã đặt' WHERE MaChuyenBay=@MaChuyenBay AND MaGhe=@MaGhe;
 
-   Dashboard:
-   EXEC sp_THONGKEDASHBOARD NULL,NULL;
+        -- Tự nhận diện các cặp khứ hồi cùng hành khách và tính lại giá
+        UPDATE v SET PhanTramGiamKhuHoi=CASE WHEN EXISTS(SELECT 1 FROM VE v2 JOIN CHUYENBAY c2 ON c2.MaChuyenBay=v2.MaChuyenBay JOIN CHUYENBAY c1 ON c1.MaChuyenBay=v.MaChuyenBay WHERE v2.MaDon=@MaDon AND v2.MaKH=v.MaKH AND v2.MaVe<>v.MaVe AND v2.TrangThai<>N'Đã hủy' AND c1.MaSanBayDi=c2.MaSanBayDen AND c1.MaSanBayDen=c2.MaSanBayDi) THEN 10 ELSE 0 END
+        FROM VE v WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+        UPDATE v SET TongPhanTramGiam=CASE WHEN PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM>30 THEN 30 ELSE PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM END,
+                     TienGiam=ROUND(GiaGoc*CASE WHEN PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM>30 THEN 30 ELSE PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM END/100.0,2)
+        FROM VE v WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+        UPDATE VE SET GiaThucTra=GiaGoc-TienGiam WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy';
+        DECLARE @TongVe MONEY,@TongDV MONEY; SELECT @TongVe=ISNULL(SUM(GiaThucTra),0) FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy'; SELECT @TongDV=ISNULL(SUM(vd.ThanhTien),0) FROM VE v JOIN VEDICHVU vd ON vd.MaVe=v.MaVe WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+        DECLARE @TongGiamDon MONEY; SELECT @TongGiamDon=ISNULL(SUM(TienGiam),0) FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy';
+        UPDATE DONDATVE SET TongTienVe=@TongVe,TongTienDichVu=@TongDV,TienGiamKM=@TongGiamDon,TongThanhToan=@TongVe+@TongDV WHERE MaDon=@MaDon;
+        COMMIT TRANSACTION;
+        SELECT @MaVe AS MaVe,@MaDon AS MaDon;
+    END TRY
+    BEGIN CATCH IF @@TRANCOUNT>0 ROLLBACK TRANSACTION; THROW; END CATCH
+END;
+GO
 
-   Seat and flight state:
-   SELECT TOP 20 * FROM V_CHUYENBAYCHITIET ORDER BY NgayGioKhoiHanh;
+-- (9) phụ: xóa vé khỏi đơn
+CREATE PROCEDURE sp_XOAVEDON
+    @MaDon INT,
+    @MaVe INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        IF NOT EXISTS(SELECT 1 FROM DONDATVE WHERE MaDon=@MaDon AND TrangThai=N'Chờ thanh toán') THROW 50120, N'Chỉ được xóa vé khi đơn đang chờ thanh toán.', 1;
+        DECLARE @CB INT,@Ghe INT; SELECT @CB=MaChuyenBay,@Ghe=MaGhe FROM VE WHERE MaVe=@MaVe AND MaDon=@MaDon AND TrangThai<>N'Đã hủy';
+        IF @CB IS NULL THROW 50121, N'Không tìm thấy vé trong đơn.', 1;
+        DELETE FROM VEDICHVU WHERE MaVe=@MaVe; DELETE FROM VE WHERE MaVe=@MaVe; UPDATE GHECHUYENBAY SET TrangThai=N'Trống' WHERE MaChuyenBay=@CB AND MaGhe=@Ghe;
+        UPDATE v SET PhanTramGiamKhuHoi=CASE WHEN EXISTS(SELECT 1 FROM VE v2 JOIN CHUYENBAY c2 ON c2.MaChuyenBay=v2.MaChuyenBay JOIN CHUYENBAY c1 ON c1.MaChuyenBay=v.MaChuyenBay WHERE v2.MaDon=@MaDon AND v2.MaKH=v.MaKH AND v2.MaVe<>v.MaVe AND c1.MaSanBayDi=c2.MaSanBayDen AND c1.MaSanBayDen=c2.MaSanBayDi) THEN 10 ELSE 0 END FROM VE v WHERE v.MaDon=@MaDon;
+        UPDATE v SET TongPhanTramGiam=CASE WHEN PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM>30 THEN 30 ELSE PhanTramGiamHang+PhanTramGiamKhuHoi+PhanTramGiamKM END FROM VE v WHERE v.MaDon=@MaDon;
+        UPDATE VE SET TienGiam=ROUND(GiaGoc*TongPhanTramGiam/100.0,2),GiaThucTra=GiaGoc-ROUND(GiaGoc*TongPhanTramGiam/100.0,2) WHERE MaDon=@MaDon;
+        DECLARE @TongVe MONEY=0,@TongDV MONEY=0; SELECT @TongVe=ISNULL(SUM(GiaThucTra),0) FROM VE WHERE MaDon=@MaDon; SELECT @TongDV=ISNULL(SUM(vd.ThanhTien),0) FROM VE v JOIN VEDICHVU vd ON vd.MaVe=v.MaVe WHERE v.MaDon=@MaDon;
+        DECLARE @TongGiamDon MONEY; SELECT @TongGiamDon=ISNULL(SUM(TienGiam),0) FROM VE WHERE MaDon=@MaDon;
+        UPDATE DONDATVE SET TongTienVe=@TongVe,TongTienDichVu=@TongDV,TienGiamKM=@TongGiamDon,TongThanhToan=@TongVe+@TongDV WHERE MaDon=@MaDon;
+        COMMIT TRANSACTION; SELECT @MaDon AS MaDon,@MaVe AS MaVe;
+    END TRY
+    BEGIN CATCH IF @@TRANCOUNT>0 ROLLBACK TRANSACTION; THROW; END CATCH
+END;
+GO
 
-   EXEC sp_LAYDULIEUCOMBOBOX 'SANBAY';
-   EXEC sp_LAYDULIEUCOMBOBOX 'DICHVU';
-   EXEC sp_LAYDULIEUCOMBOBOX 'KHUYENMAI';
-*/
+-- (9) phụ: xác nhận đơn nhiều vé
+CREATE PROCEDURE sp_XACNHANDON
+    @MaDon INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF NOT EXISTS(SELECT 1 FROM DONDATVE WHERE MaDon=@MaDon) THROW 50130, N'Không tìm thấy đơn đặt vé.', 1;
+    IF NOT EXISTS(SELECT 1 FROM VE WHERE MaDon=@MaDon AND TrangThai<>N'Đã hủy') THROW 50131, N'Đơn chưa có vé.', 1;
+    SELECT v.MaDon,v.MaVe,v.MaChuyenBay,v.MaGhe,v.MaHangVe,v.MaKH,v.GiaGoc,v.TongPhanTramGiam,v.TienGiam,v.GiaThucTra,
+           dd.TongTienVe,dd.TongTienDichVu,dd.TienGiamKM,dd.TongThanhToan,dd.TrangThai AS TrangThaiDon
+    FROM VE v JOIN DONDATVE dd ON dd.MaDon=v.MaDon WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy' ORDER BY v.MaVe;
+END;
+GO
+
+-- (9) phụ: thêm dịch vụ kể cả sau thanh toán
+CREATE PROCEDURE sp_THEMDICHVUVE
+    @MaVe INT,
+    @MaDichVu INT,
+    @SoLuong INT,
+    @MaTKNhanVien INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        DECLARE @MaDon INT,@TrangThaiVe NVARCHAR(20),@DonGia MONEY;
+        SELECT @MaDon=MaDon,@TrangThaiVe=TrangThai FROM VE WHERE MaVe=@MaVe;
+        IF @MaDon IS NULL THROW 50140, N'Không tìm thấy vé.', 1;
+        IF @TrangThaiVe<>N'Đã đặt' THROW 50141, N'Chỉ được thêm dịch vụ cho vé còn hiệu lực.', 1;
+        IF @SoLuong<=0 THROW 50142, N'Số lượng dịch vụ phải lớn hơn 0.', 1;
+        SELECT @DonGia=DonGia FROM DICHVU WHERE MaDichVu=@MaDichVu AND TrangThai=N'Hoạt động';
+        IF @DonGia IS NULL THROW 50143, N'Dịch vụ không tồn tại hoặc đã ngừng hoạt động.', 1;
+        IF EXISTS(SELECT 1 FROM VEDICHVU WHERE MaVe=@MaVe AND MaDichVu=@MaDichVu)
+            UPDATE VEDICHVU SET SoLuong=SoLuong+@SoLuong WHERE MaVe=@MaVe AND MaDichVu=@MaDichVu;
+        ELSE INSERT INTO VEDICHVU(MaVe,MaDichVu,SoLuong,DonGia) VALUES(@MaVe,@MaDichVu,@SoLuong,@DonGia);
+        DECLARE @TongDV MONEY=0; SELECT @TongDV=ISNULL(SUM(vd.ThanhTien),0) FROM VE v JOIN VEDICHVU vd ON vd.MaVe=v.MaVe WHERE v.MaDon=@MaDon AND v.TrangThai<>N'Đã hủy';
+        UPDATE DONDATVE SET TongTienDichVu=@TongDV,TongThanhToan=TongTienVe+@TongDV WHERE MaDon=@MaDon;
+        INSERT INTO NHATKYHOATDONG(MaTK,HanhDong,DoiTuong,NoiDung) VALUES(@MaTKNhanVien,N'Thêm dịch vụ',N'VEDICHVU',CONCAT(N'Thêm dịch vụ cho vé #',@MaVe));
+        COMMIT TRANSACTION;
+        SELECT @MaVe AS MaVe,@MaDon AS MaDon,@TongDV AS TongTienDichVu;
+    END TRY
+    BEGIN CATCH IF @@TRANCOUNT>0 ROLLBACK TRANSACTION; THROW; END CATCH
+END;
+GO

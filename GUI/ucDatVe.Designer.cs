@@ -604,7 +604,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.lblVeTrongDon.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(91)))), ((int)(((byte)(102)))), ((int)(((byte)(112)))));
             this.lblVeTrongDon.Margin = new System.Windows.Forms.Padding(2, 8, 3, 0);
             this.lblVeTrongDon.Name = "lblVeTrongDon";
-            this.lblVeTrongDon.Text = "VÉ TRONG ĐƠN (TỐI ĐA 2 VÉ)";
+            this.lblVeTrongDon.Text = "VÉ TRONG ĐƠN";
             //
             // dgvGioVe
             //
@@ -726,6 +726,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.chkTet.TabIndex = 2;
             this.chkTet.Text = "Ưu đãi Tết (giảm 10%)";
             this.chkTet.UseVisualStyleBackColor = true;
+            this.chkTet.Visible = false;
             this.chkTet.CheckedChanged += new System.EventHandler(this.TuyChonGia_Changed);
             //
             // chkKhuHoi
@@ -800,7 +801,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.lblTongCongNhan.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblTongCongNhan.Font = new System.Drawing.Font("Segoe UI Semibold", 10.5F);
             this.lblTongCongNhan.Name = "lblTongCongNhan";
-            this.lblTongCongNhan.Text = "Tổng thanh toán";
+            this.lblTongCongNhan.Text = "Tổng số tiền phải thanh toán";
             this.lblTongCongNhan.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // lblTongCong
@@ -819,7 +820,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.lblLoiGia.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(91)))), ((int)(((byte)(102)))), ((int)(((byte)(112)))));
             this.lblLoiGia.Name = "lblLoiGia";
             this.lblLoiGia.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
-            this.lblLoiGia.Text = "Giá đã gồm ưu đãi hạng thành viên, khuyến mãi, Tết và khứ hồi (cộng dồn, tối đa 30%).";
+            this.lblLoiGia.Text = "Giá đã gồm ưu đãi hạng thành viên, khuyến mãi và khứ hồi (cộng dồn, tối đa 30%).";
             //
             // ucDatVe
             //

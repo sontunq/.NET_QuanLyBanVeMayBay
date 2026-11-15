@@ -28,7 +28,7 @@ namespace QuanLyBanVeMayBay.GUI
             lblDonGiaTri.Text = $"#{ve["MaDon"]} · {trangThaiDon}";
 
             // Xem trước phí hủy (quy tắc nằm ở BLL, giống sp_HUYVE)
-            PhiHuyDuKien phiHuy = DatVeBLL.TinhPhiHuy(khoiHanh, gia, trangThaiDon);
+            PhiHuyDuKien phiHuy = DatVeBLL.TinhPhiHuy(ve);
             TimeSpan conLai = phiHuy.ConLai;
             int gio = (int)Math.Floor(conLai.TotalHours);
             string thoiGian = conLai.TotalDays >= 1 ? $"{(int)conLai.TotalDays} ngày {conLai.Hours} giờ" : $"{Math.Max(0, gio)} giờ {Math.Max(0, conLai.Minutes)} phút";
@@ -37,12 +37,13 @@ namespace QuanLyBanVeMayBay.GUI
             if (phiHuy.CoThuPhi)
             {
                 lblPhiHuy.Text = "Phí hủy dự kiến: " + DinhDang.Tien(phiHuy.Phi);
-                lblTienHoan.Text = "Tiền hoàn dự kiến: " + DinhDang.Tien(phiHuy.TienHoan);
+                lblTienHoan.Text = "Tiền hoàn dự kiến: " + DinhDang.Tien(phiHuy.TienHoan) +
+                                   (phiHuy.TienDichVu > 0 ? $" (đã tính {DinhDang.Tien(phiHuy.TienDichVu)} dịch vụ của vé)" : "");
             }
             else
             {
-                lblPhiHuy.Text = "Đơn chưa thanh toán — không thu phí hủy.";
-                lblTienHoan.Text = "Không hoàn tiền. Đơn có vé đã hủy sẽ không thanh toán được nữa.";
+                lblPhiHuy.Text = "Đơn chưa thanh toán đủ — không thu phí hủy.";
+                lblTienHoan.Text = "Không hoàn tiền. Các vé còn lại của đơn vẫn thanh toán bình thường.";
                 lblTienHoan.ForeColor = AppTheme.TextSecondary;
                 lblTienHoan.Font = AppTheme.FontSmall;
             }

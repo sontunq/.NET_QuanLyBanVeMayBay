@@ -31,14 +31,12 @@ namespace QuanLyBanVeMayBay.GUI
             this.lblTieuDe = new System.Windows.Forms.Label();
             this.lblMoTa = new System.Windows.Forms.Label();
             this.lblDichVu = new System.Windows.Forms.Label();
-            this.cboDichVu = new QuanLyBanVeMayBay.Controls.FlatComboBox();
-            this.lblSoLuong = new System.Windows.Forms.Label();
-            this.nudSoLuong = new System.Windows.Forms.NumericUpDown();
+            this.clbDichVu = new System.Windows.Forms.CheckedListBox();
+            this.lblGhiChuDV = new System.Windows.Forms.Label();
             this.lblThanhTienNhan = new System.Windows.Forms.Label();
             this.lblThanhTien = new System.Windows.Forms.Label();
             this.btnHuy = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.btnThem = new QuanLyBanVeMayBay.Controls.RoundedButton();
-            ((System.ComponentModel.ISupportInitialize)(this.nudSoLuong)).BeginInit();
             this.SuspendLayout();
             //
             // lblTieuDe
@@ -70,55 +68,46 @@ namespace QuanLyBanVeMayBay.GUI
             this.lblDichVu.Location = new System.Drawing.Point(28, 92);
             this.lblDichVu.Name = "lblDichVu";
             this.lblDichVu.Size = new System.Drawing.Size(51, 13);
-            this.lblDichVu.Text = "DỊCH VỤ";
+            this.lblDichVu.Text = "CHỌN DỊCH VỤ";
             //
-            // cboDichVu
+            // clbDichVu
             //
-            this.cboDichVu.Location = new System.Drawing.Point(28, 112);
-            this.cboDichVu.Name = "cboDichVu";
-            this.cboDichVu.Size = new System.Drawing.Size(400, 40);
-            this.cboDichVu.TabIndex = 2;
-            this.cboDichVu.SelectedIndexChanged += new System.EventHandler(this.TinhThanhTien);
+            this.clbDichVu.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.clbDichVu.CheckOnClick = true;
+            this.clbDichVu.Font = new System.Drawing.Font("Segoe UI", 10.5F);
+            this.clbDichVu.FormattingEnabled = true;
+            this.clbDichVu.IntegralHeight = false;
+            this.clbDichVu.Location = new System.Drawing.Point(28, 112);
+            this.clbDichVu.Name = "clbDichVu";
+            this.clbDichVu.Size = new System.Drawing.Size(400, 230);
+            this.clbDichVu.TabIndex = 2;
+            this.clbDichVu.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.clbDichVu_ItemCheck);
             //
-            // lblSoLuong
+            // lblGhiChuDV
             //
-            this.lblSoLuong.AutoSize = true;
-            this.lblSoLuong.Font = new System.Drawing.Font("Segoe UI Semibold", 8.25F);
-            this.lblSoLuong.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(91)))), ((int)(((byte)(102)))), ((int)(((byte)(112)))));
-            this.lblSoLuong.Location = new System.Drawing.Point(28, 168);
-            this.lblSoLuong.Name = "lblSoLuong";
-            this.lblSoLuong.Size = new System.Drawing.Size(61, 13);
-            this.lblSoLuong.Text = "SỐ LƯỢNG";
-            //
-            // nudSoLuong
-            //
-            this.nudSoLuong.Font = new System.Drawing.Font("Segoe UI", 11F);
-            this.nudSoLuong.Location = new System.Drawing.Point(28, 190);
-            this.nudSoLuong.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
-            this.nudSoLuong.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            this.nudSoLuong.Name = "nudSoLuong";
-            this.nudSoLuong.Size = new System.Drawing.Size(120, 27);
-            this.nudSoLuong.TabIndex = 3;
-            this.nudSoLuong.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.nudSoLuong.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            this.nudSoLuong.ValueChanged += new System.EventHandler(this.TinhThanhTien);
+            this.lblGhiChuDV.AutoSize = true;
+            this.lblGhiChuDV.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+            this.lblGhiChuDV.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(91)))), ((int)(((byte)(102)))), ((int)(((byte)(112)))));
+            this.lblGhiChuDV.Location = new System.Drawing.Point(28, 348);
+            this.lblGhiChuDV.Name = "lblGhiChuDV";
+            this.lblGhiChuDV.Text = "Tick các dịch vụ cần thêm. Dịch vụ \"(đã có)\" là vé đã đăng ký trước đó.";
             //
             // lblThanhTienNhan
             //
             this.lblThanhTienNhan.AutoSize = true;
             this.lblThanhTienNhan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(91)))), ((int)(((byte)(102)))), ((int)(((byte)(112)))));
-            this.lblThanhTienNhan.Location = new System.Drawing.Point(196, 194);
+            this.lblThanhTienNhan.Location = new System.Drawing.Point(28, 384);
             this.lblThanhTienNhan.Name = "lblThanhTienNhan";
-            this.lblThanhTienNhan.Size = new System.Drawing.Size(73, 19);
-            this.lblThanhTienNhan.Text = "Thành tiền";
+            this.lblThanhTienNhan.Size = new System.Drawing.Size(180, 19);
+            this.lblThanhTienNhan.Text = "Thành tiền dịch vụ đã chọn";
             //
             // lblThanhTien
             //
             this.lblThanhTien.Font = new System.Drawing.Font("Segoe UI Semibold", 15F);
             this.lblThanhTien.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(106)))), ((int)(((byte)(31)))));
-            this.lblThanhTien.Location = new System.Drawing.Point(268, 186);
+            this.lblThanhTien.Location = new System.Drawing.Point(228, 376);
             this.lblThanhTien.Name = "lblThanhTien";
-            this.lblThanhTien.Size = new System.Drawing.Size(160, 32);
+            this.lblThanhTien.Size = new System.Drawing.Size(200, 32);
             this.lblThanhTien.Text = "0 đ";
             this.lblThanhTien.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
@@ -126,7 +115,7 @@ namespace QuanLyBanVeMayBay.GUI
             //
             this.btnHuy.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnHuy.Kind = QuanLyBanVeMayBay.Controls.ButtonKind.Outline;
-            this.btnHuy.Location = new System.Drawing.Point(208, 248);
+            this.btnHuy.Location = new System.Drawing.Point(208, 428);
             this.btnHuy.Name = "btnHuy";
             this.btnHuy.Size = new System.Drawing.Size(104, 44);
             this.btnHuy.TabIndex = 5;
@@ -135,7 +124,7 @@ namespace QuanLyBanVeMayBay.GUI
             // btnThem
             //
             this.btnThem.Kind = QuanLyBanVeMayBay.Controls.ButtonKind.Accent;
-            this.btnThem.Location = new System.Drawing.Point(322, 248);
+            this.btnThem.Location = new System.Drawing.Point(322, 428);
             this.btnThem.Name = "btnThem";
             this.btnThem.Size = new System.Drawing.Size(106, 44);
             this.btnThem.TabIndex = 4;
@@ -149,14 +138,13 @@ namespace QuanLyBanVeMayBay.GUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
             this.CancelButton = this.btnHuy;
-            this.ClientSize = new System.Drawing.Size(456, 316);
+            this.ClientSize = new System.Drawing.Size(456, 496);
             this.Controls.Add(this.btnThem);
             this.Controls.Add(this.btnHuy);
             this.Controls.Add(this.lblThanhTien);
             this.Controls.Add(this.lblThanhTienNhan);
-            this.Controls.Add(this.nudSoLuong);
-            this.Controls.Add(this.lblSoLuong);
-            this.Controls.Add(this.cboDichVu);
+            this.Controls.Add(this.lblGhiChuDV);
+            this.Controls.Add(this.clbDichVu);
             this.Controls.Add(this.lblDichVu);
             this.Controls.Add(this.lblMoTa);
             this.Controls.Add(this.lblTieuDe);
@@ -169,7 +157,6 @@ namespace QuanLyBanVeMayBay.GUI
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Dịch vụ";
             this.Load += new System.EventHandler(this.frmThemDichVu_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.nudSoLuong)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -180,9 +167,8 @@ namespace QuanLyBanVeMayBay.GUI
         private System.Windows.Forms.Label lblTieuDe;
         private System.Windows.Forms.Label lblMoTa;
         private System.Windows.Forms.Label lblDichVu;
-        private QuanLyBanVeMayBay.Controls.FlatComboBox cboDichVu;
-        private System.Windows.Forms.Label lblSoLuong;
-        private System.Windows.Forms.NumericUpDown nudSoLuong;
+        private System.Windows.Forms.CheckedListBox clbDichVu;
+        private System.Windows.Forms.Label lblGhiChuDV;
         private System.Windows.Forms.Label lblThanhTienNhan;
         private System.Windows.Forms.Label lblThanhTien;
         private QuanLyBanVeMayBay.Controls.RoundedButton btnHuy;
