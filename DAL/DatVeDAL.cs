@@ -83,6 +83,16 @@ WHERE dd.MaDon = @id", P("@id", maDon));
             return kq == null ? 0 : Convert.ToDecimal(kq);
         }
 
+        /// <summary>Vé này là vé của người giám hộ cho một hành khách dưới 16 tuổi (vé chưa hủy, cùng đơn, cùng chuyến).</summary>
+        public static bool LaVeGiamHoConHieuLuc(int maVe)
+        {
+            object kq = ExecuteScalar(@"
+SELECT COUNT(*) FROM VE g
+JOIN VE tre ON tre.MaDon = g.MaDon AND tre.MaChuyenBay = g.MaChuyenBay AND tre.MaNguoiGiamHo = g.MaKH
+WHERE g.MaVe = @id AND tre.MaVe <> g.MaVe AND tre.TrangThai <> N'Đã hủy'", P("@id", maVe));
+            return Convert.ToInt32(kq) > 0;
+        }
+
         public static DataRow HuyVe(int maVe, string lyDo, int maTK)
         {
             return ExecuteProc("sp_HUYVE", P("@MaVe", maVe), P("@LyDo", lyDo), P("@MaTKNhanVien", maTK)).Rows[0];

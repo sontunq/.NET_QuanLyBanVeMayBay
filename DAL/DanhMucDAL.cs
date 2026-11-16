@@ -12,7 +12,13 @@ namespace QuanLyBanVeMayBay.DAL
 
         public static DataTable KhachHang()
         {
-            return ExecuteQuery("SELECT MaKH AS Ma, CONCAT(HoTen, N' — ', SoGiayTo) AS Ten FROM KHACHHANG ORDER BY HoTen");
+            return ExecuteQuery("SELECT MaKH AS Ma, CONCAT(HoTen, N' — ', SoGiayTo) AS Ten, NgaySinh FROM KHACHHANG ORDER BY HoTen");
+        }
+
+        public static DateTime? NgaySinh(int maKH)
+        {
+            object kq = ExecuteScalar("SELECT NgaySinh FROM KHACHHANG WHERE MaKH = @id", P("@id", maKH));
+            return kq == null || kq == DBNull.Value ? null : Convert.ToDateTime(kq);
         }
     }
 }

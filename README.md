@@ -34,6 +34,13 @@ Tài liệu này giúp cả nhóm nắm được hệ thống làm gì, ai dùng
    - **VS Code / terminal**: `dotnet run` tại thư mục gốc.
 3. Ở màn hình đăng nhập, nhập tên máy chủ SQL (`.` hoặc `.\SQLEXPRESS`).
 
+**Báo cáo Crystal Reports** (nút *In hóa đơn* ở màn Đơn đặt vé, *In báo cáo doanh thu* ở màn Báo cáo)
+
+- Crystal Reports chỉ chạy trên .NET Framework, nên báo cáo là chương trình riêng [BaoCao/](BaoCao/) (.NET Framework 4.8, x64). Ứng dụng chính gọi `BaoCao.exe` và truyền chuỗi kết nối, loại báo cáo, mã đơn qua tham số dòng lệnh ([Utils/MoBaoCao.cs](Utils/MoBaoCao.cs)).
+- Build ứng dụng chính thì `BaoCao` được build và chép vào `bin\...\BaoCao\` tự động.
+- Máy chạy cần cài **SAP Crystal Reports, developer version for Visual Studio** (hoặc **Crystal Reports runtime 64-bit**), bản 13.0.x.
+- Mẫu báo cáo nằm ở `BaoCao/Mau/*.rpt`, mở được bằng trình thiết kế Crystal trong Visual Studio để chỉnh. Các mẫu này được sinh bằng code (`BaoCao.exe --tao-mau <mẫu trắng .rpt> <thư mục>`, xem [BaoCao/MauBaoCao.cs](BaoCao/MauBaoCao.cs)); sinh lại sẽ ghi đè các chỉnh sửa bằng tay.
+
 **Tài khoản mẫu**
 
 | Tên đăng nhập | Mật khẩu | Vai trò |
@@ -227,7 +234,7 @@ flowchart LR
 
 - Mỗi đơn tối đa **2 vé**.
 - Một hành khách **không** có 2 vé trên cùng một chuyến.
-- Hành khách **dưới 16 tuổi** phải có **người giám hộ từ 18 tuổi**.
+- Hành khách **dưới 16 tuổi** phải có **người giám hộ từ 18 tuổi**, và người giám hộ phải **có vé trên cùng chuyến trong cùng đơn** (thêm vé người giám hộ trước). Muốn hủy vé người giám hộ thì phải hủy vé của trẻ trước.
 - Chỉ đặt được chuyến **"Đang mở bán"** và **chưa khởi hành**; ghế phải **"Trống"**.
 - **Dịch vụ đi kèm** (hành lý ký gửi thêm, suất ăn, nước uống…) tính riêng, không được giảm giá.
 

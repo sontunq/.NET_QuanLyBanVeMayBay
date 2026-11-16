@@ -6,4 +6,7 @@
     <File Path="Database/QuanLyBanVeMayBay.sql" />
   </Folder>
   <Project Path="QuanLyBanVeMayBay.csproj" />
+  <Project Path="BaoCao/BaoCao.csproj">
+    <Platform Project="x64" />
+  </Project>
 </Solution>

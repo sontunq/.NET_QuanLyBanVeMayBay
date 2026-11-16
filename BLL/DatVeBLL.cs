@@ -62,6 +62,24 @@ namespace QuanLyBanVeMayBay.BLL
             if (maGiamHo != null && maGiamHo == maKH)
                 throw new LoiNghiepVu("Người giám hộ phải khác hành khách.");
 
+            // Người giám hộ: chỉ áp dụng cho hành khách dưới 16 tuổi (tính đến ngày bay),
+            // và người giám hộ phải từ 18 tuổi, đã có vé trên CÙNG chuyến trong đơn này.
+            if (CanGiamHo(maKH.Value, chuyenBay.NgayGioKhoiHanh))
+            {
+                if (maGiamHo == null)
+                    throw new LoiNghiepVu($"{tenHanhKhach} dưới {TuoiCanGiamHo} tuổi nên cần người giám hộ đi cùng chuyến.\n" +
+                                          "Hãy thêm vé cho người giám hộ (từ 18 tuổi) trên chuyến này trước, rồi chọn người đó ở ô \"Người giám hộ\".");
+                if (!DuTuoiGiamHo(maGiamHo.Value, chuyenBay.NgayGioKhoiHanh))
+                    throw new LoiNghiepVu($"Người giám hộ phải từ {TuoiGiamHoToiThieu} tuổi trở lên.");
+                if (!CoVeTrenChuyen(gio, maGiamHo.Value, chuyenBay.MaChuyenBay))
+                    throw new LoiNghiepVu("Người giám hộ phải có vé trên cùng chuyến bay trong đơn này.\n" +
+                                          "Hãy thêm vé cho người giám hộ trên chuyến này trước.");
+            }
+            else
+            {
+                maGiamHo = null;   // Từ 16 tuổi không cần giám hộ
+            }
+
             decimal gia;
             chuyenBay.BangGia.TryGetValue(ghe.MaHangVe, out gia);
 
@@ -82,6 +100,63 @@ namespace QuanLyBanVeMayBay.BLL
             r["TienGiam"] = 0m;
             r["GiaThucTra"] = gia;
             gio.Rows.Add(r);
+        }
+
+        // ---------------------------------------------------------
+        // Người giám hộ (cùng quy tắc với sp_THEMVEDON)
+        // ---------------------------------------------------------
+        public const int TuoiCanGiamHo = 16;
+        public const int TuoiGiamHoToiThieu = 18;
+
+        /// <summary>Tuổi tròn tại một ngày (giống cách tính trong SQL).</summary>
+        public static int Tuoi(DateTime ngaySinh, DateTime taiNgay)
+        {
+            int tuoi = taiNgay.Year - ngaySinh.Year;
+            if (ngaySinh.Date > taiNgay.Date.AddYears(-tuoi)) tuoi--;
+            return tuoi;
+        }
+
+        /// <summary>Hành khách dưới 16 tuổi tính đến ngày bay thì cần người giám hộ.</summary>
+        public static bool CanGiamHo(int maKH, DateTime ngayBay)
+        {
+            DateTime? ns = DanhMucDAL.NgaySinh(maKH);
+            return ns != null && Tuoi(ns.Value, ngayBay) < TuoiCanGiamHo;
+        }
+
+        public static bool DuTuoiGiamHo(int maKH, DateTime ngayBay)
+        {
+            DateTime? ns = DanhMucDAL.NgaySinh(maKH);
+            return ns != null && Tuoi(ns.Value, ngayBay) >= TuoiGiamHoToiThieu;
+        }
+
+        private static bool CoVeTrenChuyen(DataTable gio, int maKH, int maChuyenBay) =>
+            gio.AsEnumerable().Any(r => r.Field<int>("MaKH") == maKH && r.Field<int>("MaChuyenBay") == maChuyenBay);
+
+        /// <summary>Những người có thể làm giám hộ trên một chuyến: đã có vé trên chuyến đó trong giỏ và từ 18 tuổi.
+        /// Trả về bảng (Ma, Ten) để gắn vào combobox.</summary>
+        public static DataTable NguoiGiamHoHopLe(DataTable gio, int maChuyenBay, DateTime ngayBay)
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("Ma", typeof(int));
+            dt.Columns.Add("Ten", typeof(string));
+            foreach (DataRow r in gio.AsEnumerable().Where(x => x.Field<int>("MaChuyenBay") == maChuyenBay))
+            {
+                int ma = r.Field<int>("MaKH");
+                if (DuTuoiGiamHo(ma, ngayBay)) dt.Rows.Add(ma, r.Field<string>("HanhKhach"));
+            }
+            return dt;
+        }
+
+        /// <summary>Xóa một vé khỏi giỏ. Không cho xóa vé của người giám hộ khi trẻ cùng chuyến vẫn còn trong giỏ.</summary>
+        public static void XoaVeKhoiGio(DataTable gio, DataRow ve)
+        {
+            int maKH = ve.Field<int>("MaKH"), maCB = ve.Field<int>("MaChuyenBay");
+            DataRow tre = gio.AsEnumerable().FirstOrDefault(r => r != ve && r.Field<int>("MaChuyenBay") == maCB
+                                                                 && r.Field<int?>("MaNguoiGiamHo") == maKH);
+            if (tre != null)
+                throw new LoiNghiepVu($"{ve["HanhKhach"]} đang là người giám hộ của {tre["HanhKhach"]} trên chuyến này.\n" +
+                                      "Hãy xóa vé của hành khách dưới 16 tuổi trước.");
+            gio.Rows.Remove(ve);
         }
 
         /// <summary>
@@ -132,7 +207,9 @@ namespace QuanLyBanVeMayBay.BLL
                 throw new LoiNghiepVu("Đơn chưa có vé nào.");
 
             int lienHe = maKHLienHe ?? gio.Rows[0].Field<int>("MaKH");
-            return DatVeDAL.DatVe(lienHe, gio.Rows.Cast<DataRow>().ToList(), maKM, PhienDangNhap.MaTK).Rows[0];
+            // Lưu vé không có giám hộ trước, để vé của người giám hộ đã có trong đơn khi lưu vé của trẻ (sp_THEMVEDON kiểm tra)
+            var dsVe = gio.Rows.Cast<DataRow>().OrderBy(r => r.IsNull("MaNguoiGiamHo") ? 0 : 1).ToList();
+            return DatVeDAL.DatVe(lienHe, dsVe, maKM, PhienDangNhap.MaTK).Rows[0];
         }
 
         // =========================================================
@@ -175,6 +252,9 @@ namespace QuanLyBanVeMayBay.BLL
                 throw new LoiNghiepVu("Vé #" + maVe + " đã được hủy trước đó.");
             if (Convert.ToDateTime(ve["NgayGioKhoiHanh"]) <= DateTime.Now)
                 throw new LoiNghiepVu("Chuyến bay của vé này đã khởi hành nên không thể hủy.");
+            if (DatVeDAL.LaVeGiamHoConHieuLuc(maVe))
+                throw new LoiNghiepVu("Vé #" + maVe + " là vé của người giám hộ cho hành khách dưới 16 tuổi trên cùng chuyến.\n" +
+                                      "Hãy hủy vé của hành khách đó trước.");
             return ve;
         }
 

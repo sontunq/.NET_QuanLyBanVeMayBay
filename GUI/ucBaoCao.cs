@@ -49,5 +49,8 @@ namespace QuanLyBanVeMayBay.GUI
         }
 
         private void btnLamMoi_Click(object sender, EventArgs e) => TaiLai();
+
+        // Báo cáo Crystal Reports (chương trình BaoCao.exe)
+        private void btnInBaoCao_Click(object sender, EventArgs e) => MoBaoCao.Mo(MoBaoCao.DoanhThu);
     }
 }

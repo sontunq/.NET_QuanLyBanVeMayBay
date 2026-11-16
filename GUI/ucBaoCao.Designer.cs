@@ -33,6 +33,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.btnTheoChuyen = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.btnTheoNhanVien = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.btnLamMoi = new QuanLyBanVeMayBay.Controls.RoundedButton();
+            this.btnInBaoCao = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.pnlTheoThang = new System.Windows.Forms.TableLayoutPanel();
             this.cardBieuDo = new QuanLyBanVeMayBay.Controls.CardPanel();
             this.chartThang = new QuanLyBanVeMayBay.Controls.BarChart();
@@ -59,6 +60,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.flpCongCu.Controls.Add(this.btnTheoChuyen);
             this.flpCongCu.Controls.Add(this.btnTheoNhanVien);
             this.flpCongCu.Controls.Add(this.btnLamMoi);
+            this.flpCongCu.Controls.Add(this.btnInBaoCao);
             this.flpCongCu.Dock = System.Windows.Forms.DockStyle.Top;
             this.flpCongCu.Name = "flpCongCu";
             this.flpCongCu.Padding = new System.Windows.Forms.Padding(6, 2, 0, 0);
@@ -107,6 +109,17 @@ namespace QuanLyBanVeMayBay.GUI
             this.btnLamMoi.TabIndex = 3;
             this.btnLamMoi.Text = "Làm mới";
             this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
+            //
+            // btnInBaoCao
+            //
+            this.btnInBaoCao.AutoSize = true;
+            this.btnInBaoCao.Kind = QuanLyBanVeMayBay.Controls.ButtonKind.Accent;
+            this.btnInBaoCao.Margin = new System.Windows.Forms.Padding(0, 4, 10, 4);
+            this.btnInBaoCao.Name = "btnInBaoCao";
+            this.btnInBaoCao.Size = new System.Drawing.Size(200, 42);
+            this.btnInBaoCao.TabIndex = 4;
+            this.btnInBaoCao.Text = "In báo cáo doanh thu";
+            this.btnInBaoCao.Click += new System.EventHandler(this.btnInBaoCao_Click);
             //
             // pnlTheoThang
             //
@@ -220,6 +233,7 @@ namespace QuanLyBanVeMayBay.GUI
         private QuanLyBanVeMayBay.Controls.RoundedButton btnTheoChuyen;
         private QuanLyBanVeMayBay.Controls.RoundedButton btnTheoNhanVien;
         private QuanLyBanVeMayBay.Controls.RoundedButton btnLamMoi;
+        private QuanLyBanVeMayBay.Controls.RoundedButton btnInBaoCao;
         private System.Windows.Forms.TableLayoutPanel pnlTheoThang;
         private QuanLyBanVeMayBay.Controls.CardPanel cardBieuDo;
         private QuanLyBanVeMayBay.Controls.BarChart chartThang;

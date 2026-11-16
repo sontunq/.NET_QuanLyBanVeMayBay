@@ -36,6 +36,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.btnThemDichVu = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.btnThanhToan = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.btnHuyVe = new QuanLyBanVeMayBay.Controls.RoundedButton();
+            this.btnInHoaDon = new QuanLyBanVeMayBay.Controls.RoundedButton();
             this.tlpNoiDung = new System.Windows.Forms.TableLayoutPanel();
             this.cardDon = new QuanLyBanVeMayBay.Controls.CardPanel();
             this.dgvDon = new System.Windows.Forms.DataGridView();
@@ -62,6 +63,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.flpCongCu.Controls.Add(this.btnThemDichVu);
             this.flpCongCu.Controls.Add(this.btnThanhToan);
             this.flpCongCu.Controls.Add(this.btnHuyVe);
+            this.flpCongCu.Controls.Add(this.btnInHoaDon);
             this.flpCongCu.Dock = System.Windows.Forms.DockStyle.Top;
             this.flpCongCu.Name = "flpCongCu";
             this.flpCongCu.Padding = new System.Windows.Forms.Padding(6, 2, 0, 0);
@@ -78,7 +80,7 @@ namespace QuanLyBanVeMayBay.GUI
             "Đã hủy"});
             this.cboTrangThai.Margin = new System.Windows.Forms.Padding(0, 4, 10, 4);
             this.cboTrangThai.Name = "cboTrangThai";
-            this.cboTrangThai.Size = new System.Drawing.Size(200, 40);
+            this.cboTrangThai.Size = new System.Drawing.Size(180, 40);
             this.cboTrangThai.TabIndex = 0;
             this.cboTrangThai.SelectedIndexChanged += new System.EventHandler(this.cboTrangThai_SelectedIndexChanged);
             //
@@ -87,7 +89,7 @@ namespace QuanLyBanVeMayBay.GUI
             this.ipTim.Controls.Add(this.txtTim);
             this.ipTim.Margin = new System.Windows.Forms.Padding(0, 4, 10, 4);
             this.ipTim.Name = "ipTim";
-            this.ipTim.Size = new System.Drawing.Size(260, 42);
+            this.ipTim.Size = new System.Drawing.Size(190, 42);
             this.ipTim.TabIndex = 1;
             //
             // txtTim
@@ -102,7 +104,7 @@ namespace QuanLyBanVeMayBay.GUI
             // btnLoc
             //
             this.btnLoc.Kind = QuanLyBanVeMayBay.Controls.ButtonKind.Outline;
-            this.btnLoc.Margin = new System.Windows.Forms.Padding(0, 4, 24, 4);
+            this.btnLoc.Margin = new System.Windows.Forms.Padding(0, 4, 14, 4);
             this.btnLoc.Name = "btnLoc";
             this.btnLoc.Size = new System.Drawing.Size(90, 42);
             this.btnLoc.TabIndex = 2;
@@ -141,6 +143,17 @@ namespace QuanLyBanVeMayBay.GUI
             this.btnHuyVe.TabIndex = 5;
             this.btnHuyVe.Text = "Hủy vé";
             this.btnHuyVe.Click += new System.EventHandler(this.btnHuyVe_Click);
+            //
+            // btnInHoaDon
+            //
+            this.btnInHoaDon.AutoSize = true;
+            this.btnInHoaDon.Kind = QuanLyBanVeMayBay.Controls.ButtonKind.Outline;
+            this.btnInHoaDon.Margin = new System.Windows.Forms.Padding(0, 4, 10, 4);
+            this.btnInHoaDon.Name = "btnInHoaDon";
+            this.btnInHoaDon.Size = new System.Drawing.Size(120, 42);
+            this.btnInHoaDon.TabIndex = 6;
+            this.btnInHoaDon.Text = "In hóa đơn";
+            this.btnInHoaDon.Click += new System.EventHandler(this.btnInHoaDon_Click);
             //
             // tlpNoiDung
             //
@@ -242,6 +255,7 @@ namespace QuanLyBanVeMayBay.GUI
         private QuanLyBanVeMayBay.Controls.RoundedButton btnThemDichVu;
         private QuanLyBanVeMayBay.Controls.RoundedButton btnThanhToan;
         private QuanLyBanVeMayBay.Controls.RoundedButton btnHuyVe;
+        private QuanLyBanVeMayBay.Controls.RoundedButton btnInHoaDon;
         private System.Windows.Forms.TableLayoutPanel tlpNoiDung;
         private QuanLyBanVeMayBay.Controls.CardPanel cardDon;
         private System.Windows.Forms.DataGridView dgvDon;

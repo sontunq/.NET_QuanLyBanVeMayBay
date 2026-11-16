@@ -72,6 +72,18 @@ namespace QuanLyBanVeMayBay.GUI
         private void cboTrangThai_SelectedIndexChanged(object sender, EventArgs e) { if (_daCauHinh) NapDon(); }
         private void btnLoc_Click(object sender, EventArgs e) => NapDon();
 
+        // Hóa đơn Crystal Reports của đơn đang chọn (chương trình BaoCao.exe)
+        private void btnInHoaDon_Click(object sender, EventArgs e)
+        {
+            int? maDon = MaDonDangChon;
+            if (maDon == null)
+            {
+                MsgBox.CanhBao("Chọn đơn cần in hóa đơn trong danh sách.");
+                return;
+            }
+            MoBaoCao.Mo(MoBaoCao.HoaDon, maDon);
+        }
+
         private void txtTim_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;

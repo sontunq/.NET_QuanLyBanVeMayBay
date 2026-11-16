@@ -18,4 +18,21 @@
     <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 
+  <!-- BaoCao/ là project riêng (.NET Framework 4.8, Crystal Reports): không gom file của nó vào project này -->
+  <ItemGroup>
+    <Compile Remove="BaoCao\**" />
+    <EmbeddedResource Remove="BaoCao\**" />
+    <None Remove="BaoCao\**" />
+    <Content Remove="BaoCao\**" />
+  </ItemGroup>
+
+  <!-- Build xong thì build luôn BaoCao và chép vào thư mục con BaoCao\ cạnh QuanLyBanVeMayBay.exe -->
+  <Target Name="BuildVaChepBaoCao" AfterTargets="Build" Condition="Exists('BaoCao\BaoCao.csproj')">
+    <MSBuild Projects="BaoCao\BaoCao.csproj" Targets="Restore;Build" Properties="Configuration=$(Configuration)" ContinueOnError="WarnAndContinue" />
+    <ItemGroup>
+      <FileBaoCao Include="BaoCao\bin\$(Configuration)\net48\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FileBaoCao)" DestinationFolder="$(OutDir)BaoCao\%(RecursiveDir)" SkipUnchangedFiles="true" ContinueOnError="WarnAndContinue" />
+  </Target>
+
 </Project>

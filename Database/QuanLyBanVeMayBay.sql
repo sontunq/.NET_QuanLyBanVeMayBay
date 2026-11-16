@@ -1413,6 +1413,15 @@ BEGIN
                     - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),ng.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END >=18))
     )
         THROW 50033, N'Hành khách dưới 16 tuổi cần người giám hộ từ 18 tuổi.', 1;
+    -- Người giám hộ phải có vé trên cùng chuyến bay trong đơn
+    IF EXISTS
+    (
+        SELECT 1 FROM #DanhSachVe d JOIN KHACHHANG kh ON kh.MaKH=d.MaKH JOIN CHUYENBAY cb ON cb.MaChuyenBay=d.MaChuyenBay
+        WHERE DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
+              - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),kh.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END < 16
+          AND NOT EXISTS(SELECT 1 FROM #DanhSachVe g WHERE g.MaKH=d.MaNguoiGiamHo AND g.MaChuyenBay=d.MaChuyenBay)
+    )
+        THROW 50039, N'Người giám hộ phải có vé trên cùng chuyến bay trong đơn này.', 1;
     IF EXISTS(SELECT MaChuyenBay,MaGhe FROM #DanhSachVe GROUP BY MaChuyenBay,MaGhe HAVING COUNT(*)>1)
         THROW 50034, N'Đơn có ghế bị chọn trùng.', 1;
     IF EXISTS(SELECT MaChuyenBay,MaKH FROM #DanhSachVe GROUP BY MaChuyenBay,MaKH HAVING COUNT(*)>1)
@@ -1607,6 +1616,10 @@ BEGIN
         IF @TrangThaiVe=N'Đã hủy' OR EXISTS(SELECT 1 FROM HUYVE WHERE MaVe=@MaVe) THROW 50061, N'Vé đã được hủy trước đó.', 1;
         IF @TrangThaiVe=N'Đã bay' OR @NgayKhoiHanh<=SYSDATETIME() THROW 50062, N'Không thể hủy vé đã khởi hành hoặc đã bay.', 1;
         IF @ChoPhepHuy=0 THROW 50063, N'Hạng vé này không cho phép hủy.', 1;
+        -- Không để trẻ dưới 16 tuổi bay một mình: phải hủy vé của trẻ trước vé của người giám hộ
+        IF EXISTS(SELECT 1 FROM VE WHERE MaDon=@MaDon AND MaChuyenBay=@MaChuyenBay AND MaNguoiGiamHo=@MaKH
+                                     AND MaVe<>@MaVe AND TrangThai<>N'Đã hủy')
+            THROW 50064, N'Đây là vé của người giám hộ cho hành khách dưới 16 tuổi trên cùng chuyến. Hãy hủy vé của hành khách đó trước.', 1;
 
         -- Bước 2: số tiền khách thực trả cho các vé/dịch vụ còn hiệu lực
         --         = đã thu − đã hoàn − phí hủy đã giữ của các vé hủy trước
@@ -1876,6 +1889,16 @@ BEGIN
                    AND DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
                        - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,ng.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),ng.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END >=18))
         ) THROW 50117, N'Hành khách dưới 16 tuổi cần người giám hộ từ 18 tuổi.', 1;
+        -- Người giám hộ phải đi cùng: có vé chưa hủy trên CÙNG chuyến bay, trong CÙNG đơn.
+        -- Hành khách từ 16 tuổi không cần giám hộ: bỏ giá trị giám hộ để dữ liệu sạch.
+        DECLARE @TuoiHK INT;
+        SELECT @TuoiHK = DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh))
+                       - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,kh.NgaySinh,CONVERT(DATE,cb.NgayGioKhoiHanh)),kh.NgaySinh)>CONVERT(DATE,cb.NgayGioKhoiHanh) THEN 1 ELSE 0 END
+        FROM KHACHHANG kh JOIN CHUYENBAY cb ON cb.MaChuyenBay=@MaChuyenBay WHERE kh.MaKH=@MaKH;
+        IF @TuoiHK>=16
+            SET @MaNguoiGiamHo=NULL;
+        ELSE IF NOT EXISTS(SELECT 1 FROM VE WHERE MaDon=@MaDon AND MaChuyenBay=@MaChuyenBay AND MaKH=@MaNguoiGiamHo AND TrangThai<>N'Đã hủy')
+            THROW 50118, N'Người giám hộ phải có vé trên cùng chuyến bay trong đơn này. Hãy thêm vé cho người giám hộ trước.', 1;
         IF NOT EXISTS(SELECT 1 FROM GHE g JOIN CHUYENBAY cb ON cb.MaChuyenBay=@MaChuyenBay JOIN GHECHUYENBAY gc ON gc.MaChuyenBay=@MaChuyenBay AND gc.MaGhe=g.MaGhe WHERE g.MaGhe=@MaGhe AND g.MaMayBay=cb.MaMayBay AND g.MaHangVe=@MaHangVe AND gc.TrangThai=N'Trống') THROW 50114, N'Ghế không còn trống hoặc không đúng hạng vé.', 1;
         IF EXISTS(SELECT 1 FROM VE WHERE MaChuyenBay=@MaChuyenBay AND MaGhe=@MaGhe AND TrangThai<>N'Đã hủy') THROW 50115, N'Ghế đã có người đặt.', 1;
         IF EXISTS(SELECT 1 FROM VE WHERE MaChuyenBay=@MaChuyenBay AND MaKH=@MaKH AND TrangThai<>N'Đã hủy') THROW 50116, N'Hành khách đã có vé trên chuyến bay này.', 1;

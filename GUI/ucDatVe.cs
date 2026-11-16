@@ -48,6 +48,8 @@ namespace QuanLyBanVeMayBay.GUI
                     chkKhuHoi.Enabled = false;
                     // Đổi khách liên hệ thì tính lại giá (ưu đãi khách hàng mới xét theo khách liên hệ)
                     cboLienHe.SelectedIndexChanged += TuyChonGia_Changed;
+                    // Đổi hành khách thì xét lại có cần người giám hộ không
+                    cboHanhKhach.SelectedIndexChanged += (s, e) => CapNhatGiamHo();
 
                     HienChuyenBay(ChuyenBayBLL.LichBaySapToi(null, null), "Lịch bay sắp tới");
                     _daNap = true;
@@ -86,10 +88,43 @@ namespace QuanLyBanVeMayBay.GUI
             int? giu = chonMaKH ?? (cboHanhKhach.SelectedValue as int?);
             int? giuLienHe = cboLienHe.SelectedValue as int?;
             GanCombo(cboHanhKhach, DanhMucBLL.KhachHang(), null);
-            GanCombo(cboGiamHo, DanhMucBLL.KhachHang(), "Không cần giám hộ");
             GanCombo(cboLienHe, DanhMucBLL.KhachHang(), "Hành khách của vé thứ nhất");
             if (giu != null) cboHanhKhach.SelectedValue = giu.Value;
             if (giuLienHe != null) cboLienHe.SelectedValue = giuLienHe.Value;
+            CapNhatGiamHo();
+        }
+
+        /// <summary>
+        /// Ô người giám hộ chỉ bật khi hành khách đang chọn dưới 16 tuổi (tính đến ngày bay),
+        /// và chỉ liệt kê người từ 18 tuổi đã có vé trên chuyến này trong đơn.
+        /// </summary>
+        private void CapNhatGiamHo()
+        {
+            try
+            {
+                int? maHK = cboHanhKhach.SelectedValue as int?;
+                bool can = _chuyenBay != null && maHK != null && DatVeBLL.CanGiamHo(maHK.Value, _chuyenBay.NgayGioKhoiHanh);
+                if (!can)
+                {
+                    GanCombo(cboGiamHo, DatVeBLL.NguoiGiamHoHopLe(_gioVe, -1, DateTime.Today), "Không cần giám hộ");
+                    cboGiamHo.Enabled = false;
+                    return;
+                }
+
+                DataTable ds = DatVeBLL.NguoiGiamHoHopLe(_gioVe, _chuyenBay.MaChuyenBay, _chuyenBay.NgayGioKhoiHanh);
+                if (ds.Rows.Count == 0)
+                {
+                    GanCombo(cboGiamHo, ds, "Thêm vé cho người lớn đi cùng trước");
+                    cboGiamHo.Enabled = false;
+                    return;
+                }
+                GanCombo(cboGiamHo, ds, null);   // chọn sẵn người lớn đầu tiên trên chuyến
+                cboGiamHo.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+            }
         }
 
         // =========================================================
@@ -182,6 +217,7 @@ namespace QuanLyBanVeMayBay.GUI
                 seatMap.SetData(dsGhe, _chuyenBay.BangGia);
                 seatLegend.SetHangVe(dsGhe.GroupBy(g => g.MaHangVe).Select(n => (n.Key, n.First().TenHangVe)));
                 CapNhatGheTrongDon();
+                CapNhatGiamHo();
                 lblChuyenSoDo.Text = $"Chuyến #{_chuyenBay.MaChuyenBay} · {_chuyenBay.TuyenBay} · " +
                                      $"{_chuyenBay.NgayGioKhoiHanh:dd/MM/yyyy HH:mm} · {_chuyenBay.SoHieu}";
                 pnlSoDo_Resize(this, EventArgs.Empty);
@@ -254,8 +290,8 @@ namespace QuanLyBanVeMayBay.GUI
                 return;
             }
 
-            cboGiamHo.SelectedIndex = 0;
             seatMap.SelectedMaGhe = null;
+            CapNhatGiamHo();
             CapNhatGheTrongDon();
             HienGheDangChon();
             TuDongKhuHoi();
@@ -274,7 +310,16 @@ namespace QuanLyBanVeMayBay.GUI
                 MsgBox.CanhBao("Chọn vé cần xóa trong danh sách \"Vé trong đơn\".");
                 return;
             }
-            _gioVe.Rows.Remove(r);
+            try
+            {
+                DatVeBLL.XoaVeKhoiGio(_gioVe, r);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Loi(ex);
+                return;
+            }
+            CapNhatGiamHo();
             TuDongKhuHoi();
             CapNhatGheTrongDon();
             CapNhatThanhDuoi();
