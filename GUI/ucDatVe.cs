@@ -354,11 +354,10 @@ namespace QuanLyBanVeMayBay.GUI
             foreach (DataRow r in _gioVe.Rows)
             {
                 sb.AppendLine();
-                sb.AppendLine($"Vé {i++}: {r["Tuyen"]}  ·  {r.Field<DateTime>("NgayGioKhoiHanh"):dd/MM/yyyy HH:mm}");
-                sb.AppendLine($"   Ghế {r["SoGhe"]}  ·  {r["HangVe"]}");
-                sb.AppendLine($"   Hành khách: {r["HanhKhach"]}" +
+                sb.AppendLine($"Vé {i++}: {r["Tuyen"]}  ·  {r.Field<DateTime>("NgayGioKhoiHanh"):dd/MM HH:mm}  ·  Ghế {r["SoGhe"]} ({r["HangVe"]})");
+                sb.AppendLine($"   {r["HanhKhach"]}" +
                               (string.IsNullOrEmpty(r["NguoiGiamHo"] as string) ? "" : $"  (giám hộ: {r["NguoiGiamHo"]})"));
-                sb.AppendLine($"   Giá: {DinhDang.Tien(r["GiaGoc"])}  −{r["PhanTramGiam"]}%  →  {DinhDang.Tien(r["GiaThucTra"])}");
+                sb.AppendLine($"   {DinhDang.Tien(r["GiaGoc"])}  −{r["PhanTramGiam"]}%  →  {DinhDang.Tien(r["GiaThucTra"])}");
             }
             sb.AppendLine();
             sb.AppendLine("Khách liên hệ: " + cboLienHe.Text);

@@ -43,13 +43,53 @@ namespace QuanLyBanVeMayBay.GUI
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            Rectangle manHinh = Screen.FromControl(Owner ?? (Control)this).WorkingArea;
+
+            // Nội dung dài (nhiều dòng): nới rộng hộp để bớt xuống dòng
+            if (lblNoiDung.Text.Split('\n').Length > 8)
+            {
+                int them = Math.Min(200, Math.Max(0, manHinh.Width - Width - 80));
+                Width += them;
+                lblNoiDung.Width += them;
+            }
+
             // Tự co giãn chiều cao theo độ dài nội dung
             Size sz = TextRenderer.MeasureText(lblNoiDung.Text, lblNoiDung.Font, new Size(lblNoiDung.Width, 0), TextFormatFlags.WordBreak);
             lblNoiDung.Height = Math.Max(24, sz.Height + 4);
             foreach (Control c in flpNut.Controls) c.Width = Math.Max(110, c.GetPreferredSize(Size.Empty).Width);
-            int top = Math.Max(picIcon.Bottom, lblNoiDung.Bottom) + 24;
+
+            // Không cho hộp cao quá màn hình: phần nội dung vượt quá thì cuộn, nút luôn hiện
+            Control vungNoiDung = lblNoiDung;
+            int phanCoDinh = lblNoiDung.Top + 24 + flpNut.Height + 20;   // lề trên + khoảng cách + nút + lề dưới
+            int caoToiDa = manHinh.Height - 80 - phanCoDinh;
+            if (lblNoiDung.Height > caoToiDa)
+            {
+                var pnlCuon = new Panel
+                {
+                    Location = lblNoiDung.Location,
+                    Size = new Size(lblNoiDung.Width + SystemInformation.VerticalScrollBarWidth, caoToiDa),
+                    AutoScroll = true,
+                    BackColor = BackColor
+                };
+                Controls.Remove(lblNoiDung);
+                lblNoiDung.Location = Point.Empty;
+                pnlCuon.Controls.Add(lblNoiDung);
+                Controls.Add(pnlCuon);
+                Width += SystemInformation.VerticalScrollBarWidth;
+                vungNoiDung = pnlCuon;
+            }
+
+            int top = Math.Max(picIcon.Bottom, vungNoiDung.Bottom) + 24;
             ClientSize = new Size(ClientSize.Width, top + flpNut.Height + 20);
             flpNut.Location = new Point(ClientSize.Width - flpNut.Width - 24, top);
+
+            // Căn giữa lại sau khi đổi kích thước và giữ trọn trong màn hình
+            Rectangle goc = Owner != null ? Owner.Bounds : manHinh;
+            int x = goc.Left + (goc.Width - Width) / 2;
+            int y = goc.Top + (goc.Height - Height) / 2;
+            x = Math.Max(manHinh.Left, Math.Min(x, manHinh.Right - Width));
+            y = Math.Max(manHinh.Top, Math.Min(y, manHinh.Bottom - Height));
+            Location = new Point(x, y);
         }
 
         protected override void OnPaint(PaintEventArgs e)

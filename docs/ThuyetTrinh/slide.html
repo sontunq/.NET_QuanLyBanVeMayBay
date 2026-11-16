@@ -124,6 +124,11 @@
   #tip { position: fixed; z-index: 50; pointer-events: none; background: #0f2a33; color: #fff; font-size: 13px; padding: 6px 10px;
     border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
 
+  .buoc { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
+  .buoc div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 15.5px; font-weight: 600; line-height: 1.35; }
+  .buoc b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 13px; margin-bottom: 6px; display: grid; }
+  .buoc span { font-weight: 400; font-size: 13.5px; color: var(--ink-2); }
+
   /* Thanh điều khiển */
   #dieu-khien { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 8px 16px;
     font-size: 13px; color: var(--ink-2); }
@@ -264,29 +269,33 @@
   <div class="than">
     <div class="so-do" style="flex:1.35"><pre class="mermaid">
 flowchart TB
-    subgraph GUI["GUI · Giao diện"]
+    subgraph GUI["① GUI · Giao diện"]
+        direction LR
         F["Form và UserControl<br/>frmThanhToan, ucDatVe, ..."]
         C["Control tự vẽ<br/>SeatMap, FlightCard, BarChart"]
     end
-    subgraph BLL["BLL · Nghiệp vụ"]
+    subgraph BLL["② BLL · Nghiệp vụ"]
+        direction LR
         B["DatVeBLL, ThanhToanBLL,<br/>KhachHangBLL, ..."]
         V["KiemTraDuLieu<br/>kiểm tra dữ liệu nhập"]
         L["LoiNghiepVu<br/>lỗi thân thiện"]
     end
-    subgraph DAL["DAL · Truy cập dữ liệu"]
+    subgraph DAL["③ DAL · Truy cập dữ liệu"]
+        direction LR
         D["DatVeDAL, ChuyenBayDAL, ..."]
-        P["DataProvider<br/>ExecuteQuery, ExecuteProc,<br/>ChayTrongGiaoDich"]
+        P["DataProvider<br/>ExecuteProc, ChayTrongGiaoDich"]
         K["KetNoiCSDL"]
     end
     DB[("SQL Server<br/>bảng, view, thủ tục, trigger")]
-    DTO[["DTO: ChuyenBayDTO, GheDTO, TaiKhoanDTO"]]
-    F --> B
-    C --> DTO
+    DTO[["DTO: ChuyenBayDTO, GheDTO, TaiKhoanDTO<br/>dữ liệu truyền giữa các lớp"]]
+    F -- "gọi" --> B
     B --> V
-    B --> D
-    D --> P --> K --> DB
-    B -. ném .-> L -. hộp cảnh báo .-> F
-    D -. trả về .-> DTO
+    B -. "ném" .-> L
+    B -- "gọi" --> D
+    D --> P --> K
+    K -- "SQL có tham số" --> DB
+    D -. "trả về" .-> DTO
+    C -. "hiển thị" .-> DTO
     </pre></div>
     <div class="cot hep">
       <div class="the"><h3>GUI</h3><p>Chỉ hiển thị và nhận thao tác. Không viết SQL, không chứa quy tắc nghiệp vụ.</p></div>
@@ -712,38 +721,37 @@ flowchart LR
 <section class="slide" data-nguoi="Suan">
   <div class="dau"><span class="phan">07 · Quy trình bán vé</span></div>
   <h2>Quy trình bán vé: luồng nghiệp vụ</h2>
-  <div class="than">
-    <div class="so-do" style="flex:1.6"><pre class="mermaid">
-flowchart TD
-    A(["Khách đến quầy"]) --> B["Tìm chuyến: điểm đi, điểm đến, ngày"]
-    B --> C{"Có chuyến mở bán<br/>còn ghế trống?"}
+  <div class="than" style="flex-direction:column;gap:12px">
+    <div class="so-do"><pre class="mermaid">
+flowchart LR
+    A(["Khách<br/>đến quầy"]) --> B["Tìm chuyến<br/>điểm đi, đến, ngày"]
+    B --> C{"Có chuyến<br/>còn ghế?"}
     C -- Không --> Z1(["Báo khách"])
-    C -- Có --> D["Chọn chuyến, xem sơ đồ ghế"]
-    D --> E["Chọn ghế trống + hành khách<br/>(chưa có hồ sơ thì tạo mới)"]
-    E --> F{"Dưới 16 tuổi?"}
-    F -- Có --> G["Chọn người giám hộ ≥ 18 tuổi"]
-    F -- Không --> H
-    G --> H["Thêm vé vào giỏ"]
-    H --> I{"Thêm vé nữa?<br/>người khác / chuyến khác"}
+    C -- Có --> D["Chọn chuyến,<br/>xem sơ đồ ghế"]
+    D --> E["Chọn ghế trống<br/>+ hành khách"]
+    E --> F{"Dưới<br/>16 tuổi?"}
+    F -- Có --> G["Chọn người<br/>giám hộ ≥ 18"]
+    F -- Không --> H["Thêm vé<br/>vào giỏ"]
+    G --> H
+    H --> I{"Thêm<br/>vé nữa?"}
     I -- Có --> D
-    I -- Không --> J["Bước 3: chọn khách liên hệ, mã KM<br/>xem giá từng vé - khứ hồi tự nhận"]
-    J --> K["Hộp xác nhận liệt kê từng vé + tổng tiền"]
-    K -- Xem lại --> J
-    K -- Đặt vé --> L["Tạo đơn: Chờ thanh toán"]
-    L --> M{"Thanh toán ngay?"}
-    M -- Để sau --> Z2(["Đơn chờ; thêm dịch vụ / thanh toán<br/>ở màn Đơn đặt vé"])
-    M -- Có --> N(["Sang quy trình thanh toán"])
+    I -- Không --> T(["① → ②"])
     </pre></div>
-    <div class="cot">
+    <div class="so-do"><pre class="mermaid">
+flowchart LR
+    T(["②"]) --> J["Bước 3: khách liên hệ,<br/>mã KM, xem giá<br/>khứ hồi tự nhận"]
+    J --> K{"Hộp xác nhận<br/>liệt kê từng vé"}
+    K -- Xem lại --> J
+    K -- Đặt vé --> L["Tạo đơn<br/>Chờ thanh toán"]
+    L --> M{"Thanh toán<br/>ngay?"}
+    M -- Có --> N(["Quy trình<br/>thanh toán"])
+    M -- Để sau --> Z2(["Đơn chờ ở<br/>Đơn đặt vé"])
+    </pre></div>
+    <div class="luoi c2" style="flex:0 0 auto">
       <div class="the"><h3>Ràng buộc khi thêm vé</h3>
-        <ul>
-          <li>Chuyến <b>Đang mở bán</b> và <b>chưa khởi hành</b></li>
-          <li>Ghế <b>Trống</b>, đúng hạng của ghế</li>
-          <li><b>Không giới hạn số vé</b> trong một đơn</li>
-          <li>Mỗi hành khách <b>1 ghế / chuyến</b></li>
-          <li>Người giám hộ khác hành khách</li>
-        </ul></div>
-      <div class="the vang"><h3>Giỏ vé nằm ở giao diện</h3><p>Giỏ chưa lưu CSDL nên nhân viên thêm/xóa vé thoải mái; chỉ khi bấm <b>Đặt vé</b> mới ghi một lần.</p></div>
+        <p style="font-size:15.5px">Chuyến <b>Đang mở bán</b>, chưa khởi hành · ghế <b>Trống</b>, đúng hạng · <b>không giới hạn số vé</b>/đơn · mỗi hành khách <b>1 ghế/chuyến</b> · người giám hộ khác hành khách.</p></div>
+      <div class="the vang"><h3>Giỏ vé nằm ở giao diện</h3>
+        <p style="font-size:15.5px">Giỏ chưa lưu CSDL nên thêm/xóa vé thoải mái; chỉ khi bấm <b>Đặt vé</b> mới ghi vào CSDL một lần.</p></div>
     </div>
   </div>
 </section>
@@ -846,9 +854,9 @@ flowchart TD
     H["% hạng thành viên<br/>của hành khách"] --> S
     K{"Cùng khách có vé<br/>tuyến ngược trong đơn?"} -- Có: 10% --> S
     K -- Không: 0% --> S
-    M{"Mã KM hợp lệ?<br/>KM mới: khách liên hệ<br/>chưa có đơn"} -- "Có: % hoặc quy đổi từ trần đ" --> S
+    M{"Mã KM hợp lệ?<br/>KM mới: khách liên hệ<br/>chưa có đơn"} -- "Hợp lệ" --> S
     M -- "Không chọn: 0%" --> S
-    M -- "Sai: báo lỗi" --> X(["Dừng"])
+    M -- "Sai" --> X(["Báo lỗi"])
     S{{"Cộng dồn"}} --> C{"> 30%?"}
     C -- Có --> C30["Lấy 30%"]
     C -- Không --> CX["Giữ nguyên"]
@@ -983,22 +991,29 @@ sequenceDiagram
 <section class="slide" data-nguoi="Suan">
   <div class="dau"><span class="phan">10 · Hủy vé và hoàn tiền</span></div>
   <h2>Hủy vé: luồng nghiệp vụ</h2>
-  <div class="than">
+  <div class="than" style="flex-direction:column;gap:12px">
     <div class="so-do"><pre class="mermaid">
-flowchart TD
-    A["Yêu cầu hủy vé<br/>từ Đơn đặt vé hoặc Tra cứu"] --> B{"Vé đã hủy / đã bay<br/>hoặc chuyến đã khởi hành?"}
+flowchart LR
+    A["Yêu cầu hủy<br/>từ Đơn đặt vé<br/>hoặc Tra cứu"] --> B{"Đã hủy / đã bay /<br/>chuyến đã<br/>khởi hành?"}
     B -- Có --> X1(["Từ chối"])
     B -- Không --> C{"Hạng vé<br/>cho phép hủy?"}
     C -- Không --> X2(["Từ chối"])
-    C -- Có --> P["Xem trước phí và tiền hoàn<br/>nhập lý do, xác nhận"]
+    C -- Có --> P["Xem trước phí,<br/>tiền hoàn; nhập<br/>lý do, xác nhận"]
     P --> D{"Đơn đã thanh toán<br/>và còn dư sau hủy?"}
-    D -- Không --> E["Phí 0, hoàn 0<br/>tính lại khứ hồi các vé còn lại"]
-    D -- Có --> F["Phí 10/20/30% theo giờ<br/>hoàn = dư − phí<br/>ghi THANHTOAN: Đã hoàn"]
-    F --> F2["Trừ chi tiêu, xét lại hạng"]
-    E & F2 --> G["Ghi HUYVE, xóa dịch vụ của vé<br/>Vé: Đã hủy · Ghế: Trống<br/>tính lại tổng đơn"]
-    G --> H{"Mọi vé trong đơn<br/>đã hủy?"}
+    D -- Không --> E["Phí 0, hoàn 0<br/>tính lại khứ hồi<br/>vé còn lại"]
+    D -- Có --> F["Phí 10/20/30%<br/>hoàn = dư − phí<br/>THANHTOAN: Đã hoàn"]
+    F --> F2["Trừ chi tiêu,<br/>xét lại hạng"]
+    E --> T(["① → ②"])
+    F2 --> T
+    </pre></div>
+    <div class="so-do"><pre class="mermaid">
+flowchart LR
+    T(["②"]) --> G["Ghi HUYVE<br/>xóa dịch vụ của vé"]
+    G --> G2["Vé: Đã hủy<br/>Ghế: Trống"]
+    G2 --> G3["Tính lại<br/>tổng đơn"]
+    G3 --> H{"Mọi vé trong<br/>đơn đã hủy?"}
     H -- Có --> K(["Đơn: Đã hủy"])
-    H -- Không --> L(["Đơn giữ trạng thái"])
+    H -- Không --> L(["Đơn giữ<br/>trạng thái"])
     </pre></div>
   </div>
 </section>
@@ -1061,14 +1076,15 @@ sequenceDiagram
         <ul><li>Sau mỗi lần <b>thanh toán</b> (cả lần thu thêm dịch vụ)</li><li>Sau mỗi lần <b>hủy vé có hoàn tiền</b></li></ul></div>
     </div>
     <div class="cot">
-      <div class="so-do" style="flex:1"><pre class="mermaid">
-flowchart LR
-    TV["Thành viên<br/>0%"] -- "≥ 20tr" --> B["Bạc<br/>8%"]
-    B -- "≥ 40tr" --> V["Vàng<br/>10%"]
-    V -- "≥ 50tr" --> BK["Bạch Kim<br/>12%"]
-    BK -- "≥ 100tr" --> KC["Kim Cương<br/>15%"]
-    B & V & BK & KC -. "hết hạn 1 năm" .-> TV
-      </pre></div>
+      <div class="the"><h3>Cách xét lại hạng</h3>
+        <div class="buoc">
+          <div><b>1</b>Thanh toán<br><span>hoặc hủy vé có hoàn tiền</span></div>
+          <div><b>2</b>Cộng / trừ<br><span>tổng chi tiêu của hành khách</span></div>
+          <div><b>3</b>Còn hiệu lực?<br><span>hết hạn → Thành viên</span></div>
+          <div><b>4</b>So ngưỡng<br><span>lấy hạng cao nhất đạt được</span></div>
+        </div>
+        <p class="ghi" style="margin-top:10px">Vé mới của khách dùng % giảm của hạng mới; vé đã bán giữ nguyên % lúc bán.</p>
+      </div>
       <div class="the do"><h3>Hiệu lực 1 năm — hạn chế hiện tại</h3>
         <p style="font-size:15.5px">Hạn = <b>giao dịch đầu tiên + 1 năm</b>, chỉ đặt một lần, <b>chưa tự gia hạn</b>. Sau 1 năm khách về hạng Thành viên dù vẫn mua vé.</p></div>
     </div>
@@ -1238,7 +1254,8 @@ stateDiagram-v2
     el.addEventListener('mouseleave', () => tip.style.opacity = 0);
   });
 
-  coGian();
+  // Chưa co giãn khi Mermaid đo chữ (đo trong khung đã thu nhỏ sẽ làm chữ bị cắt)
+  stage.style.transform = 'none';
   const batDau = parseInt((location.hash || '#1').slice(1), 10);
   den(isNaN(batDau) ? 0 : batDau - 1);
 
@@ -1254,12 +1271,12 @@ stateDiagram-v2
         clusterBkg: '#ffffff', clusterBorder: '#d5dee2'
       },
       flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
-      sequence: { useMaxWidth: true, mirrorActors: false, messageAlign: 'center' },
+      sequence: { useMaxWidth: true, mirrorActors: false, messageAlign: 'center', actorFontSize: 17, messageFontSize: 17, noteFontSize: 15, boxMargin: 8, messageMargin: 30, height: 50 },
       er: { useMaxWidth: true },
       state: { useMaxWidth: true }
     });
-    mermaid.run({ querySelector: '.mermaid' }).catch(err => console.error(err));
-  }
+    mermaid.run({ querySelector: '.mermaid' }).catch(err => console.error(err)).finally(coGian);
+  } else coGian();
 })();
 </script>
 </body>
